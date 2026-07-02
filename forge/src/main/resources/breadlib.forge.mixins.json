@@ -5,7 +5,7 @@
   "compatibilityLevel": "JAVA_18",
   "mixins": [],
   "client": [
-    "MixinTitleScreen"
+	"org.bread_experts_group.breadlib.alpha.mixin.MixinTitleScreen"
   ],
   "server": [],
   "injectors": {

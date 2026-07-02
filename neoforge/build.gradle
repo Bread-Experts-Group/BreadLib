@@ -29,8 +29,14 @@ neoForge {
     mods {
         "${mod_id}" {
             sourceSet sourceSets.main
+            sourceSet project(":common").sourceSets.main
         }
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    jarJar(additionalRuntimeClasspath "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}")
+    jarJar(additionalRuntimeClasspath "org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}")
+}

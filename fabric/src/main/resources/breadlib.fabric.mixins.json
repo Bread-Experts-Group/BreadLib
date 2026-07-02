@@ -6,8 +6,8 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "MixinMouseHandler",
-    "MixinTitleScreen"
+	"org.bread_experts_group.breadlib.alpha.mixin.MixinMouseHandler",
+	"org.bread_experts_group.breadlib.alpha.mixin.MixinTitleScreen"
   ],
   "server": [],
   "injectors": {

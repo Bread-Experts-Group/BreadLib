@@ -11,6 +11,7 @@ public class BreadLib {
 	public static final Logger LOGGER = LogManager.getLogger("BreadLib");
 
 	public static void init() {
+		Test.Companion.test();
 		LOGGER.info(
 				"Hello from Common init on {}! we are currently in a {} environment!",
 				PlatformServices.PLATFORM.getPlatformName(), PlatformServices.PLATFORM.getEnvironmentName()
