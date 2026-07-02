@@ -10,30 +10,30 @@ import org.bread_experts_group.breadlib.registry.ItemLikeExtended;
 import org.jetbrains.annotations.NotNull;
 
 public class RegistryBlock<B extends Block> extends RegistryObject<Block, B> implements ItemLikeExtended {
-    public static <B extends Block> RegistryBlock<B> create(String modID, String name) {
-        return new RegistryBlock<>(ResourceLocation.fromNamespaceAndPath(modID, name));
-    }
+	public static <B extends Block> RegistryBlock<B> create(String modID, String name) {
+		return new RegistryBlock<>(ResourceLocation.fromNamespaceAndPath(modID, name));
+	}
 
-    public RegistryBlock(ResourceLocation name) {
-        super(name, BuiltInRegistries.BLOCK);
-    }
+	public RegistryBlock(ResourceLocation name) {
+		super(name, BuiltInRegistries.BLOCK);
+	}
 
-    public BlockState defaultState() {
-        return get().defaultBlockState();
-    }
+	public BlockState defaultState() {
+		return get().defaultBlockState();
+	}
 
-    @Override
-    public @NotNull Item asItem() {
-        return toStack().getItem();
-    }
+	@Override
+	public @NotNull Item asItem() {
+		return toStack().getItem();
+	}
 
-    @Override
-    public ItemStack toStack() {
-        return new ItemStack(this, 1);
-    }
+	@Override
+	public ItemStack toStack() {
+		return new ItemStack(this, 1);
+	}
 
-    @Override
-    public ItemStack asStack(int count) {
-        return new ItemStack(this, count);
-    }
+	@Override
+	public ItemStack asStack(int count) {
+		return new ItemStack(this, count);
+	}
 }

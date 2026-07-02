@@ -10,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class TestBlock extends Block implements EntityBlock {
-    public TestBlock() {
-        super(BlockBehaviour.Properties.of());
-    }
+	public TestBlock() {
+		super(BlockBehaviour.Properties.of());
+	}
 
-    @Override
-    public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
-        return new TestBlockEntity(pos, state);
-    }
+	@Override
+	public @Nullable BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
+		return new TestBlockEntity(pos, state);
+	}
 }

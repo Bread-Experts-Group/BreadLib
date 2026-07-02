@@ -5,7 +5,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class TestBlockEntity extends BlockEntity {
-    public TestBlockEntity(BlockPos pPos, BlockState pBlockState) {
-        super(BlockEntityTypeTest.TEST_TYPE.get(), pPos, pBlockState);
-    }
+	public TestBlockEntity(BlockPos pPos, BlockState pBlockState) {
+		super(BlockEntityTypeTest.TEST_TYPE.get(), pPos, pBlockState);
+	}
 }

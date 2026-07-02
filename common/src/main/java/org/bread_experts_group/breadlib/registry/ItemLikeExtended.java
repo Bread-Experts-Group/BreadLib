@@ -4,7 +4,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 public interface ItemLikeExtended extends ItemLike {
-    ItemStack toStack();
+	ItemStack toStack();
 
-    ItemStack asStack(int count);
+	ItemStack asStack(int count);
 }
