@@ -28,7 +28,6 @@ public class BreadLibNeoForge {
 		BreadLib.init();
 		registerContent(eventBus);
 
-		NeoEvents.addRLSETask();
-		NeoEvents.addMouseScrollTask();
+		NeoEvents.registerEvents();
 	}
 }

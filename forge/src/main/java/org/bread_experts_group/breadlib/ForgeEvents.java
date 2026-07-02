@@ -49,6 +49,11 @@ public class ForgeEvents {
         throw new NullPointerException();
     }
 
+	public static void registerEvents() {
+		addRLSETask();
+		addMouseScrollTask();
+	}
+
     @SuppressWarnings({"NewExpressionSideOnly", "removal"})
     public static void addRLSETask() {
         addListener(RenderLevelStageEvent.class, (event) -> {

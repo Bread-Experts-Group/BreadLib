@@ -15,7 +15,6 @@ public class BreadLibForge {
 		BreadLib.init();
 		registerContent(eventBus);
 
-		ForgeEvents.addRLSETask();
-		ForgeEvents.addMouseScrollTask();
+		ForgeEvents.registerEvents();
 	}
 }

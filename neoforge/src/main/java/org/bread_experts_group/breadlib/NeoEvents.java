@@ -23,55 +23,60 @@ import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTE
 import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_WEATHER;
 
 public class NeoEvents {
-    private static <T extends Event> void addListener(Class<T> eventClass, Consumer<T> task) {
-        NeoForge.EVENT_BUS.addListener(eventClass, task);
-    }
+	private static <T extends Event> void addListener(Class<T> eventClass, Consumer<T> task) {
+		NeoForge.EVENT_BUS.addListener(eventClass, task);
+	}
 
-    private static RenderLevelStage getRenderLevelStage(RenderLevelStageEvent.Stage stage) {
-        if (stage == RenderLevelStageEvent.Stage.AFTER_SKY) {
-            return AFTER_SKY;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) {
-            return AFTER_SOLID_BLOCKS;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS) {
-            return AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
-            return AFTER_CUTOUT_BLOCKS;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
-            return AFTER_ENTITIES;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
-            return AFTER_BLOCK_ENTITIES;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
-            return AFTER_TRANSLUCENT_BLOCKS;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
-            return AFTER_TRIPWIRE_BLOCKS;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
-            return AFTER_PARTICLES;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
-            return AFTER_WEATHER;
-        } else if (stage == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
-            return AFTER_LEVEL;
-        }
+	private static RenderLevelStage getRenderLevelStage(RenderLevelStageEvent.Stage stage) {
+		if (stage == RenderLevelStageEvent.Stage.AFTER_SKY) {
+			return AFTER_SKY;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) {
+			return AFTER_SOLID_BLOCKS;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS) {
+			return AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
+			return AFTER_CUTOUT_BLOCKS;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_ENTITIES) {
+			return AFTER_ENTITIES;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_BLOCK_ENTITIES) {
+			return AFTER_BLOCK_ENTITIES;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+			return AFTER_TRANSLUCENT_BLOCKS;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_TRIPWIRE_BLOCKS) {
+			return AFTER_TRIPWIRE_BLOCKS;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+			return AFTER_PARTICLES;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
+			return AFTER_WEATHER;
+		} else if (stage == RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+			return AFTER_LEVEL;
+		}
 
-        throw new NullPointerException();
-    }
+		throw new NullPointerException();
+	}
 
-    public static void addRLSETask() {
-        addListener(RenderLevelStageEvent.class, (event) -> TaskManager.runTasks(
-                new LevelRenderTask(
-                        getRenderLevelStage(event.getStage()),
-                        event.getLevelRenderer(),
-                        event.getPoseStack(),
-                        event.getProjectionMatrix(),
-                        event.getPartialTick(),
-                        event.getCamera(),
-                        event.getFrustum()
-                ))
-        );
-    }
+	public static void registerEvents() {
+		addRLSETask();
+		addMouseScrollTask();
+	}
 
-    public static void addMouseScrollTask() {
-        addListener(InputEvent.MouseScrollingEvent.class, event -> TaskManager.runTasks(
-                new MouseTask.Scroll(Minecraft.getInstance().mouseHandler, event.getScrollDeltaX(), event.getScrollDeltaY())
-        ));
-    }
+	public static void addRLSETask() {
+		addListener(RenderLevelStageEvent.class, (event) -> TaskManager.runTasks(
+				new LevelRenderTask(
+						getRenderLevelStage(event.getStage()),
+						event.getLevelRenderer(),
+						event.getPoseStack(),
+						event.getProjectionMatrix(),
+						event.getPartialTick(),
+						event.getCamera(),
+						event.getFrustum()
+				))
+		);
+	}
+
+	public static void addMouseScrollTask() {
+		addListener(InputEvent.MouseScrollingEvent.class, event -> TaskManager.runTasks(
+				new MouseTask.Scroll(Minecraft.getInstance().mouseHandler, event.getScrollDeltaX(), event.getScrollDeltaY())
+		));
+	}
 }

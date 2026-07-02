@@ -12,16 +12,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MouseHandler.class)
 public class MixinMouseHandler {
-    @Unique
-    private MouseHandler breadlib$getThis() {
-        return (MouseHandler) (Object) this;
-    }
+	@Unique
+	private MouseHandler breadlib$getThis() {
+		return (MouseHandler) (Object) this;
+	}
 
-    @Inject(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z", shift = At.Shift.BEFORE))
-    private void breadlib$handleScrollTask(
-            long windowPointer, double xOffset, double yOffset, CallbackInfo ci,
-            @Local(name = "e") double e, @Local(name = "f") double f
-    ) {
-        TaskManager.runTasks(new MouseTask.Scroll(breadlib$getThis(), e, f));
-    }
+	@Inject(method = "onScroll", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z", shift = At.Shift.BEFORE))
+	private void breadlib$handleScrollTask(
+			long windowPointer, double xOffset, double yOffset, CallbackInfo ci,
+			@Local(name = "e") double e, @Local(name = "f") double f
+	) {
+		TaskManager.runTasks(new MouseTask.Scroll(breadlib$getThis(), e, f));
+	}
 }
