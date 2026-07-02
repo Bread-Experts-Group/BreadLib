@@ -15,6 +15,6 @@ public class BreadLibForge {
 		BreadLib.init();
 		registerContent(eventBus);
 
-		ForgeEvents.registerEvents();
+		ForgeEvents.registerEvents(eventBus);
 	}
 }

@@ -15,9 +15,10 @@ public class TaskManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends Task> void runTasks(T task) {
+	public static <T extends Task> boolean runTasks(T task) {
 		ArrayList<Consumer<? extends Task>> list = tasks.get(task.getClass());
-		if (list == null || list.isEmpty()) return;
+		if (list == null || list.isEmpty()) return false;
 		for (Consumer<? extends Task> consumer : list) ((Consumer<T>) consumer).accept(task);
+		return task.isCanceled();
 	}
 }

@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask;
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage;
@@ -62,19 +63,19 @@ public class FabricEvents {
 
 	public static void addServerTickTasks() {
 		ServerTickEvents.START_WORLD_TICK.register(level ->
-				TaskManager.runTasks(new ServerTickTask.Pre(level))
+				TaskManager.runTasks(new ServerTickTask(level, FireSide.PRE))
 		);
 		ServerTickEvents.END_WORLD_TICK.register(level ->
-				TaskManager.runTasks(new ServerTickTask.Post(level))
+				TaskManager.runTasks(new ServerTickTask(level, FireSide.POST))
 		);
 	}
 
 	public static void addClientTickTasks() {
 		ClientTickEvents.START_WORLD_TICK.register(level ->
-				TaskManager.runTasks(new ClientTickTask.Pre(level))
+				TaskManager.runTasks(new ClientTickTask(level, FireSide.PRE))
 		);
-		ServerTickEvents.END_WORLD_TICK.register(level ->
-				TaskManager.runTasks(new ServerTickTask.Post(level))
+		ClientTickEvents.END_WORLD_TICK.register(level ->
+				TaskManager.runTasks(new ClientTickTask(level, FireSide.POST))
 		);
 	}
 }

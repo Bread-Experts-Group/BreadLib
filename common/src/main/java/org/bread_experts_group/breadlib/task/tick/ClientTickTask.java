@@ -1,24 +1,14 @@
 package org.bread_experts_group.breadlib.task.tick;
 
 import net.minecraft.client.multiplayer.ClientLevel;
-import org.bread_experts_group.breadlib.task.Task;
+import org.bread_experts_group.breadlib.task.FireSide;
+import org.bread_experts_group.breadlib.task.SidedTask;
 
-public abstract class ClientTickTask extends Task {
+public class ClientTickTask extends SidedTask {
 	public ClientLevel level;
 
-	public ClientTickTask(ClientLevel level) {
+	public ClientTickTask(ClientLevel level, FireSide side) {
+		super(side);
 		this.level = level;
-	}
-
-	public static class Pre extends ClientTickTask {
-		public Pre(ClientLevel level) {
-			super(level);
-		}
-	}
-
-	public static class Post extends ClientTickTask {
-		public Post(ClientLevel level) {
-			super(level);
-		}
 	}
 }

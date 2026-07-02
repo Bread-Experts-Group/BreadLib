@@ -1,4 +1,4 @@
-package org.bread_experts_group.breadlib.mixin;
+package org.bread_experts_group.breadlib.mixin.client;
 
 import net.minecraft.client.Minecraft;
 import org.bread_experts_group.breadlib.BreadLib;

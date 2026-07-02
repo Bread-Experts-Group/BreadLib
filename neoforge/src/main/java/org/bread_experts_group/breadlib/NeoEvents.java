@@ -2,25 +2,23 @@ package org.bread_experts_group.breadlib;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
-import org.bread_experts_group.breadlib.task.input.MouseTask;
+import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask;
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage;
+import org.bread_experts_group.breadlib.task.tick.ClientTickTask;
+import org.bread_experts_group.breadlib.task.tick.ServerTickTask;
 
 import java.util.function.Consumer;
 
 import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.*;
-import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_BLOCK_ENTITIES;
-import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_CUTOUT_BLOCKS;
-import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_ENTITIES;
-import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_LEVEL;
-import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_PARTICLES;
-import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_TRANSLUCENT_BLOCKS;
-import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_TRIPWIRE_BLOCKS;
-import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.AFTER_WEATHER;
 
 public class NeoEvents {
 	private static <T extends Event> void addListener(Class<T> eventClass, Consumer<T> task) {
@@ -55,9 +53,12 @@ public class NeoEvents {
 		throw new NullPointerException();
 	}
 
-	public static void registerEvents() {
+	public static void registerEvents(IEventBus eventBus) {
 		addRLSETask();
 		addMouseScrollTask();
+		addMouseButtonTasks();
+		addClientTickTasks();
+		addServerTickTasks();
 	}
 
 	public static void addRLSETask() {
@@ -75,8 +76,51 @@ public class NeoEvents {
 	}
 
 	public static void addMouseScrollTask() {
-		addListener(InputEvent.MouseScrollingEvent.class, event -> TaskManager.runTasks(
-				new MouseTask.Scroll(Minecraft.getInstance().mouseHandler, event.getScrollDeltaX(), event.getScrollDeltaY())
+		addListener(InputEvent.MouseScrollingEvent.class, event -> {
+			if (TaskManager.runTasks(
+					new MouseTasks.Scroll(Minecraft.getInstance().mouseHandler, event.getScrollDeltaX(), event.getScrollDeltaY())
+			)) event.setCanceled(true);
+		});
+	}
+
+	public static void addMouseButtonTasks() {
+		addListener(InputEvent.MouseButton.Pre.class, event -> {
+			if (TaskManager.runTasks(
+					new MouseTasks.Button(
+							Minecraft.getInstance().mouseHandler,
+							event.getButton(),
+							event.getAction(),
+							event.getModifiers(),
+							FireSide.PRE
+					)
+			)) event.setCanceled(true);
+		});
+		addListener(InputEvent.MouseButton.Post.class, event -> TaskManager.runTasks(
+				new MouseTasks.Button(
+						Minecraft.getInstance().mouseHandler,
+						event.getButton(),
+						event.getAction(),
+						event.getModifiers(),
+						FireSide.POST
+				)
+		));
+	}
+
+	public static void addClientTickTasks() {
+		addListener(ClientTickEvent.Pre.class, event -> TaskManager.runTasks(
+				new ClientTickTask(Minecraft.getInstance().level, FireSide.PRE)
+		));
+		addListener(ClientTickEvent.Post.class, event -> TaskManager.runTasks(
+				new ClientTickTask(Minecraft.getInstance().level, FireSide.POST)
+		));
+	}
+
+	public static void addServerTickTasks() {
+		addListener(ServerTickEvent.Pre.class, event -> TaskManager.runTasks(
+				new ServerTickTask(event.getServer().overworld(), FireSide.PRE)
+		));
+		addListener(ServerTickEvent.Post.class, event -> TaskManager.runTasks(
+				new ServerTickTask(event.getServer().overworld(), FireSide.POST)
 		));
 	}
 }

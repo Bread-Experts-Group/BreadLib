@@ -27,7 +27,6 @@ public class BreadLibNeoForge {
 		BreadLib.LOGGER.info("Hello NeoForge world!");
 		BreadLib.init();
 		registerContent(eventBus);
-
-		NeoEvents.registerEvents();
+		NeoEvents.registerEvents(eventBus);
 	}
 }

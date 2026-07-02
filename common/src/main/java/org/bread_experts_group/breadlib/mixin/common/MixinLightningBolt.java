@@ -1,4 +1,4 @@
-package org.bread_experts_group.breadlib.mixin;
+package org.bread_experts_group.breadlib.mixin.common;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.core.BlockPos;

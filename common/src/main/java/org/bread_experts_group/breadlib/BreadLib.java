@@ -1,9 +1,16 @@
 package org.bread_experts_group.breadlib;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bread_experts_group.breadlib.extensions.IMouseItem;
 import org.bread_experts_group.breadlib.platform.PlatformServices;
 import org.bread_experts_group.breadlib.registry.RegistryProvider;
+import org.bread_experts_group.breadlib.task.TaskManager;
+import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.test.*;
 
 public class BreadLib {
@@ -25,7 +32,30 @@ public class BreadLib {
 		);
 
 //		TasksTest.renderTest();
-		TasksTest.mouseTest();
+//		TasksTest.mouseTest();
+
+		TaskManager.newTask(MouseTasks.Scroll.class, task -> {
+			Minecraft minecraft = Minecraft.getInstance();
+			LocalPlayer player = minecraft.player;
+			if (player == null) return;
+			ItemStack heldStack = player.getMainHandItem();
+			if (heldStack.getItem() instanceof IMouseItem item) {
+				if (item.onMouseScroll(heldStack, (ClientLevel) player.level(), player)) task.cancel();
+			}
+		});
+
+		TaskManager.newTask(MouseTasks.Button.class, task -> {
+			Minecraft minecraft = Minecraft.getInstance();
+			LocalPlayer player = minecraft.player;
+			if (player == null) return;
+			ItemStack heldStack = player.getMainHandItem();
+			if (heldStack.getItem() instanceof IMouseItem item) {
+				if (task.isPre()) {
+					if (item.onMouseInputPre(heldStack, (ClientLevel) player.level(), player)) task.cancel();
+				}
+				else if (task.isPost()) item.onMouseInputPost(heldStack, (ClientLevel) player.level(), player);
+			}
+		});
 
 		if (PlatformServices.PLATFORM.isModLoaded("breadlib")) {
 			LOGGER.info("Hello to breadlib");
