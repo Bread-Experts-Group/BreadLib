@@ -1,11 +1,15 @@
 package org.bread_experts_group.breadlib;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import org.bread_experts_group.breadlib.task.TaskManager;
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask;
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage;
+import org.bread_experts_group.breadlib.task.tick.ClientTickTask;
+import org.bread_experts_group.breadlib.task.tick.ServerTickTask;
 
 public class FabricEvents {
 	private static void renderWorldEvent(WorldRenderContext context, RenderLevelStage... stage) {
@@ -25,6 +29,8 @@ public class FabricEvents {
 
 	public static void registerEvents() {
 		addWorldRenderTasks();
+		addClientTickTasks();
+		addServerTickTasks();
 	}
 
 	public static void addWorldRenderTasks() {
@@ -51,6 +57,24 @@ public class FabricEvents {
 		);
 		WorldRenderEvents.END.register(context ->
 				renderWorldEvent(context, RenderLevelStage.AFTER_LEVEL)
+		);
+	}
+
+	public static void addServerTickTasks() {
+		ServerTickEvents.START_WORLD_TICK.register(level ->
+				TaskManager.runTasks(new ServerTickTask.Pre(level))
+		);
+		ServerTickEvents.END_WORLD_TICK.register(level ->
+				TaskManager.runTasks(new ServerTickTask.Post(level))
+		);
+	}
+
+	public static void addClientTickTasks() {
+		ClientTickEvents.START_WORLD_TICK.register(level ->
+				TaskManager.runTasks(new ClientTickTask.Pre(level))
+		);
+		ServerTickEvents.END_WORLD_TICK.register(level ->
+				TaskManager.runTasks(new ServerTickTask.Post(level))
 		);
 	}
 }
