@@ -6,8 +6,10 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.bread_experts_group.breadlib.BreadLib;
 import org.bread_experts_group.breadlib.extensions.IMouseItem;
+import org.bread_experts_group.breadlib.network.NetworkDirection;
 import org.bread_experts_group.breadlib.task.TaskManager;
 import org.bread_experts_group.breadlib.task.input.MouseTasks;
+import org.bread_experts_group.breadlib.task.network.NetworkTask;
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask;
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask;
 import org.bread_experts_group.breadlib.util.Color;
@@ -48,5 +50,14 @@ public class TasksTest {
 				guiGraphics.fill(0, 0, 100, 100, Color.WHITE);
 			}));
 		});
-	};
+	}
+
+	public static void networkTest() {
+		TaskManager.newTask(NetworkTask.class, task -> task.add(
+				NetworkDirection.SERVER_BOUND,
+				ServerboundPacketTest.TYPE,
+				ServerboundPacketTest.STREAM_CODEC,
+				ServerboundPacketTest::handleServerbound
+		));
+	}
 }
