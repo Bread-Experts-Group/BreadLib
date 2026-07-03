@@ -16,7 +16,9 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import org.bread_experts_group.breadlib.network.context.NetworkContext;
 import org.bread_experts_group.breadlib.network.context.ServerNetworkContext;
+import org.bread_experts_group.breadlib.network.payload.PayloadHandler;
 import org.bread_experts_group.breadlib.network.payload.PayloadInfo;
 import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
@@ -28,6 +30,7 @@ import org.bread_experts_group.breadlib.task.render.RenderLevelStage;
 import org.bread_experts_group.breadlib.task.tick.ClientTickTask;
 import org.bread_experts_group.breadlib.task.tick.ServerTickTask;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
 import static org.bread_experts_group.breadlib.task.render.RenderLevelStage.*;
@@ -157,13 +160,13 @@ public class NeoEvents {
 						(CustomPacketPayload.Type<CustomPacketPayload>) info.type(),
 						(StreamCodec<? super RegistryFriendlyByteBuf, CustomPacketPayload>) info.streamCodec(),
 						(payload, context) -> {
-							info.handler().handle(payload, new ServerNetworkContext((ServerPlayer) context.player()));
-//						try {
-//							PayloadHandler.class.getMethod("handle", CustomPacketPayload.class, NetworkContext.class)
-//									.invoke(info.handler(), payload,  new ServerNetworkContext((ServerPlayer) context.player()));
-//						} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-//							throw new RuntimeException(e);
-//						}
+//							info.handler().handle(payload, new ServerNetworkContext((ServerPlayer) context.player()));
+						try {
+							PayloadHandler.class.getMethod("handle", CustomPacketPayload.class, NetworkContext.class)
+									.invoke(info.handler(), payload,  new ServerNetworkContext((ServerPlayer) context.player()));
+						} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+							throw new RuntimeException(e);
+						}
 				});
 			}
 		});

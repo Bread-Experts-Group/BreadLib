@@ -34,6 +34,7 @@ public class BreadLib {
 //		TasksTest.renderTest();
 		TasksTest.mouseTests();
 		TasksTest.layeredDrawTest();
+		TasksTest.networkTest();
 
 		TaskManager.newTask(GenerateDataTask.class, task -> task.addGenerator(new LocaleGenerator(BreadLib.MOD_ID)));
 
