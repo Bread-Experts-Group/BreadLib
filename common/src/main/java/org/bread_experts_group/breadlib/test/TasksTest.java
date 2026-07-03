@@ -6,7 +6,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.bread_experts_group.breadlib.BreadLib;
 import org.bread_experts_group.breadlib.extensions.IMouseItem;
-import org.bread_experts_group.breadlib.network.NetworkDirection;
 import org.bread_experts_group.breadlib.task.TaskManager;
 import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.task.network.NetworkTask;
@@ -53,11 +52,19 @@ public class TasksTest {
 	}
 
 	public static void networkTest() {
-		TaskManager.newTask(NetworkTask.class, task -> task.add(
-				NetworkDirection.SERVER_BOUND,
-				ServerboundPacketTest.TYPE,
-				ServerboundPacketTest.STREAM_CODEC,
-				ServerboundPacketTest::handleServerbound
-		));
+		TaskManager.newTask(NetworkTask.class, task -> {
+			task.addServerbound(
+					ServerboundPacketTest.class,
+					ServerboundPacketTest.TYPE,
+					ServerboundPacketTest.STREAM_CODEC,
+					ServerboundPacketTest::handleServerbound
+			);
+			task.addClientbound(
+					ClientboundPacketTest.class,
+					ClientboundPacketTest.TYPE,
+					ClientboundPacketTest.STREAM_CODEC,
+					ClientboundPacketTest::handleClientbound
+			);
+		});
 	}
 }

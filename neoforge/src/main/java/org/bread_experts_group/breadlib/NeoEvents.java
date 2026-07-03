@@ -1,6 +1,7 @@
 package org.bread_experts_group.breadlib;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
@@ -13,6 +14,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import org.bread_experts_group.breadlib.network.context.ClientNetworkContext;
 import org.bread_experts_group.breadlib.network.context.ServerNetworkContext;
 import org.bread_experts_group.breadlib.network.payload.PayloadInfo;
 import org.bread_experts_group.breadlib.task.FireSide;
@@ -154,9 +156,17 @@ public class NeoEvents {
 				registrar.playToServer(
 						info.type(),
 						info.streamCodec(),
-						(payload, context) -> {
-							info.handler().handle(payload, new ServerNetworkContext((ServerPlayer) context.player()));
-				});
+						(payload, context) ->
+								info.handler().handle(payload, new ServerNetworkContext((ServerPlayer) context.player()))
+				);
+			}
+			for (PayloadInfo info : task.clientboundPayloads()) {
+				registrar.playToClient(
+						info.type(),
+						info.streamCodec(),
+						(payload, context) ->
+								info.handler().handle(payload, new ClientNetworkContext((LocalPlayer) context.player()))
+				);
 			}
 		});
 	}

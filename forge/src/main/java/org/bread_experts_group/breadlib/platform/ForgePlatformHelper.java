@@ -2,15 +2,11 @@ package org.bread_experts_group.breadlib.platform;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.RegisterEvent;
-import org.bread_experts_group.breadlib.BreadLibForge;
+import org.bread_experts_group.breadlib.ForgeNetworking;
 import org.bread_experts_group.breadlib.platform.services.IPlatformHelper;
-import org.bread_experts_group.breadlib.registry.RegistryProvider;
 
 public class ForgePlatformHelper implements IPlatformHelper {
 
@@ -29,28 +25,19 @@ public class ForgePlatformHelper implements IPlatformHelper {
 		return !FMLLoader.isProduction();
 	}
 
-	public static <T> void registerContent(RegistryProvider<T> provider, RegisterEvent event) {
-		event.register(provider.getKey(), helper ->
-				provider.entries().forEach((key, value) -> {
-					helper.register(key.getName(), value.get());
-					key.bind();
-				})
-		);
-	}
-
-	public static void registerContent(IEventBus eventBus) {
-		eventBus.addListener(EventPriority.NORMAL, false, RegisterEvent.class, event -> {
-			for (RegistryProvider<?> provider : RegistryProvider.providers) registerContent(provider, event);
-		});
-	}
-
 	@Override
 	public <T extends CustomPacketPayload> void sendServerboundPacket(T payload) {
-		// todo (forge networking stinks)
+		if (ForgeNetworking.NETWORK_CHANNEL == null) throw new NullPointerException(
+				"Breadlib's network channel was not initialized before accessing, this shouldn't be possible!"
+		);
+		ForgeNetworking.NETWORK_CHANNEL.send(payload, PacketDistributor.SERVER.noArg());
 	}
 
 	@Override
 	public <T extends CustomPacketPayload> void sendClientboundPacket(T payload, ServerLevel level) {
-		BreadLibForge.NETWORK_CHANNEL.send(payload, PacketDistributor.ALL.noArg());
+		if (ForgeNetworking.NETWORK_CHANNEL == null) throw new NullPointerException(
+				"Breadlib's network channel was not initialized before accessing, this shouldn't be possible!"
+		);
+		ForgeNetworking.NETWORK_CHANNEL.send(payload, PacketDistributor.ALL.noArg());
 	}
 }

@@ -15,13 +15,32 @@ import java.util.List;
 public class NetworkTask extends Task {
 	private final List<PayloadInfo<?, ?>> payloads = new ArrayList<>();
 
-	public <B extends ByteBuf, T extends CustomPacketPayload> void add(
+	private <B extends ByteBuf, T extends CustomPacketPayload> void add(
+			Class<T> packetClass,
 			NetworkDirection bound,
 			CustomPacketPayload.Type<T> type,
 			StreamCodec<B, T> streamCodec,
 			PayloadHandler<T> handler
 	) {
-		payloads.add(new PayloadInfo<>(handler, type, streamCodec, bound));
+		payloads.add(new PayloadInfo<>(packetClass, handler, type, streamCodec, bound));
+	}
+
+	public <B extends ByteBuf, T extends CustomPacketPayload> void addServerbound(
+			Class<T> packetClass,
+			CustomPacketPayload.Type<T> type,
+			StreamCodec<B, T> streamCodec,
+			PayloadHandler<T> handler
+	) {
+		this.add(packetClass, NetworkDirection.SERVER_BOUND, type, streamCodec, handler);
+	}
+
+	public <B extends ByteBuf, T extends CustomPacketPayload> void addClientbound(
+			Class<T> packetClass,
+			CustomPacketPayload.Type<T> type,
+			StreamCodec<B, T> streamCodec,
+			PayloadHandler<T> handler
+	) {
+		this.add(packetClass, NetworkDirection.CLIENT_BOUND, type, streamCodec, handler);
 	}
 
 	public Collection<PayloadInfo<?, ?>> clientboundPayloads() {
