@@ -1,5 +1,8 @@
 package org.bread_experts_group.breadlib.platform.services;
 
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
+
 public interface IPlatformHelper {
 	/**
 	 * Gets the name of the current platform
@@ -31,4 +34,8 @@ public interface IPlatformHelper {
 	default String getEnvironmentName() {
 		return isDevelopmentEnvironment() ? "development" : "production";
 	}
+
+	// todo expand to include players tracking chunks instead of sending to all players at once
+	<T extends CustomPacketPayload> void sendServerboundPacket(T payload);
+	<T extends CustomPacketPayload> void sendClientboundPacket(T payload, ServerLevel level);
 }

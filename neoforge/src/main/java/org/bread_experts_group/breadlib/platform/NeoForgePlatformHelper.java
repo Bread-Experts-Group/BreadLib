@@ -1,7 +1,10 @@
 package org.bread_experts_group.breadlib.platform;
 
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.bread_experts_group.breadlib.platform.services.IPlatformHelper;
 
 public class NeoForgePlatformHelper implements IPlatformHelper {
@@ -18,5 +21,15 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
 	@Override
 	public boolean isDevelopmentEnvironment() {
 		return !FMLLoader.isProduction();
+	}
+
+	@Override
+	public <T extends CustomPacketPayload> void sendServerboundPacket(T payload) {
+		PacketDistributor.sendToServer(payload);
+	}
+
+	@Override
+	public <T extends CustomPacketPayload> void sendClientboundPacket(T packet, ServerLevel level) {
+		PacketDistributor.sendToAllPlayers(packet);
 	}
 }
