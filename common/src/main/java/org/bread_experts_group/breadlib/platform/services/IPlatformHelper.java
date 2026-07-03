@@ -1,5 +1,4 @@
 package org.bread_experts_group.breadlib.platform.services;
-
 public interface IPlatformHelper {
 	/**
 	 * Gets the name of the current platform

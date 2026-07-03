@@ -4,6 +4,7 @@ import org.bread_experts_group.breadlib.util.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class TaskManager {
@@ -16,7 +17,13 @@ public class TaskManager {
 
 	@SuppressWarnings("unchecked")
 	public static <T extends Task> boolean runTasks(T task) {
-		ArrayList<Consumer<? extends Task>> list = tasks.get(task.getClass());
+		ArrayList<Consumer<? extends Task>> list = null;
+		for (Map.Entry<Class<?>, ArrayList<Consumer<? extends Task>>> entry : tasks.entrySet()) {
+			if (entry.getKey().isAssignableFrom(task.getClass())) {
+				list = entry.getValue();
+				break;
+			}
+		}
 		if (list == null || list.isEmpty()) return false;
 		for (Consumer<? extends Task> consumer : list) ((Consumer<T>) consumer).accept(task);
 		return task.isCanceled();

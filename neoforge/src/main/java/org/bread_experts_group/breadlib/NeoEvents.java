@@ -2,7 +2,6 @@ package org.bread_experts_group.breadlib;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.Event;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -50,10 +49,10 @@ public class NeoEvents {
 			return AFTER_LEVEL;
 		}
 
-		throw new NullPointerException();
+		throw new ClassCastException("Failed to map NeoForge specific RenderLevelStageEvent.Stage: " + stage);
 	}
 
-	public static void registerEvents(IEventBus eventBus) {
+	public static void registerEvents() {
 		addRLSETask();
 		addMouseScrollTask();
 		addMouseButtonTasks();
@@ -61,7 +60,7 @@ public class NeoEvents {
 		addServerTickTasks();
 	}
 
-	public static void addRLSETask() {
+	private static void addRLSETask() {
 		addListener(RenderLevelStageEvent.class, (event) -> TaskManager.runTasks(
 				new LevelRenderTask(
 						getRenderLevelStage(event.getStage()),
@@ -75,7 +74,7 @@ public class NeoEvents {
 		);
 	}
 
-	public static void addMouseScrollTask() {
+	private static void addMouseScrollTask() {
 		addListener(InputEvent.MouseScrollingEvent.class, event -> {
 			if (TaskManager.runTasks(
 					new MouseTasks.Scroll(Minecraft.getInstance().mouseHandler, event.getScrollDeltaX(), event.getScrollDeltaY())
@@ -83,7 +82,7 @@ public class NeoEvents {
 		});
 	}
 
-	public static void addMouseButtonTasks() {
+	private static void addMouseButtonTasks() {
 		addListener(InputEvent.MouseButton.Pre.class, event -> {
 			if (TaskManager.runTasks(
 					new MouseTasks.Button(
@@ -106,7 +105,7 @@ public class NeoEvents {
 		));
 	}
 
-	public static void addClientTickTasks() {
+	private static void addClientTickTasks() {
 		addListener(ClientTickEvent.Pre.class, event -> TaskManager.runTasks(
 				new ClientTickTask(Minecraft.getInstance().level, FireSide.PRE)
 		));
@@ -115,7 +114,7 @@ public class NeoEvents {
 		));
 	}
 
-	public static void addServerTickTasks() {
+	private static void addServerTickTasks() {
 		addListener(ServerTickEvent.Pre.class, event -> TaskManager.runTasks(
 				new ServerTickTask(event.getServer().overworld(), FireSide.PRE)
 		));

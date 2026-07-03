@@ -6,10 +6,12 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bread_experts_group.breadlib.data.LocaleGenerator;
 import org.bread_experts_group.breadlib.extensions.IMouseItem;
 import org.bread_experts_group.breadlib.platform.PlatformServices;
 import org.bread_experts_group.breadlib.registry.RegistryProvider;
 import org.bread_experts_group.breadlib.task.TaskManager;
+import org.bread_experts_group.breadlib.task.data.GenerateDataTask;
 import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.test.*;
 
@@ -18,7 +20,6 @@ public class BreadLib {
 	public static final Logger LOGGER = LogManager.getLogger("BreadLib");
 
 	public static void init() {
-		Test.Companion.test();
 		LOGGER.info(
 				"Hello from Common init on {}! we are currently in a {} environment!",
 				PlatformServices.PLATFORM.getPlatformName(), PlatformServices.PLATFORM.getEnvironmentName()
@@ -56,6 +57,8 @@ public class BreadLib {
 				else if (task.isPost()) item.onMouseInputPost(heldStack, (ClientLevel) player.level(), player);
 			}
 		});
+
+		TaskManager.newTask(GenerateDataTask.class, task -> task.addGenerator(new LocaleGenerator(BreadLib.MOD_ID)));
 
 		if (PlatformServices.PLATFORM.isModLoaded("breadlib")) {
 			LOGGER.info("Hello to breadlib");
