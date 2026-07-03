@@ -17,7 +17,8 @@ public class ShapeUtils {
 			case NONE -> input;
 			case CLOCKWISE_90 -> new AABB(-input.minZ, input.minY, input.minX, -input.maxZ, input.maxY, input.maxX);
 			case CLOCKWISE_180 -> new AABB(-input.minX, input.minY, -input.minZ, -input.maxX, input.maxY, -input.maxZ);
-			case COUNTERCLOCKWISE_90 -> new AABB(input.minZ, input.minY, -input.minX, input.maxZ, input.maxY, -input.maxX);
+			case COUNTERCLOCKWISE_90 ->
+					new AABB(input.minZ, input.minY, -input.minX, input.maxZ, input.maxY, -input.maxX);
 		};
 	}
 

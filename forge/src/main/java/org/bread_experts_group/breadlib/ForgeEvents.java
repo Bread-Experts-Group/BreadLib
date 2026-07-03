@@ -2,6 +2,7 @@ package org.bread_experts_group.breadlib;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.client.event.AddGuiOverlayLayersEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -12,6 +13,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
 import org.bread_experts_group.breadlib.task.input.MouseTasks;
+import org.bread_experts_group.breadlib.task.render.LayeredDrawTask;
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask;
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage;
 import org.bread_experts_group.breadlib.task.tick.ClientTickTask;
@@ -60,10 +62,11 @@ public class ForgeEvents {
 		addMouseButtonTasks();
 		addClientTickTasks();
 		addServerTickTasks();
+		addLayeredDrawTask(eventBus);
 	}
 
 	@SuppressWarnings({"NewExpressionSideOnly", "removal"})
-	public static void addRLSETask() {
+	private static void addRLSETask() {
 		addListener(RenderLevelStageEvent.class, (event) -> {
 					PoseStack poseStack = new PoseStack();
 					poseStack.mulPose(event.getPoseStack());
@@ -81,15 +84,15 @@ public class ForgeEvents {
 		);
 	}
 
-	public static void addMouseScrollTask() {
+	private static void addMouseScrollTask() {
 		addListener(InputEvent.MouseScrollingEvent.class, event -> {
 			if (TaskManager.runTasks(
 					new MouseTasks.Scroll(Minecraft.getInstance().mouseHandler, event.getDeltaX(), event.getDeltaY())
-			)) event.setCanceled(true);
+			).isCanceled()) event.setCanceled(true);
 		});
 	}
 
-	public static void addMouseButtonTasks() {
+	private static void addMouseButtonTasks() {
 		addListener(InputEvent.MouseButton.Pre.class, event -> {
 			if (TaskManager.runTasks(
 					new MouseTasks.Button(
@@ -98,7 +101,7 @@ public class ForgeEvents {
 							event.getAction(),
 							event.getModifiers(),
 							FireSide.PRE
-					))) event.setCanceled(true);
+					)).isCanceled()) event.setCanceled(true);
 		});
 		addListener(InputEvent.MouseButton.Post.class, event -> TaskManager.runTasks(
 				new MouseTasks.Button(
@@ -111,7 +114,7 @@ public class ForgeEvents {
 		));
 	}
 
-	public static void addClientTickTasks() {
+	private static void addClientTickTasks() {
 		addListener(TickEvent.ClientTickEvent.Pre.class, event -> TaskManager.runTasks(
 				new ClientTickTask(Minecraft.getInstance().level, FireSide.PRE)
 		));
@@ -120,12 +123,25 @@ public class ForgeEvents {
 		));
 	}
 
-	public static void addServerTickTasks() {
+	private static void addServerTickTasks() {
 		addListener(TickEvent.ServerTickEvent.Pre.class, event -> TaskManager.runTasks(
 				new ServerTickTask(event.getServer().overworld(), FireSide.PRE)
 		));
 		addListener(TickEvent.ServerTickEvent.Post.class, event -> TaskManager.runTasks(
 				new ServerTickTask(event.getServer().overworld(), FireSide.POST)
 		));
+	}
+
+	private static void addLayeredDrawTask(IEventBus eventBus) {
+		eventBus.addListener(
+				EventPriority.NORMAL,
+				false,
+				AddGuiOverlayLayersEvent.class,
+				event -> {
+					LayeredDrawTask task = TaskManager.runTasks(new LayeredDrawTask());
+					task.getLayers().forEach((location, layer) ->
+							event.getLayeredDraw().add(location, layer)
+					);
+				});
 	}
 }

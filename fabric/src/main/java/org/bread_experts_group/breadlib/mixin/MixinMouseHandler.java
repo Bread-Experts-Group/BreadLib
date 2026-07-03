@@ -32,7 +32,7 @@ public class MixinMouseHandler {
 			long windowPointer, double xOffset, double yOffset, CallbackInfo ci,
 			@Local(name = "e") double e, @Local(name = "f") double f
 	) {
-		if (TaskManager.runTasks(new MouseTasks.Scroll(breadlib$getThis(), e, f))) ci.cancel();
+		if (TaskManager.runTasks(new MouseTasks.Scroll(breadlib$getThis(), e, f)).isCanceled()) ci.cancel();
 	}
 
 	@Inject(
@@ -45,7 +45,8 @@ public class MixinMouseHandler {
 			cancellable = true
 	)
 	private void breadlib$handleButtonPreTask(long windowPointer, int button, int action, int modifiers, CallbackInfo ci) {
-		if (TaskManager.runTasks(new MouseTasks.Button(breadlib$getThis(), button, action, modifiers, FireSide.PRE))) ci.cancel();
+		if (TaskManager.runTasks(new MouseTasks.Button(breadlib$getThis(), button, action, modifiers, FireSide.PRE)).isCanceled())
+			ci.cancel();
 	}
 
 	@Inject(method = "onPress", at = @At("TAIL"))

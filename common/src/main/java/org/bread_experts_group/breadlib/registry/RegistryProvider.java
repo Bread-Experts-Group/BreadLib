@@ -22,7 +22,7 @@ public class RegistryProvider<T> {
 	private final String modID;
 	private boolean frozen = false;
 
-	public static ArrayList<RegistryProvider<?>> providers = new ArrayList<>();
+	public static final ArrayList<RegistryProvider<?>> providers = new ArrayList<>();
 
 	public static void registerAll(RegistryProvider<?>... providers) {
 		for (RegistryProvider<?> provider : providers) provider.register();

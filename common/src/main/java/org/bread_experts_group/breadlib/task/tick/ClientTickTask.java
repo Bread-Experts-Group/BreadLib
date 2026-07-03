@@ -5,7 +5,7 @@ import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.SidedTask;
 
 public class ClientTickTask extends SidedTask {
-	public ClientLevel level;
+	public final ClientLevel level;
 
 	public ClientTickTask(ClientLevel level, FireSide side) {
 		super(side);

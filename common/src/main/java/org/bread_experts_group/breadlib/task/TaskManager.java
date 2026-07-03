@@ -15,8 +15,11 @@ public class TaskManager {
 		list.add(task);
 	}
 
+	/**
+	 * Runs all consumers registered to the specified task, then returns the task.
+	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Task> boolean runTasks(T task) {
+	public static <T extends Task> T runTasks(T task) {
 		ArrayList<Consumer<? extends Task>> list = null;
 		for (Map.Entry<Class<?>, ArrayList<Consumer<? extends Task>>> entry : tasks.entrySet()) {
 			if (entry.getKey().isAssignableFrom(task.getClass())) {
@@ -24,8 +27,8 @@ public class TaskManager {
 				break;
 			}
 		}
-		if (list == null || list.isEmpty()) return false;
+		if (list == null || list.isEmpty()) return task;
 		for (Consumer<? extends Task> consumer : list) ((Consumer<T>) consumer).accept(task);
-		return task.isCanceled();
+		return task;
 	}
 }

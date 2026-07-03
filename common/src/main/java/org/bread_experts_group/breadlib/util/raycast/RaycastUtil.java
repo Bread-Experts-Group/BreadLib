@@ -95,7 +95,7 @@ public class RaycastUtil {
 		);
 	}
 
-	public static Invokers.Three<Level, Vec3, Vec3, BlockState> blocks(Block...filter) {
+	public static Invokers.Three<Level, Vec3, Vec3, BlockState> blocks(Block... filter) {
 		return (level, from, to) -> {
 			BlockPos blockPos = new BlockPos(VecUtil.toVec3i(to));
 			BlockState state = level.getBlockState(blockPos);
@@ -105,7 +105,7 @@ public class RaycastUtil {
 		};
 	}
 
-	public static Invokers.Three<Level, Vec3, Vec3, Entity> entities(EntityType<?>...filter) {
+	public static Invokers.Three<Level, Vec3, Vec3, Entity> entities(EntityType<?>... filter) {
 		return (level, from, to) -> {
 			List<Entity> entities = level.getEntities(null, AABB.ofSize(to, 1.0, 1.0, 1.0));
 			if (entities.isEmpty()) return null;

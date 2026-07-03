@@ -1,23 +1,22 @@
 package org.bread_experts_group.breadlib;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bread_experts_group.breadlib.data.LocaleGenerator;
-import org.bread_experts_group.breadlib.extensions.IMouseItem;
 import org.bread_experts_group.breadlib.platform.PlatformServices;
 import org.bread_experts_group.breadlib.registry.RegistryProvider;
 import org.bread_experts_group.breadlib.task.TaskManager;
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask;
-import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.test.*;
 
 public class BreadLib {
 	public static final String MOD_ID = "breadlib";
 	public static final Logger LOGGER = LogManager.getLogger("BreadLib");
+
+	public static ResourceLocation modLoc(String...path) {
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, String.join("/", path));
+	}
 
 	public static void init() {
 		LOGGER.info(
@@ -33,30 +32,8 @@ public class BreadLib {
 		);
 
 //		TasksTest.renderTest();
-//		TasksTest.mouseTest();
-
-		TaskManager.newTask(MouseTasks.Scroll.class, task -> {
-			Minecraft minecraft = Minecraft.getInstance();
-			LocalPlayer player = minecraft.player;
-			if (player == null) return;
-			ItemStack heldStack = player.getMainHandItem();
-			if (heldStack.getItem() instanceof IMouseItem item) {
-				if (item.onMouseScroll(heldStack, (ClientLevel) player.level(), player)) task.cancel();
-			}
-		});
-
-		TaskManager.newTask(MouseTasks.Button.class, task -> {
-			Minecraft minecraft = Minecraft.getInstance();
-			LocalPlayer player = minecraft.player;
-			if (player == null) return;
-			ItemStack heldStack = player.getMainHandItem();
-			if (heldStack.getItem() instanceof IMouseItem item) {
-				if (task.isPre()) {
-					if (item.onMouseInputPre(heldStack, (ClientLevel) player.level(), player)) task.cancel();
-				}
-				else if (task.isPost()) item.onMouseInputPost(heldStack, (ClientLevel) player.level(), player);
-			}
-		});
+		TasksTest.mouseTests();
+		TasksTest.layeredDrawTest();
 
 		TaskManager.newTask(GenerateDataTask.class, task -> task.addGenerator(new LocaleGenerator(BreadLib.MOD_ID)));
 
