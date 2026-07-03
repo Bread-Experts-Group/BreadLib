@@ -15,6 +15,7 @@ import static org.bread_experts_group.breadlib.platform.ForgePlatformHelper.regi
 
 @Mod(BreadLib.MOD_ID)
 public class BreadLibForge {
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static final SimpleChannel NETWORK_CHANNEL =
 			ChannelBuilder
 					.named("breadlib")

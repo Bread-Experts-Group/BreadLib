@@ -8,6 +8,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.bread_experts_group.breadlib.extensions.IMouseItem;
+import org.bread_experts_group.breadlib.platform.PlatformServices;
 
 public class TestItem extends Item implements IMouseItem {
 	public TestItem() {
@@ -19,6 +20,7 @@ public class TestItem extends Item implements IMouseItem {
 		if (player.isCrouching()) {
 			level.playLocalSound(player, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.AMBIENT, 1f, 1f);
 			player.displayClientMessage(Component.literal("pling!"), false);
+			PlatformServices.PLATFORM.sendServerboundPacket(new ServerboundPacketTest(10, "test"));
 			return true;
 		}
 		return false;

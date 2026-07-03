@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class NetworkTask extends Task {
-	private final List<PayloadInfo<?>> payloads = new ArrayList<>();
+	private final List<PayloadInfo<?, ?>> payloads = new ArrayList<>();
 
 	public <B extends ByteBuf, T extends CustomPacketPayload> void add(
 			NetworkDirection bound,
@@ -24,11 +24,11 @@ public class NetworkTask extends Task {
 		payloads.add(new PayloadInfo<>(handler, type, streamCodec, bound));
 	}
 
-	public Collection<PayloadInfo<?>> clientboundPayloads() {
+	public Collection<PayloadInfo<?, ?>> clientboundPayloads() {
 		return payloads.stream().filter(info -> info.bound() == NetworkDirection.CLIENT_BOUND).toList();
 	}
 
-	public Collection<PayloadInfo<?>> serverboundPayloads() {
+	public Collection<PayloadInfo<?, ?>> serverboundPayloads() {
 		return payloads.stream().filter(info -> info.bound() == NetworkDirection.SERVER_BOUND).toList();
 	}
 }
