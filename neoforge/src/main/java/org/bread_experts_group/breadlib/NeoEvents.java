@@ -1,9 +1,6 @@
 package org.bread_experts_group.breadlib;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
@@ -150,15 +147,16 @@ public class NeoEvents {
 		});
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static void addNetworkTasks(IEventBus eventBus) {
 		eventBus.addListener(RegisterPayloadHandlersEvent.class, event -> {
 			NetworkTask task = TaskManager.runTasks(new NetworkTask());
 			PayloadRegistrar registrar = event.registrar("1.4.0");
 
-			for (PayloadInfo<?> info : task.serverboundPayloads()) {
+			for (PayloadInfo info : task.serverboundPayloads()) {
 				registrar.playToServer(
-						(CustomPacketPayload.Type<CustomPacketPayload>) info.type(),
-						(StreamCodec<? super RegistryFriendlyByteBuf, CustomPacketPayload>) info.streamCodec(),
+						info.type(),
+						info.streamCodec(),
 						(payload, context) -> {
 //							info.handler().handle(payload, new ServerNetworkContext((ServerPlayer) context.player()));
 						try {
