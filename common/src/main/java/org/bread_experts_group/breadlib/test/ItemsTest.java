@@ -9,7 +9,6 @@ import org.bread_experts_group.breadlib.registry.objects.RegistryItem;
 public class ItemsTest {
 	public static final RegistryProvider.Items ITEM_REGISTRY = RegistryProvider.createItems(BreadLib.MOD_ID);
 
-	public static RegistryItem<BlockItem> TEST_ITEM_BLOCK =
-			ITEM_REGISTRY.registerSimpleBlockItem("test_item_block", BlocksTest.TEST_BLOCK, new Item.Properties());
+	public static final RegistryItem<BlockItem> TEST_ITEM_BLOCK = ITEM_REGISTRY.registerSimpleBlockItem("test_item_block", BlocksTest.TEST_BLOCK, new Item.Properties());
 	public static final RegistryItem<TestItem> TEST_ITEM = ITEM_REGISTRY.register("test_item", TestItem::new);
 }

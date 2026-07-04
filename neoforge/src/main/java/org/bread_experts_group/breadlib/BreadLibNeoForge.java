@@ -27,8 +27,8 @@ public class BreadLibNeoForge {
 	}
 
 	public BreadLibNeoForge(IEventBus eventBus) {
-		eventBus.addListener(GatherDataEvent.class, (event) -> TaskManager.runTasks(
-				new NeoForgeGenerateDataTask(event))
+		eventBus.addListener(GatherDataEvent.class, (event) ->
+			TaskManager.runTasks(new NeoForgeGenerateDataTask(event))
 		);
 
 		BreadLib.LOGGER.info("Hello NeoForge world!");

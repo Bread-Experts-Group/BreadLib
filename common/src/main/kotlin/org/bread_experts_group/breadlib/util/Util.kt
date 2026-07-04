@@ -2,9 +2,15 @@
 
 package org.bread_experts_group.breadlib.util
 
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.Item
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.util.Supplier
 import org.bread_experts_group.breadlib.BreadLib
+import org.bread_experts_group.breadlib.task.Task
+import org.bread_experts_group.breadlib.task.TaskManager
+import java.nio.file.Path
 
 fun getFrame(backwardsDepth: Long): StackWalker.StackFrame? = StackWalker.getInstance(
 	StackWalker.Option.RETAIN_CLASS_REFERENCE
@@ -40,3 +46,12 @@ fun warn(message: Any): Unit = warn(1) { message }
 
 fun fatal(backwardsDepth: Long = 1, message: () -> Any): Unit = log(Level.FATAL, 1 + backwardsDepth, message)
 fun fatal(message: Any): Unit = fatal(1) { message }
+
+inline fun <reified T : Task> newTask(noinline task: (T) -> Unit): Unit = TaskManager.newTask(
+	T::class.java, task
+)
+
+fun Path.resolve(vararg paths: String): Path = paths.fold(this) { a, path -> a.resolve(path) }
+
+val Item.location: ResourceLocation
+	get() = BuiltInRegistries.ITEM.getKey(this)

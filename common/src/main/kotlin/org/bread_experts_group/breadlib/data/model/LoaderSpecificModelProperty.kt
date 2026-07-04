@@ -1,0 +1,3 @@
+package org.bread_experts_group.breadlib.data.model
+
+interface LoaderSpecificModelProperty
