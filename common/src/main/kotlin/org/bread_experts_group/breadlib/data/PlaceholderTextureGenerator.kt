@@ -5,6 +5,11 @@ import com.google.common.hash.HashingOutputStream
 import net.minecraft.data.CachedOutput
 import net.minecraft.data.PackOutput
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.item.Item
+import net.minecraft.world.level.block.Block
+import org.bread_experts_group.breadlib.registry.objects.RegistryBlock
+import org.bread_experts_group.breadlib.registry.objects.RegistryItem
+import org.bread_experts_group.breadlib.util.location
 import org.bread_experts_group.breadlib.util.resolve
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -20,6 +25,12 @@ class PlaceholderTextureGenerator(override val modID: String) : DataGenerator() 
 			"$location already defined for texture generation ($category, checkerboard)"
 		)
 	}
+
+	fun checkerboard(item: Item): Unit = checkerboard(item.location)
+	fun checkerboard(block: Block): Unit = checkerboard(block.location, "block")
+
+	fun checkerboard(item: RegistryItem<*>): Unit = checkerboard(item.get())
+	fun checkerboard(block: RegistryBlock<*>): Unit = checkerboard(block.get())
 
 	override fun getName(): String = "BreadLib Placeholder Texture Generator ($modID)"
 

@@ -8,4 +8,6 @@ public class BlocksTest {
 	public static final RegistryProvider.Blocks BLOCK_REGISTRY = RegistryProvider.createBlocks(BreadLib.MOD_ID);
 
 	public static final RegistryBlock<TestBlock> TEST_BLOCK = BLOCK_REGISTRY.register("test_block", TestBlock::new);
+
+	public static final RegistryBlock<QuarryBlock> QUARRY = BLOCK_REGISTRY.register("quarry", QuarryBlock::new);
 }

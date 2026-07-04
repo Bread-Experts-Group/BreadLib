@@ -5,6 +5,7 @@ package org.bread_experts_group.breadlib.util
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Item
+import net.minecraft.world.level.block.Block
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.util.Supplier
 import org.bread_experts_group.breadlib.BreadLib
@@ -55,3 +56,5 @@ fun Path.resolve(vararg paths: String): Path = paths.fold(this) { a, path -> a.r
 
 val Item.location: ResourceLocation
 	get() = BuiltInRegistries.ITEM.getKey(this)
+val Block.location: ResourceLocation
+	get() = BuiltInRegistries.BLOCK.getKey(this)
