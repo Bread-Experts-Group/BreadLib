@@ -15,7 +15,7 @@ public class BlockEntityTypeTest {
 			"test_block_entity",
 			() -> BlockEntityTypeBuilder
 					.create(TestBlockEntity::new, BlocksTest.TEST_BLOCK.get())
-					.withRenderer(provider -> new TestBlockEntityRenderer())
+//					.withRenderer(provider -> new TestBlockEntityRenderer())
 					.build()
 	);
 }

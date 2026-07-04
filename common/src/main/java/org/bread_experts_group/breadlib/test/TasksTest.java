@@ -46,7 +46,8 @@ public class TasksTest {
 		TaskManager.newTask(LayeredDrawTask.class, task -> {
 			task.add(BreadLib.modLoc("layered_draw", "test_layer"), ((guiGraphics, deltaTracker) -> {
 //				Window window = Minecraft.getInstance().getWindow();
-				guiGraphics.fill(0, 0, 100, 100, Color.WHITE);
+				guiGraphics.fill(0, 0, 25, 12, Color.BLACK);
+				guiGraphics.drawString(Minecraft.getInstance().font, "Breadlib", 1, 1, Color.WHITE, false);
 			}));
 		});
 	}

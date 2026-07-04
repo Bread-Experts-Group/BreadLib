@@ -1,3 +1,6 @@
+//file:noinspection GroovyAssignabilityCheck
+//file:noinspection DependencyNotationArgument
+
 plugins {
     id 'multiloader-loader'
     id 'net.minecraftforge.gradle' version '7.0.31'
