@@ -4,6 +4,7 @@ import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.component.DataComponents
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.item.ItemEntity
@@ -43,8 +44,7 @@ class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BlockEntity(
 
 	private var id: Int? = null
 
-	fun tick(level: Level, state: BlockState) {
-		if (level is ClientLevel || noUpdate) return
+	fun tick(level: ServerLevel, pos: BlockPos, state: BlockState) {
 		if (id == null) id = ItemEntity(level, 0.0, 0.0, 0.0, ItemStack(this.blockState.block)).id
 		if (drillPos == null) {
 			val (nX, nZ) = when (state.getValue(HorizontalDirectionalBlock.FACING)) {

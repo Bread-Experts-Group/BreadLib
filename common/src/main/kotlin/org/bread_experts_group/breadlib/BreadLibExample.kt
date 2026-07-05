@@ -16,7 +16,12 @@ import org.bread_experts_group.breadlib.test.client.TasksClientTest
 import org.bread_experts_group.breadlib.test.server.TasksServerTest
 import org.bread_experts_group.breadlib.util.info
 import org.bread_experts_group.breadlib.util.newTask
+import java.io.File
+import java.nio.file.Files
 import java.util.Locale
+import kotlin.io.path.Path
+import kotlin.io.path.name
+import kotlin.io.path.toPath
 
 private fun kGetLocaleGenerator() = LocaleGenerator(BreadLib.MOD_ID, Locale.of("en", "us")).also {
 	it.addBLBlocks(
