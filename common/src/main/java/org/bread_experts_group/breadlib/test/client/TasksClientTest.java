@@ -16,7 +16,7 @@ import org.bread_experts_group.breadlib.util.Color;
 
 public class TasksClientTest {
 	public static void renderTest() {
-		TaskManager.newTask(LevelRenderTask.class, task -> BreadLib.LOGGER.info(task.stage));
+//		TaskManager.newTask(LevelRenderTask.class, task -> BreadLib.LOGGER.info(task.stage));
 	}
 
 	public static void mouseTests() {

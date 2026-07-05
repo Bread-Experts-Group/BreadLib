@@ -18,4 +18,12 @@ public class BlockEntityTypeTest {
 //					.withRenderer(provider -> new TestBlockEntityRenderer())
 					.build()
 	);
+
+	public static final RegistryObject<BlockEntityType<?>, BlockEntityType<QuarryBlockEntity>> QUARRY_TYPE = BLOCK_ENTITY_TYPE_REGISTRY.register(
+			"quarry_block_entity",
+			() -> BlockEntityTypeBuilder
+					.create(QuarryBlockEntity::new, BlocksTest.QUARRY.get())
+//					.withRenderer(provider -> new TestBlockEntityRenderer())
+					.build()
+	);
 }
