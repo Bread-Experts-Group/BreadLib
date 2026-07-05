@@ -37,7 +37,7 @@ neoForge {
     }
 }
 
-sourceSets.main.resources {srcDir 'src/generated/resources' }
+sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
     jarJar(additionalRuntimeClasspath "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}")

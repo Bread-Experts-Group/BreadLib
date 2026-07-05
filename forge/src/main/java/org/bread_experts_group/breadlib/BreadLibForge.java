@@ -1,11 +1,14 @@
 package org.bread_experts_group.breadlib;
 
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.RegisterEvent;
+import org.bread_experts_group.breadlib.platform.ForgeGenerateDataTask;
 import org.bread_experts_group.breadlib.registry.RegistryProvider;
+import org.bread_experts_group.breadlib.task.TaskManager;
 
 @Mod(BreadLib.MOD_ID)
 public class BreadLibForge {
@@ -25,6 +28,10 @@ public class BreadLibForge {
 	}
 
 	public BreadLibForge(FMLJavaModLoadingContext context) {
+		context.getModEventBus().addListener((GatherDataEvent event) ->
+				TaskManager.runTasks(new ForgeGenerateDataTask(event))
+		);
+
 		IEventBus eventBus = context.getModEventBus();
 		BreadLib.LOGGER.info("Hello Forge world!");
 		BreadLib.init();

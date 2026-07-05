@@ -1,5 +1,6 @@
 package org.bread_experts_group.breadlib.platform;
 
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -10,7 +11,6 @@ import net.minecraft.server.level.ServerPlayer;
 import org.bread_experts_group.breadlib.platform.services.IPlatformHelper;
 
 public class FabricPlatformHelper implements IPlatformHelper {
-
 	@Override
 	public String getPlatformName() {
 		return "Fabric";
@@ -22,8 +22,21 @@ public class FabricPlatformHelper implements IPlatformHelper {
 	}
 
 	@Override
-	public boolean isDevelopmentEnvironment() {
-		return FabricLoader.getInstance().isDevelopmentEnvironment();
+	public EnvironmentKind getEnvironmentKind() {
+		if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+			return EnvironmentKind.DEVELOPMENT;
+		} else {
+			return EnvironmentKind.RELEASE;
+		}
+	}
+
+	@Override
+	public ApplicationSide getSide() {
+		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+			return ApplicationSide.CLIENT;
+		} else {
+			return ApplicationSide.SERVER;
+		}
 	}
 
 	@Override

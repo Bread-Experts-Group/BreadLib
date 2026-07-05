@@ -18,8 +18,10 @@ public class BreadLib {
 
 	public static void init() {
 		LOGGER.info(
-				"Hello from Common init on {}! we are currently in a {} environment!",
-				PlatformServices.PLATFORM.getPlatformName(), PlatformServices.PLATFORM.getEnvironmentName()
+				"Hello from Common init on {}! we are currently in a {} environment on the {}!",
+				PlatformServices.PLATFORM.getPlatformName(),
+				PlatformServices.PLATFORM.getEnvironmentKind(),
+				PlatformServices.PLATFORM.getSide()
 		);
 		kExample();
 	}

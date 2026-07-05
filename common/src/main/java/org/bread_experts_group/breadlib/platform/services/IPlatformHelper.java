@@ -2,8 +2,17 @@ package org.bread_experts_group.breadlib.platform.services;
 
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
+import org.bread_experts_group.breadlib.platform.ApplicationSide;
+import org.bread_experts_group.breadlib.platform.EnvironmentKind;
 
 public interface IPlatformHelper {
+	/**
+	 * Gets the side of the current platform environment.
+	 * @return The side of the current platform environment.
+	 * @see ApplicationSide
+	 */
+	ApplicationSide getSide();
+
 	/**
 	 * Gets the name of the current platform
 	 *
@@ -20,20 +29,12 @@ public interface IPlatformHelper {
 	boolean isModLoaded(String modId);
 
 	/**
-	 * Check if the game is currently in a development environment.
+	 * Gets the kind of environment this platform represents.
 	 *
-	 * @return True if in a development environment, false otherwise.
+	 * @return The environment kind.
+	 * @see EnvironmentKind
 	 */
-	boolean isDevelopmentEnvironment();
-
-	/**
-	 * Gets the name of the environment type as a string.
-	 *
-	 * @return The name of the environment type.
-	 */
-	default String getEnvironmentName() {
-		return isDevelopmentEnvironment() ? "development" : "production";
-	}
+	EnvironmentKind getEnvironmentKind();
 
 	// todo expand to include players tracking chunks instead of sending to all players at once
 	<T extends CustomPacketPayload> void sendServerboundPacket(T payload);

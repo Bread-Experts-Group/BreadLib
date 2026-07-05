@@ -1,6 +1,7 @@
 package org.bread_experts_group.breadlib;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -8,6 +9,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import org.bread_experts_group.breadlib.network.context.ClientNetworkContext;
 import org.bread_experts_group.breadlib.network.context.ServerNetworkContext;
 import org.bread_experts_group.breadlib.network.payload.PayloadInfo;
@@ -36,8 +38,10 @@ public class FabricEvents {
 	}
 
 	public static void registerEvents() {
-		addWorldRenderTasks();
-		addClientTickTasks();
+		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+			addWorldRenderTasks();
+			addClientTickTasks();
+		}
 		addServerTickTasks();
 		addPacketsTask();
 	}

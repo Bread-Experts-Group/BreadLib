@@ -7,10 +7,13 @@ import org.bread_experts_group.breadlib.data.LocaleGenerator
 import org.bread_experts_group.breadlib.data.PlaceholderTextureGenerator
 import org.bread_experts_group.breadlib.data.model.ObjectResourceLocation
 import org.bread_experts_group.breadlib.data.model.block.BlockStateSingleVariant
+import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask
 import org.bread_experts_group.breadlib.test.*
+import org.bread_experts_group.breadlib.test.client.TasksClientTest
+import org.bread_experts_group.breadlib.test.server.TasksServerTest
 import org.bread_experts_group.breadlib.util.info
 import org.bread_experts_group.breadlib.util.newTask
 import java.util.Locale
@@ -79,10 +82,14 @@ fun kExample() {
 		BlockEntityTypeTest.BLOCK_ENTITY_TYPE_REGISTRY
 	)
 
-//	TasksTest.renderTest();
-	TasksTest.mouseTests()
-	TasksTest.layeredDrawTest()
-	TasksTest.networkTest()
+	if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {
+		TasksClientTest.renderTest()
+		TasksClientTest.mouseTests()
+		TasksClientTest.layeredDrawTest()
+		TasksClientTest.networkTest()
+	} else {
+		TasksServerTest.networkTest()
+	}
 
 	newTask<GenerateDataTask> { task ->
 		task.addGenerator(kGetLocaleGenerator())

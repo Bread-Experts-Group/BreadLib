@@ -15,6 +15,9 @@
   "icon": "${mod_id}.png",
   "environment": "*",
   "entrypoints": {
+    "fabric-datagen": [
+      "org.bread_experts_group.breadlib.platform.BreadLibDataGeneratorEntry"
+    ],
     "main": [
       "org.bread_experts_group.breadlib.BreadLibFabric"
     ]
