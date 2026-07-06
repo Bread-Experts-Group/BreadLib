@@ -1,8 +1,6 @@
 package org.bread_experts_group.breadlib;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
@@ -14,11 +12,10 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
-import org.bread_experts_group.breadlib.network.context.ClientNetworkContext;
-import org.bread_experts_group.breadlib.network.context.ServerNetworkContext;
 import org.bread_experts_group.breadlib.network.payload.PayloadInfo;
 import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
+import org.bread_experts_group.breadlib.task.input.KeyboardTask;
 import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.task.network.NetworkTask;
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask;
@@ -68,6 +65,7 @@ public class NeoEvents {
 		addRLSETask();
 		addMouseScrollTask();
 		addMouseButtonTasks();
+		addKeyboardTasks();
 		addClientTickTasks();
 		addServerTickTasks();
 		addLayeredDrawTask(eventBus);
@@ -119,6 +117,12 @@ public class NeoEvents {
 		));
 	}
 
+	private static void addKeyboardTasks() {
+		addListener(InputEvent.Key.class, event -> TaskManager.runTasks(
+				new KeyboardTask(event.getKey(), event.getScanCode(), event.getAction(), event.getModifiers())
+		));
+	}
+
 	private static void addClientTickTasks() {
 		addListener(ClientTickEvent.Pre.class, event -> TaskManager.runTasks(
 				new ClientTickTask(Minecraft.getInstance().level, FireSide.PRE)
@@ -157,7 +161,7 @@ public class NeoEvents {
 						info.type(),
 						info.streamCodec(),
 						(payload, context) ->
-								info.handler().handle(payload, new ServerNetworkContext((ServerPlayer) context.player()))
+								info.handler().handle(payload, context.player())
 				);
 			}
 			for (PayloadInfo info : task.clientboundPayloads()) {
@@ -165,7 +169,7 @@ public class NeoEvents {
 						info.type(),
 						info.streamCodec(),
 						(payload, context) ->
-								info.handler().handle(payload, new ClientNetworkContext((LocalPlayer) context.player()))
+								info.handler().handle(payload, context.player())
 				);
 			}
 		});

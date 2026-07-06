@@ -5,32 +5,16 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import org.bread_experts_group.breadlib.BreadLib;
-import org.bread_experts_group.breadlib.network.context.NetworkContext;
+import org.bread_experts_group.breadlib.network.NetworkContext;
 import org.jetbrains.annotations.NotNull;
 
-public class ClientboundPacketTest implements CustomPacketPayload {
+public record ClientboundPacketTest(int testInt, String testString) implements CustomPacketPayload {
 	public static final Type<ClientboundPacketTest> TYPE = new Type<>(BreadLib.modLoc("clientbound_packets", "test"));
 	public static final StreamCodec<ByteBuf, ClientboundPacketTest> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.INT, ClientboundPacketTest::getTestInt,
-			ByteBufCodecs.STRING_UTF8, ClientboundPacketTest::getTestString,
+			ByteBufCodecs.INT, ClientboundPacketTest::testInt,
+			ByteBufCodecs.STRING_UTF8, ClientboundPacketTest::testString,
 			ClientboundPacketTest::new
 	);
-
-	private final int testInt;
-	private final String testString;
-
-	public ClientboundPacketTest(int testInt, String testString) {
-		this.testInt = testInt;
-		this.testString = testString;
-	}
-
-	public String getTestString() {
-		return testString;
-	}
-
-	public int getTestInt() {
-		return testInt;
-	}
 
 	@Override
 	@NotNull
@@ -39,6 +23,6 @@ public class ClientboundPacketTest implements CustomPacketPayload {
 	}
 
 	public static void handleClientbound(ClientboundPacketTest data, NetworkContext context) {
-		BreadLib.LOGGER.info("Clientbound packet test: {}, {}", data.getTestInt(), data.getTestString());
+		BreadLib.LOGGER.info("Clientbound packet test: {}, {}", data.testInt(), data.testString());
 	}
 }

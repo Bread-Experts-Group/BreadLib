@@ -10,8 +10,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import org.bread_experts_group.breadlib.network.context.ClientNetworkContext;
-import org.bread_experts_group.breadlib.network.context.ServerNetworkContext;
 import org.bread_experts_group.breadlib.network.payload.PayloadInfo;
 import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
@@ -97,13 +95,13 @@ public class FabricEvents {
 		for (PayloadInfo info : task.serverboundPayloads()) {
 			PayloadTypeRegistry.playC2S().register(info.type(), info.streamCodec());
 			ServerPlayNetworking.registerGlobalReceiver(info.type(), (payload, context) ->
-					info.handler().handle(payload, new ServerNetworkContext(context.player()))
+					info.handler().handle(payload, context.player())
 			);
 		}
 		for (PayloadInfo info : task.clientboundPayloads()) {
 			PayloadTypeRegistry.playS2C().register(info.type(), info.streamCodec());
 			ClientPlayNetworking.registerGlobalReceiver(info.type(), (payload, context) ->
-				info.handler().handle(payload, new ClientNetworkContext(context.player()))
+				info.handler().handle(payload, context.player())
 			);
 		}
 	}

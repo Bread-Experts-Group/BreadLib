@@ -1,4 +1,4 @@
-package org.bread_experts_group.breadlib.extensions;
+package org.bread_experts_group.breadlib.extensions.item;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.player.Player;

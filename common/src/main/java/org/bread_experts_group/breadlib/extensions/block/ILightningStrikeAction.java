@@ -1,4 +1,4 @@
-package org.bread_experts_group.breadlib.extensions;
+package org.bread_experts_group.breadlib.extensions.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;

@@ -12,6 +12,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
+import org.bread_experts_group.breadlib.task.input.KeyboardTask;
 import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask;
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask;
@@ -111,6 +112,12 @@ public class ForgeEvents {
 						event.getModifiers(),
 						FireSide.POST
 				)
+		));
+	}
+
+	private static void addKeyboardTasks() {
+		addListener(InputEvent.Key.class, event -> TaskManager.runTasks(
+				new KeyboardTask(event.getKey(), event.getScanCode(), event.getAction(), event.getModifiers())
 		));
 	}
 

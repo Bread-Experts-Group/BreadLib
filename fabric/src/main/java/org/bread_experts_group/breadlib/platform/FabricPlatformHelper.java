@@ -8,7 +8,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import org.bread_experts_group.breadlib.platform.services.IPlatformHelper;
+import net.minecraft.world.level.ChunkPos;
+
+import java.nio.file.Path;
 
 public class FabricPlatformHelper implements IPlatformHelper {
 	@Override
@@ -19,6 +21,11 @@ public class FabricPlatformHelper implements IPlatformHelper {
 	@Override
 	public boolean isModLoaded(String modId) {
 		return FabricLoader.getInstance().isModLoaded(modId);
+	}
+
+	@Override
+	public Path getConfigDir() {
+		return FabricLoader.getInstance().getConfigDir();
 	}
 
 	@Override
@@ -40,14 +47,22 @@ public class FabricPlatformHelper implements IPlatformHelper {
 	}
 
 	@Override
-	public <T extends CustomPacketPayload> void sendServerboundPacket(T payload) {
+	public void sendToServer(CustomPacketPayload payload) {
 		ClientPlayNetworking.send(payload);
 	}
 
 	@Override
-	public <T extends CustomPacketPayload> void sendClientboundPacket(T payload, ServerLevel level) {
-		for (ServerPlayer player : PlayerLookup.all(level.getServer())) {
-			ServerPlayNetworking.send(player, payload);
-		}
+	public void sendToAllPlayers(CustomPacketPayload payload, ServerLevel level) {
+		for (ServerPlayer player : PlayerLookup.all(level.getServer())) ServerPlayNetworking.send(player, payload);
+	}
+
+	@Override
+	public void sendToPlayersTrackingChunk(CustomPacketPayload payload, ServerLevel level, ChunkPos pos) {
+		for (ServerPlayer player : PlayerLookup.tracking(level, pos)) ServerPlayNetworking.send(player, payload);
+	}
+
+	@Override
+	public void sendToPlayersInDimension(CustomPacketPayload payload, ServerLevel level) {
+		for (ServerPlayer player : PlayerLookup.world(level)) ServerPlayNetworking.send(player, payload);
 	}
 }
