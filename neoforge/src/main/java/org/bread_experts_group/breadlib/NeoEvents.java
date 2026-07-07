@@ -3,18 +3,18 @@ package org.bread_experts_group.breadlib;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.client.event.InputEvent;
-import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.*;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.bread_experts_group.breadlib.network.payload.PayloadInfo;
 import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
+import org.bread_experts_group.breadlib.task.command.ClientCommandTask;
+import org.bread_experts_group.breadlib.task.command.ServerCommandTask;
 import org.bread_experts_group.breadlib.task.input.KeyboardTask;
 import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.task.network.NetworkTask;
@@ -70,6 +70,7 @@ public class NeoEvents {
 		addServerTickTasks();
 		addLayeredDrawTask(eventBus);
 		addNetworkTasks(eventBus);
+		addCommandTasks();
 	}
 
 	private static void addRLSETask() {
@@ -173,5 +174,14 @@ public class NeoEvents {
 				);
 			}
 		});
+	}
+
+	private static void addCommandTasks() {
+		addListener(RegisterClientCommandsEvent.class, event -> TaskManager.runTasks(
+				new ClientCommandTask(event.getDispatcher(), event.getBuildContext())
+		));
+		addListener(RegisterCommandsEvent.class, event -> TaskManager.runTasks(
+				new ServerCommandTask(event.getDispatcher(), event.getBuildContext())
+		));
 	}
 }

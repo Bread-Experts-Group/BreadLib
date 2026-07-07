@@ -1,11 +1,14 @@
 package org.bread_experts_group.breadlib;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -13,6 +16,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.bread_experts_group.breadlib.network.payload.PayloadInfo;
 import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
+import org.bread_experts_group.breadlib.task.command.ClientCommandTask;
+import org.bread_experts_group.breadlib.task.command.ServerCommandTask;
 import org.bread_experts_group.breadlib.task.network.NetworkTask;
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask;
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage;
@@ -36,12 +41,14 @@ public class FabricEvents {
 	}
 
 	public static void registerEvents() {
-		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+		EnvType envType = FabricLoader.getInstance().getEnvironmentType();
+		if (envType == EnvType.CLIENT) {
 			addWorldRenderTasks();
 			addClientTickTasks();
 		}
 		addServerTickTasks();
-		addPacketsTask();
+		addPacketsTask(envType);
+		addCommandTasks(envType);
 	}
 
 	private static void addWorldRenderTasks() {
@@ -90,7 +97,7 @@ public class FabricEvents {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private static void addPacketsTask() {
+	private static void addPacketsTask(EnvType envType) {
 		NetworkTask task = TaskManager.runTasks(new NetworkTask());
 		for (PayloadInfo info : task.serverboundPayloads()) {
 			PayloadTypeRegistry.playC2S().register(info.type(), info.streamCodec());
@@ -98,11 +105,22 @@ public class FabricEvents {
 					info.handler().handle(payload, context.player())
 			);
 		}
-		for (PayloadInfo info : task.clientboundPayloads()) {
+		if (envType == EnvType.CLIENT) for (PayloadInfo info : task.clientboundPayloads()) {
 			PayloadTypeRegistry.playS2C().register(info.type(), info.streamCodec());
 			ClientPlayNetworking.registerGlobalReceiver(info.type(), (payload, context) ->
 				info.handler().handle(payload, context.player())
 			);
 		}
+	}
+
+	// todo just doesn't work
+	private static void addCommandTasks(EnvType envType) {
+		if (envType == EnvType.CLIENT) ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) ->
+				// todo why does fabric use it's own source for client commands???
+				TaskManager.runTasks(new ClientCommandTask((CommandDispatcher) dispatcher, context))
+		);
+		else CommandRegistrationCallback.EVENT.register((dispatcher, context, env) ->
+				TaskManager.runTasks(new ServerCommandTask(dispatcher, context))
+		);
 	}
 }

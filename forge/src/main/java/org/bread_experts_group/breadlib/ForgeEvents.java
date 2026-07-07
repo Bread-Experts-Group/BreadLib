@@ -4,14 +4,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.AddGuiOverlayLayersEvent;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import org.bread_experts_group.breadlib.task.FireSide;
 import org.bread_experts_group.breadlib.task.TaskManager;
+import org.bread_experts_group.breadlib.task.command.ClientCommandTask;
+import org.bread_experts_group.breadlib.task.command.ServerCommandTask;
 import org.bread_experts_group.breadlib.task.input.KeyboardTask;
 import org.bread_experts_group.breadlib.task.input.MouseTasks;
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask;
@@ -64,6 +68,7 @@ public class ForgeEvents {
 		addClientTickTasks();
 		addServerTickTasks();
 		addLayeredDrawTask(eventBus);
+		addCommandTasks();
 	}
 
 	@SuppressWarnings({"NewExpressionSideOnly", "removal"})
@@ -150,5 +155,14 @@ public class ForgeEvents {
 							event.getLayeredDraw().add(location, layer)
 					);
 				});
+	}
+
+	private static void addCommandTasks() {
+		addListener(RegisterClientCommandsEvent.class, event -> TaskManager.runTasks(
+				new ClientCommandTask(event.getDispatcher(), event.getBuildContext())
+		));
+		addListener(RegisterCommandsEvent.class, event -> TaskManager.runTasks(
+				new ServerCommandTask(event.getDispatcher(), event.getBuildContext())
+		));
 	}
 }

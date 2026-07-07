@@ -94,6 +94,7 @@ fun kExample() {
 		TasksClientTest.networkTest()
 
 		BreadLibTasks.setupInputTasks()
+		BreadLibTasks.setupCommandTasks()
 	} else {
 		TasksServerTest.networkTest()
 	}
