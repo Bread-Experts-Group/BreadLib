@@ -2,8 +2,10 @@ package org.bread_experts_group.breadlib
 
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
-import org.bread_experts_group.breadlib.data.ModelGenerator
+import org.bread_experts_group.breadlib.config.ConfigManager
+import org.bread_experts_group.breadlib.config.ConfigValue
 import org.bread_experts_group.breadlib.data.LocaleGenerator
+import org.bread_experts_group.breadlib.data.ModelGenerator
 import org.bread_experts_group.breadlib.data.PlaceholderTextureGenerator
 import org.bread_experts_group.breadlib.data.model.ObjectResourceLocation
 import org.bread_experts_group.breadlib.data.model.block.BlockStateSingleVariant
@@ -12,17 +14,16 @@ import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.BreadLibTasks
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask
-import org.bread_experts_group.breadlib.test.*
+import org.bread_experts_group.breadlib.test.BlockEntityTypeTest
+import org.bread_experts_group.breadlib.test.BlocksTest
+import org.bread_experts_group.breadlib.test.CreativeTabTest
+import org.bread_experts_group.breadlib.test.ItemsTest
 import org.bread_experts_group.breadlib.test.client.TasksClientTest
 import org.bread_experts_group.breadlib.test.server.TasksServerTest
 import org.bread_experts_group.breadlib.util.info
 import org.bread_experts_group.breadlib.util.newTask
-import java.io.File
-import java.nio.file.Files
-import java.util.Locale
-import kotlin.io.path.Path
-import kotlin.io.path.name
-import kotlin.io.path.toPath
+import java.math.BigDecimal
+import java.util.*
 
 private fun kGetLocaleGenerator() = LocaleGenerator(BreadLib.MOD_ID, Locale.of("en", "us")).also {
 	it.addBLBlocks(
@@ -106,4 +107,14 @@ fun kExample() {
 	}
 
 	if (PlatformServices.PLATFORM.isModLoaded("breadlib")) info("breadlib appears loaded on the platform")
+
+	val config = ConfigManager(BreadLib.MOD_ID)["config-test", "json"]
+	val testValue = ConfigValue.builder<BigDecimal>().name("test").comment("Test comment").build()
+	info(config.getOrNull(testValue))
+	config[testValue] = (config.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
+	info(config[testValue])
+//	val config2 = ConfigManager(BreadLib.MOD_ID)["config-test", "toml"]
+//	info(config2.getOrNull(testValue))
+//	config2[testValue] = (config2.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
+//	info(config2[testValue])
 }
