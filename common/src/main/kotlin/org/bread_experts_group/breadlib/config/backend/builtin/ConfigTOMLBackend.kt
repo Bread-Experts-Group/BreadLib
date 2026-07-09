@@ -5,16 +5,14 @@ import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFReader
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFResolved
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`basic-string`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`basic-unescaped`
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`dec-int`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`dotted-key`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.escaped
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.expEm
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.expKv
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.expression
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.integer
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`literal-string`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`non-ascii`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`quoted-key`
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`simple-key`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.string
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.toml
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`unquoted-key`
@@ -31,13 +29,13 @@ object ConfigTOMLBackend : ConfigBackend {
 			`basic-string`.rule -> {
 				var str = ""
 				((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
-					val char = (it as ABNFResolved.ABNFAlternate).selected
+					val char = it
 					when (char.rule) {
 						`basic-unescaped` -> {
-							val char = (char as ABNFResolved.ABNFAlternate).selected
+							val char = char
 							str += Char(
 								(char as? ABNFResolved.ABNFCharacter ?: when (char.rule) {
-									wschar, `non-ascii` -> (char as ABNFResolved.ABNFAlternate).selected as ABNFResolved.ABNFCharacter
+									wschar, `non-ascii` -> char as ABNFResolved.ABNFCharacter
 									else -> throw IllegalStateException("${char.rule?.name} - ${char.rule} - $char")
 								}).character.toInt()
 							)
@@ -53,9 +51,9 @@ object ConfigTOMLBackend : ConfigBackend {
 			`literal-string` -> {
 				var str = ""
 				((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
-					val char = (it as ABNFResolved.ABNFAlternate).selected
+					val char = it
 					str += Char(
-						((char as? ABNFResolved.ABNFCharacter) ?: (char as ABNFResolved.ABNFAlternate).selected as ABNFResolved.ABNFCharacter)
+						((char as? ABNFResolved.ABNFCharacter) ?: char as ABNFResolved.ABNFCharacter)
 							.character.toInt()
 					)
 				}
@@ -66,15 +64,13 @@ object ConfigTOMLBackend : ConfigBackend {
 		}
 
 		fun decodeSimpleKey(a: ABNFResolved): String {
-			val a = (a as ABNFResolved.ABNFAlternate).selected
 			return when (val rule = a.rule) {
-				`quoted-key` -> decodeString((a as ABNFResolved.ABNFAlternate).selected)
+				`quoted-key` -> decodeString(a)
 				`unquoted-key` -> {
 					var str = ""
 					(a as ABNFResolved.ABNFRepetition).selected.forEach {
 						str += Char(
-							when (val sel = (it as ABNFResolved.ABNFAlternate).selected) {
-								is ABNFResolved.ABNFAlternate -> (sel.selected as ABNFResolved.ABNFCharacter).character
+							when (val sel = it) {
 								is ABNFResolved.ABNFCharacter -> sel.character
 								else -> throw IllegalStateException()
 							}.toInt()
@@ -87,7 +83,7 @@ object ConfigTOMLBackend : ConfigBackend {
 		}
 
 		fun decodeKey(a: ABNFResolved): List<String> = when (val rule = a.rule) {
-			`simple-key` -> listOf(decodeSimpleKey(a))
+			`unquoted-key` -> listOf(decodeSimpleKey(a))
 			`dotted-key` -> buildList {
 				a as ABNFResolved.ABNFString
 				add(decodeSimpleKey(a.concatenated[0]))
@@ -100,9 +96,17 @@ object ConfigTOMLBackend : ConfigBackend {
 		}
 
 		fun decodeVal(a: ABNFResolved): Any = when (val rule = a.rule) {
-			string -> decodeString((a as ABNFResolved.ABNFAlternate).selected)
-			integer -> {
-				BigDecimal.TEN
+			string -> decodeString(a)
+			`dec-int` -> {
+				val negative = ((a as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let {
+					(it as ABNFResolved.ABNFCharacter).character == '-'.code.toUInt()
+				} ?: false
+				val n = when (val c = a.concatenated[1]) {
+					is ABNFResolved.ABNFCharacter -> Char(c.character.toInt()).toString()
+					is ABNFResolved.ABNFString -> TODO("STR")
+					else -> throw IllegalStateException()
+				}
+				BigDecimal("${if (negative) "-" else ""}$n")
 			}
 
 			else -> throw IllegalStateException("${rule?.name} - $rule - $a")
@@ -128,11 +132,10 @@ object ConfigTOMLBackend : ConfigBackend {
 				}
 			}
 
-			expression -> decodeToml((a as ABNFResolved.ABNFAlternate).selected)
 			expKv -> {
 				val keyval = (a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFString
-				val key = decodeKey((keyval.concatenated[0] as ABNFResolved.ABNFAlternate).selected)
-				val value = decodeVal((keyval.concatenated[2] as ABNFResolved.ABNFAlternate).selected)
+				val key = decodeKey(keyval.concatenated[0])
+				val value = decodeVal(keyval.concatenated[2])
 				key to value
 			}
 

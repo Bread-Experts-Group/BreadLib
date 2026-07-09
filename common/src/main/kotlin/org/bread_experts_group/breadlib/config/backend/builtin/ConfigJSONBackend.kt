@@ -23,12 +23,12 @@ object ConfigJSONBackend : ConfigBackend {
 		fun decodeStr(rep: ABNFResolved.ABNFString): String {
 			var str = ""
 			(rep.concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
-				val selected = (it as ABNFResolved.ABNFAlternate).selected
+				val selected = it
 				if (selected.rule == unescaped) {
-					val sel = (selected as ABNFResolved.ABNFAlternate).selected
+					val sel = selected
 					str += Char((sel as ABNFResolved.ABNFCharacter).character.toInt())
 				} else {
-					val sel = ((selected as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFAlternate).selected
+					val sel = (selected as ABNFResolved.ABNFString).concatenated[1]
 					if (sel is ABNFResolved.ABNFCharacter) str += when (val char = Char(sel.character.toInt())) {
 						'b' -> '\b'
 						'f' -> '\u000C'
@@ -40,10 +40,10 @@ object ConfigJSONBackend : ConfigBackend {
 						val hexDig = (sel as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition
 						var hexStr = ""
 						hexDig.selected.forEach { hexAlt ->
-							val hexChar = (hexAlt as ABNFResolved.ABNFAlternate).selected
+							val hexChar = hexAlt
 							hexStr += if (hexChar is ABNFResolved.ABNFCharacter) Char(hexChar.character.toInt())
 							else {
-								val char = (hexChar as ABNFResolved.ABNFAlternate).selected as ABNFResolved.ABNFCharacter
+								val char = hexChar as ABNFResolved.ABNFCharacter
 								Char(char.character.toInt())
 							}
 						}
@@ -55,7 +55,7 @@ object ConfigJSONBackend : ConfigBackend {
 		}
 
 		fun decodeJson(a: ABNFResolved): Any? = when (a.rule) {
-			`JSON-text` -> decodeJson(((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFAlternate).selected)
+			`JSON-text` -> decodeJson((a as ABNFResolved.ABNFString).concatenated[1])
 			`object` -> {
 				val members = mutableListOf<ABNFResolved.ABNFString>()
 				val initial = ((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected
@@ -68,7 +68,7 @@ object ConfigJSONBackend : ConfigBackend {
 				}
 				members.associate {
 					decodeStr(it.concatenated[0] as ABNFResolved.ABNFString) to
-							decodeJson((it.concatenated[2] as ABNFResolved.ABNFAlternate).selected)
+							decodeJson(it.concatenated[2])
 				}
 			}
 
@@ -77,9 +77,9 @@ object ConfigJSONBackend : ConfigBackend {
 				val initial = ((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected
 				if (initial.isNotEmpty()) {
 					val initialMember = initial[0] as ABNFResolved.ABNFString
-					members.add((initialMember.concatenated[0] as ABNFResolved.ABNFAlternate).selected)
+					members.add(initialMember.concatenated[0])
 					for (resolved in (initialMember.concatenated[1] as ABNFResolved.ABNFRepetition).selected) {
-						members.add(((resolved as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFAlternate).selected)
+						members.add((resolved as ABNFResolved.ABNFString).concatenated[1])
 					}
 				}
 				members.map { decodeJson(it) }
@@ -93,7 +93,7 @@ object ConfigJSONBackend : ConfigBackend {
 			number -> {
 				a as ABNFResolved.ABNFString
 				val negative = (a.concatenated[0] as ABNFResolved.ABNFRepetition).selected.isNotEmpty()
-				val int = (a.concatenated[1] as ABNFResolved.ABNFAlternate).selected.let {
+				val int = a.concatenated[1].let {
 					if (it.rule == zero) return@let BigDecimal.ZERO
 
 					val int = (it as ABNFResolved.ABNFString).concatenated
@@ -115,7 +115,7 @@ object ConfigJSONBackend : ConfigBackend {
 					val frac = (it as ABNFResolved.ABNFString).concatenated
 					var str = (frac[1] as ABNFResolved.ABNFRepetition).selected.getOrNull(0)?.let { expSign ->
 						if (
-							((expSign as ABNFResolved.ABNFAlternate).selected as ABNFResolved.ABNFCharacter).character == ABNFJson.minus.character
+							(expSign as ABNFResolved.ABNFCharacter).character == ABNFJson.minus.character
 						) "-" else ""
 					} ?: ""
 					(frac[2] as ABNFResolved.ABNFRepetition).selected.forEach { char ->
