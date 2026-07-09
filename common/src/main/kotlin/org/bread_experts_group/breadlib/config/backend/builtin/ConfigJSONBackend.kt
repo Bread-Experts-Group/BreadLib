@@ -1,7 +1,6 @@
 package org.bread_experts_group.breadlib.config.backend.builtin
 
 import org.bread_experts_group.breadlib.config.backend.ConfigBackend
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFReader
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFResolved
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson.`JSON-text`
@@ -17,7 +16,6 @@ import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNF
 import java.math.BigDecimal
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.readText
 
 object ConfigJSONBackend : ConfigBackend {
 	override val extension: String = "json"
@@ -131,8 +129,9 @@ object ConfigJSONBackend : ConfigBackend {
 			else -> throw IllegalStateException("${a.rule?.name} - ${a.rule} - $a")
 		}
 
-		@Suppress("UNCHECKED_CAST")
-		return decodeJson(ABNFReader().resolve(path.readText(Charsets.UTF_8).ifEmpty { "{}" }, `JSON-text`)) as Map<String, Any?>
+		TODO("JSON")
+//		@Suppress("UNCHECKED_CAST")
+//		return decodeJson(ABNFReader().resolve(path.readText(Charsets.UTF_8).ifEmpty { "{}" }, `JSON-text`).first) as Map<String, Any?>
 	}
 
 	override fun encode(path: Path, config: Map<String, Any?>) = Files.newBufferedWriter(path, Charsets.UTF_8).use {

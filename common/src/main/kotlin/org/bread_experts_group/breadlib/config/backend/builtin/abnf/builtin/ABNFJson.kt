@@ -1,6 +1,6 @@
 package org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin
 
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFRule
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFRule.*
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.DIGIT
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.HEXDIG
 
@@ -8,106 +8,106 @@ import org.bread_experts_group.breadlib.config.backend.builtin.abnf.HEXDIG
 // TODO: Probably a good idea to put this as a separate library when the maven exists again
 
 object ABNFJson {
-	val value = ABNFRule.ABNFReference()
+	val value = ABNFReference()
 
-	val ws = ABNFRule.ABNFRepetition(
-		rule = ABNFRule.ABNFAlternate(
-			ABNFRule.ABNFCharacter(0x20),
-			ABNFRule.ABNFCharacter(0x09),
-			ABNFRule.ABNFCharacter(0x0A),
-			ABNFRule.ABNFCharacter(0x0D)
+	val ws = ABNFRepetition(
+		rule = ABNFAlternate(
+			ABNFCharacter(0x20u),
+			ABNFCharacter(0x09u),
+			ABNFCharacter(0x0Au),
+			ABNFCharacter(0x0Du)
 		),
 		name = "ws"
 	)
 
-	val `quotation-mark` = ABNFRule.ABNFCharacter(0x22, "quotation-mark")
-	val unescaped = ABNFRule.ABNFAlternate(
-		ABNFRule.ABNFCharacterRange(0x20..0x21L),
-		ABNFRule.ABNFCharacterRange(0x23..0x5BL),
-		ABNFRule.ABNFCharacterRange(0x5D..0x10FFFFL),
+	val `quotation-mark` = ABNFCharacter(0x22u, "quotation-mark")
+	val unescaped = ABNFAlternate(
+		ABNFCharacterRange(0x20u..0x21u),
+		ABNFCharacterRange(0x23u..0x5Bu),
+		ABNFCharacterRange(0x5Du..0x10FFFFu),
 		name = "unescaped"
 	)
 
-	val escape = ABNFRule.ABNFCharacter(0x5C, "escape")
+	val escape = ABNFCharacter(0x5Cu, "escape")
 
-	val char = ABNFRule.ABNFAlternate(
+	val char = ABNFAlternate(
 		unescaped,
-		ABNFRule.ABNFString(
+		ABNFString(
 			escape,
-			ABNFRule.ABNFAlternate(
-				ABNFRule.ABNFCharacter(0x22),
-				ABNFRule.ABNFCharacter(0x5C),
-				ABNFRule.ABNFCharacter(0x2F),
-				ABNFRule.ABNFCharacter(0x62),
-				ABNFRule.ABNFCharacter(0x66),
-				ABNFRule.ABNFCharacter(0x6E),
-				ABNFRule.ABNFCharacter(0x72),
-				ABNFRule.ABNFCharacter(0x74),
-				ABNFRule.ABNFString(
-					ABNFRule.ABNFCharacter(0x75),
-					ABNFRule.ABNFRepetition(4, 4, HEXDIG)
+			ABNFAlternate(
+				ABNFCharacter(0x22u),
+				ABNFCharacter(0x5Cu),
+				ABNFCharacter(0x2Fu),
+				ABNFCharacter(0x62u),
+				ABNFCharacter(0x66u),
+				ABNFCharacter(0x6Eu),
+				ABNFCharacter(0x72u),
+				ABNFCharacter(0x74u),
+				ABNFString(
+					ABNFCharacter(0x75u),
+					ABNFRepetition(4u, 4u, HEXDIG)
 				),
 			)
 		),
 		name = "char"
 	)
 
-	val string: ABNFRule.ABNFString = ABNFRule.ABNFString(
+	val string: ABNFString = ABNFString(
 		`quotation-mark`,
-		ABNFRule.ABNFRepetition(rule = char),
+		ABNFRepetition(rule = char),
 		`quotation-mark`,
 		name = "string"
 	)
 
-	val `false` = ABNFRule.ABNFString(
-		ABNFRule.ABNFCharacter(0x66),
-		ABNFRule.ABNFCharacter(0x61),
-		ABNFRule.ABNFCharacter(0x6C),
-		ABNFRule.ABNFCharacter(0x73),
-		ABNFRule.ABNFCharacter(0x65),
+	val `false` = ABNFString(
+		ABNFCharacter(0x66u),
+		ABNFCharacter(0x61u),
+		ABNFCharacter(0x6Cu),
+		ABNFCharacter(0x73u),
+		ABNFCharacter(0x65u),
 		name = "false"
 	)
 
-	val `null` = ABNFRule.ABNFString(
-		ABNFRule.ABNFCharacter(0x6E),
-		ABNFRule.ABNFCharacter(0x75),
-		ABNFRule.ABNFCharacter(0x6C),
-		ABNFRule.ABNFCharacter(0x6C),
+	val `null` = ABNFString(
+		ABNFCharacter(0x6Eu),
+		ABNFCharacter(0x75u),
+		ABNFCharacter(0x6Cu),
+		ABNFCharacter(0x6Cu),
 		name = "null"
 	)
 
-	val `true` = ABNFRule.ABNFString(
-		ABNFRule.ABNFCharacter(0x74),
-		ABNFRule.ABNFCharacter(0x72),
-		ABNFRule.ABNFCharacter(0x75),
-		ABNFRule.ABNFCharacter(0x65),
+	val `true` = ABNFString(
+		ABNFCharacter(0x74u),
+		ABNFCharacter(0x72u),
+		ABNFCharacter(0x75u),
+		ABNFCharacter(0x65u),
 		name = "true"
 	)
 
-	val `begin-object` = ABNFRule.ABNFString(ws, ABNFRule.ABNFCharacter(0x7B), ws, name = "begin-object")
-	val `end-object` = ABNFRule.ABNFString(ws, ABNFRule.ABNFCharacter(0x7D), ws, name = "end-object")
+	val `begin-object` = ABNFString(ws, ABNFCharacter(0x7Bu), ws, name = "begin-object")
+	val `end-object` = ABNFString(ws, ABNFCharacter(0x7Du), ws, name = "end-object")
 
-	val `begin-array` = ABNFRule.ABNFString(ws, ABNFRule.ABNFCharacter(0x5B), ws, name = "begin-array")
-	val `end-array` = ABNFRule.ABNFString(ws, ABNFRule.ABNFCharacter(0x5D), ws, name = "end-array")
+	val `begin-array` = ABNFString(ws, ABNFCharacter(0x5Bu), ws, name = "begin-array")
+	val `end-array` = ABNFString(ws, ABNFCharacter(0x5Du), ws, name = "end-array")
 
-	val `name-separator` = ABNFRule.ABNFString(ws, ABNFRule.ABNFCharacter(0x3A), ws, name = "name-separator")
-	val `value-separator` = ABNFRule.ABNFString(ws, ABNFRule.ABNFCharacter(0x2C), ws, name = "value-separator")
+	val `name-separator` = ABNFString(ws, ABNFCharacter(0x3Au), ws, name = "name-separator")
+	val `value-separator` = ABNFString(ws, ABNFCharacter(0x2Cu), ws, name = "value-separator")
 
-	val member = ABNFRule.ABNFString(
+	val member = ABNFString(
 		string,
 		`name-separator`,
 		value,
 		name = "member"
 	)
 
-	val `object` = ABNFRule.ABNFString(
+	val `object` = ABNFString(
 		`begin-object`,
-		ABNFRule.ABNFRepetition(
-			high = 1,
-			rule = ABNFRule.ABNFString(
+		ABNFRepetition(
+			high = 1u,
+			rule = ABNFString(
 				member,
-				ABNFRule.ABNFRepetition(
-					rule = ABNFRule.ABNFString(`value-separator`, member)
+				ABNFRepetition(
+					rule = ABNFString(`value-separator`, member)
 				)
 			)
 		),
@@ -115,14 +115,14 @@ object ABNFJson {
 		name = "object"
 	)
 
-	val array: ABNFRule.ABNFString = ABNFRule.ABNFString(
+	val array: ABNFString = ABNFString(
 		`begin-array`,
-		ABNFRule.ABNFRepetition(
-			high = 1,
-			rule = ABNFRule.ABNFString(
+		ABNFRepetition(
+			high = 1u,
+			rule = ABNFString(
 				value,
-				ABNFRule.ABNFRepetition(
-					rule = ABNFRule.ABNFString(`value-separator`, value)
+				ABNFRepetition(
+					rule = ABNFString(`value-separator`, value)
 				)
 			)
 		),
@@ -130,33 +130,33 @@ object ABNFJson {
 		name = "array"
 	)
 
-	val zero = ABNFRule.ABNFCharacter(0x30, "zero")
-	val `digit1-9` = ABNFRule.ABNFCharacterRange(0x31..0x39L, "digit1-9")
-	val int = ABNFRule.ABNFAlternate(zero, ABNFRule.ABNFString(`digit1-9`, ABNFRule.ABNFRepetition(rule = DIGIT)), name = "int")
-	val minus = ABNFRule.ABNFCharacter(0x2D, name = "minux")
-	val plus = ABNFRule.ABNFCharacter(0x2B, name = "plus")
-	val e = ABNFRule.ABNFAlternate(ABNFRule.ABNFCharacter(0x65), ABNFRule.ABNFCharacter(0x45), name = "e")
-	val `decimal-point` = ABNFRule.ABNFCharacter(0x2E, "decimal-point")
-	val frac = ABNFRule.ABNFString(`decimal-point`, ABNFRule.ABNFRepetition(1, rule = DIGIT), name = "frac")
-	val exp = ABNFRule.ABNFString(
+	val zero = ABNFCharacter(0x30u, "zero")
+	val `digit1-9` = ABNFCharacterRange(0x31u..0x39u, "digit1-9")
+	val int = ABNFAlternate(zero, ABNFString(`digit1-9`, ABNFRepetition(rule = DIGIT)), name = "int")
+	val minus = ABNFCharacter(0x2Du, name = "minux")
+	val plus = ABNFCharacter(0x2Bu, name = "plus")
+	val e = ABNFAlternate(ABNFCharacter(0x65u), ABNFCharacter(0x45u), name = "e")
+	val `decimal-point` = ABNFCharacter(0x2Eu, "decimal-point")
+	val frac = ABNFString(`decimal-point`, ABNFRepetition(1u, rule = DIGIT), name = "frac")
+	val exp = ABNFString(
 		e,
-		ABNFRule.ABNFRepetition(
-			high = 1,
-			rule = ABNFRule.ABNFAlternate(minus, plus)
+		ABNFRepetition(
+			high = 1u,
+			rule = ABNFAlternate(minus, plus)
 		),
-		ABNFRule.ABNFRepetition(1, rule = DIGIT),
+		ABNFRepetition(1u, rule = DIGIT),
 		name = "exp"
 	)
 
-	val number: ABNFRule.ABNFString = ABNFRule.ABNFString(
-		ABNFRule.ABNFRepetition(high = 1, rule = minus),
+	val number: ABNFString = ABNFString(
+		ABNFRepetition(high = 1u, rule = minus),
 		int,
-		ABNFRule.ABNFRepetition(high = 1, rule = frac),
-		ABNFRule.ABNFRepetition(high = 1, rule = exp),
+		ABNFRepetition(high = 1u, rule = frac),
+		ABNFRepetition(high = 1u, rule = exp),
 		name = "number"
 	)
 
-	val `JSON-text` = ABNFRule.ABNFString(ws, value, ws, name = "JSON-text").also {
-		value.rule = ABNFRule.ABNFAlternate(`false`, `null`, `true`, `object`, array, number, string, name = "value")
+	val `JSON-text` = ABNFString(ws, value, ws, name = "JSON-text").also {
+		value.rule = ABNFAlternate(`false`, `null`, `true`, `object`, array, number, string, name = "value")
 	}
 }

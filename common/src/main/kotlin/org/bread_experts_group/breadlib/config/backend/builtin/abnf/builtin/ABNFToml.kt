@@ -1,61 +1,63 @@
-package org.bread_experts_group.breadlib.config.backend.builtin.abnf
+package org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin
 
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFRule.ABNFAlternate
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFRule.ABNFString
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFRule.*
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ALPHA
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.DIGIT
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.HEXDIG
 
 object ABNFToml {
 	val wschar = ABNFAlternate(
-		ABNFRule.ABNFCharacter(0x20),
-		ABNFRule.ABNFCharacter(0x09),
+		ABNFCharacter(0x20u),
+		ABNFCharacter(0x09u),
 		name = "wschar"
 	)
 
-	val ws = ABNFRule.ABNFRepetition(rule = wschar, name = "ws")
+	val ws = ABNFRepetition(rule = wschar, name = "ws")
 
-	val `comment-start-symbol` = ABNFRule.ABNFCharacter(0x23, "comment-start-symbol")
+	val `comment-start-symbol` = ABNFCharacter(0x23u, "comment-start-symbol")
 
 	val `non-ascii` = ABNFAlternate(
-		ABNFRule.ABNFCharacterRange(0x80..0xD7FFL),
-		ABNFRule.ABNFCharacterRange(0xE000..0x10FFFFL),
+		ABNFCharacterRange(0x80u..0xD7FFu),
+		ABNFCharacterRange(0xE000u..0x10FFFFu),
 		name = "non-ascii"
 	)
 
 	val `non-eol` = ABNFAlternate(
-		ABNFRule.ABNFCharacter(0x09),
-		ABNFRule.ABNFCharacterRange(0x20..0x7EL),
+		ABNFCharacter(0x09u),
+		ABNFCharacterRange(0x20u..0x7Eu),
 		`non-ascii`,
 		name = "non-eol"
 	)
 
 	val comment = ABNFString(
 		`comment-start-symbol`,
-		ABNFRule.ABNFRepetition(rule = `non-eol`),
+		ABNFRepetition(rule = `non-eol`),
 		name = "comment"
 	)
 
-	val `val` = ABNFRule.ABNFReference()
+	val `val` = ABNFReference()
 
-	val `unquoted-key` = ABNFRule.ABNFRepetition(
-		1,
-		rule = ABNFAlternate(ALPHA, DIGIT, ABNFRule.ABNFCharacter(0x2D), ABNFRule.ABNFCharacter(0x5F)),
+	val `unquoted-key` = ABNFRepetition(
+		1u,
+		rule = ABNFAlternate(ALPHA, DIGIT, ABNFCharacter(0x2Du), ABNFCharacter(0x5Fu)),
 		name = "unquoted-key"
 	)
 
-	val `basic-string` = ABNFRule.ABNFReference()
+	val `basic-string` = ABNFReference()
 
-	val apostrophe = ABNFRule.ABNFCharacter(0x27, "apostrophe")
+	val apostrophe = ABNFCharacter(0x27u, "apostrophe")
 
 	val `literal-char` = ABNFAlternate(
-		ABNFRule.ABNFCharacter(0x09),
-		ABNFRule.ABNFCharacterRange(0x20..0x26L),
-		ABNFRule.ABNFCharacterRange(0x28..0x7EL),
+		ABNFCharacter(0x09u),
+		ABNFCharacterRange(0x20u..0x26u),
+		ABNFCharacterRange(0x28u..0x7Eu),
 		`non-ascii`,
 		name = "literal-char"
 	)
 
 	val `literal-string` = ABNFString(
 		apostrophe,
-		ABNFRule.ABNFRepetition(rule = `literal-char`),
+		ABNFRepetition(rule = `literal-char`),
 		apostrophe,
 		name = "literal-string"
 	)
@@ -72,21 +74,21 @@ object ABNFToml {
 		name = "simple-key"
 	)
 
-	val `dot-sep` = ABNFString(ws, ABNFRule.ABNFCharacter(0x2E), ws, name = "dot-sep")
+	val `dot-sep` = ABNFString(ws, ABNFCharacter(0x2Eu), ws, name = "dot-sep")
 	val `dotted-key` = ABNFString(
 		`simple-key`,
-		ABNFRule.ABNFRepetition(1, rule = ABNFString(`dot-sep`, `simple-key`)),
+		ABNFRepetition(1u, rule = ABNFString(`dot-sep`, `simple-key`)),
 		name = "dotted-key"
 	)
 
 	val key = ABNFAlternate(`dotted-key`, `simple-key`, name = "key")
 
-	val `keyval-sep` = ABNFString(ws, ABNFRule.ABNFCharacter(0x3D), ws, name = "keyval-sep")
+	val `keyval-sep` = ABNFString(ws, ABNFCharacter(0x3Du), ws, name = "keyval-sep")
 
 	val keyval = ABNFString(key, `keyval-sep`, `val`, name = "keyval")
 
-	val `std-table-open` = ABNFString(ABNFRule.ABNFCharacter(0x5B), ws, name = "std-table-open")
-	val `std-table-close` = ABNFString(ws, ABNFRule.ABNFCharacter(0x5D), name = "std-table-close")
+	val `std-table-open` = ABNFString(ABNFCharacter(0x5Bu), ws, name = "std-table-open")
+	val `std-table-close` = ABNFString(ws, ABNFCharacter(0x5Du), name = "std-table-close")
 
 	val `std-table` = ABNFString(
 		`std-table-open`,
@@ -101,44 +103,47 @@ object ABNFToml {
 		name = "table"
 	)
 
+	val expKv = ABNFString(ws, keyval, ws, ABNFRepetition(high = 1u, rule = comment), name = "_exp_kv")
+	val expTb = ABNFString(ws, table, ws, ABNFRepetition(high = 1u, rule = comment), name = "_exp_tb")
+	val expEm = ABNFString(ws, ABNFRepetition(high = 1u, rule = comment), name = "_exp_em")
 	val expression = ABNFAlternate(
-		ABNFString(ws, keyval, ws, ABNFRule.ABNFRepetition(high = 1, rule = comment)),
-		ABNFString(ws, table, ws, ABNFRule.ABNFRepetition(high = 1, rule = comment)),
-		ABNFString(ws, ABNFRule.ABNFRepetition(high = 1, rule = comment)),
+		expKv,
+		expTb,
+		expEm,
 		name = "expression"
 	)
 
 	val newline = ABNFAlternate(
-		ABNFRule.ABNFCharacter(0x0A),
-		ABNFString(ABNFRule.ABNFCharacter(0x0D), ABNFRule.ABNFCharacter(0x0A)),
+		ABNFCharacter(0x0Au),
+		ABNFString(ABNFCharacter(0x0Du), ABNFCharacter(0x0Au)),
 		name = "newline"
 	)
 
-	val `quotation-mark` = ABNFRule.ABNFCharacter(0x22, "quotation-mark")
+	val `quotation-mark` = ABNFCharacter(0x22u, "quotation-mark")
 
 	val `basic-unescaped` = ABNFAlternate(
 		wschar,
-		ABNFRule.ABNFCharacter(0x21),
-		ABNFRule.ABNFCharacterRange(0x23..0x5BL),
-		ABNFRule.ABNFCharacterRange(0x5D..0x7EL),
+		ABNFCharacter(0x21u),
+		ABNFCharacterRange(0x23u..0x5Bu),
+		ABNFCharacterRange(0x5Du..0x7Eu),
 		`non-ascii`,
 		name = "basic-unescaped"
 	)
 
-	val escape = ABNFRule.ABNFCharacter(0x5C, "escape")
+	val escape = ABNFCharacter(0x5Cu, "escape")
 
 	val `escape-seq-char` = ABNFAlternate(
-		ABNFRule.ABNFCharacter(0x22),
-		ABNFRule.ABNFCharacter(0x5C),
-		ABNFRule.ABNFCharacter(0x62),
-		ABNFRule.ABNFCharacter(0x65),
-		ABNFRule.ABNFCharacter(0x66),
-		ABNFRule.ABNFCharacter(0x6E),
-		ABNFRule.ABNFCharacter(0x72),
-		ABNFRule.ABNFCharacter(0x74),
-		ABNFString(ABNFRule.ABNFCharacter(0x78), ABNFRule.ABNFRepetition(2, 2, HEXDIG)),
-		ABNFString(ABNFRule.ABNFCharacter(0x75), ABNFRule.ABNFRepetition(4, 4, HEXDIG)),
-		ABNFString(ABNFRule.ABNFCharacter(0x55), ABNFRule.ABNFRepetition(8, 8, HEXDIG)),
+		ABNFCharacter(0x22u),
+		ABNFCharacter(0x5Cu),
+		ABNFCharacter(0x62u),
+		ABNFCharacter(0x65u),
+		ABNFCharacter(0x66u),
+		ABNFCharacter(0x6Eu),
+		ABNFCharacter(0x72u),
+		ABNFCharacter(0x74u),
+		ABNFString(ABNFCharacter(0x78u), ABNFRepetition(2u, 2u, HEXDIG)),
+		ABNFString(ABNFCharacter(0x75u), ABNFRepetition(4u, 4u, HEXDIG)),
+		ABNFString(ABNFCharacter(0x55u), ABNFRepetition(8u, 8u, HEXDIG)),
 		name = "escape-seq-char"
 	)
 
@@ -154,13 +159,13 @@ object ABNFToml {
 		name = "basic-char"
 	)
 
-	val `mlb-quotes` = ABNFRule.ABNFRepetition(1, 2, `quotation-mark`, name = "mlb-quotes")
+	val `mlb-quotes` = ABNFRepetition(1u, 2u, `quotation-mark`, name = "mlb-quotes")
 
 	val `mlb-escaped-nl` = ABNFString(
 		escape,
 		ws,
 		newline,
-		ABNFRule.ABNFRepetition(rule = ABNFAlternate(wschar, newline)),
+		ABNFRepetition(rule = ABNFAlternate(wschar, newline)),
 		name = "mlb-escaped-nl"
 	)
 
@@ -172,15 +177,15 @@ object ABNFToml {
 	)
 
 	val `ml-basic-body` = ABNFString(
-		ABNFRule.ABNFRepetition(rule = `mlb-content`),
-		ABNFRule.ABNFRepetition(rule = ABNFString(`mlb-quotes`, ABNFRule.ABNFRepetition(1, rule = `mlb-content`))),
-		//ABNFRule.ABNFRepetition(high = 1, rule = `mlb-quotes`) // TODO: The ABNF reader can't understand this yet
+		ABNFRepetition(rule = `mlb-content`),
+		ABNFRepetition(rule = ABNFString(`mlb-quotes`, ABNFRepetition(1u, rule = `mlb-content`))),
+		ABNFRepetition(high = 1u, rule = `mlb-quotes`),
 		name = "ml-basic-body"
 	)
 
-	val `ml-basic-string-delim` = ABNFRule.ABNFRepetition(3, 3, `quotation-mark`, name = "ml-basic-string-delim")
+	val `ml-basic-string-delim` = ABNFRepetition(3u, 3u, `quotation-mark`, name = "ml-basic-string-delim")
 	val `ml-basic-string` = ABNFString(
-		`ml-basic-string-delim`, ABNFRule.ABNFRepetition(high = 1, rule = newline), `ml-basic-body`,
+		`ml-basic-string-delim`, ABNFRepetition(high = 1u, rule = newline), `ml-basic-body`,
 		`ml-basic-string-delim`,
 		name = "ml-basic-string"
 	)
@@ -193,48 +198,45 @@ object ABNFToml {
 		name = "string"
 	)
 
-	val `date-fullyear` = ABNFRule.ABNFRepetition(4, 4, DIGIT, name = "date-fullyear")
-	val `date-month` = ABNFRule.ABNFRepetition(2, 2, DIGIT, name = "date-month")
-	val `date-mday` = ABNFRule.ABNFRepetition(2, 2, DIGIT, name = "date-mday")
+	val `date-fullyear` = ABNFRepetition(4u, 4u, DIGIT, name = "date-fullyear")
+	val `date-month` = ABNFRepetition(2u, 2u, DIGIT, name = "date-month")
+	val `date-mday` = ABNFRepetition(2u, 2u, DIGIT, name = "date-mday")
 
-	val `time-hour` = ABNFRule.ABNFRepetition(2, 2, DIGIT, name = "time-hour")
-	val `time-minute` = ABNFRule.ABNFRepetition(2, 2, DIGIT, name = "time-minute")
-	val `time-second` = ABNFRule.ABNFRepetition(2, 2, DIGIT, name = "time-second")
+	val `time-hour` = ABNFRepetition(2u, 2u, DIGIT, name = "time-hour")
+	val `time-minute` = ABNFRepetition(2u, 2u, DIGIT, name = "time-minute")
+	val `time-second` = ABNFRepetition(2u, 2u, DIGIT, name = "time-second")
 	val `time-secfrac` = ABNFString(
-		ABNFRule.ABNFCharacter('.'.code.toLong()),
-		ABNFRule.ABNFRepetition(1, rule = DIGIT),
+		ABNFAlternate.char('.'),
+		ABNFRepetition(1u, rule = DIGIT),
 		name = "time-secfrac"
 	)
 
 	val `full-date` = ABNFString(
 		`date-fullyear`,
-		ABNFRule.ABNFCharacter('-'.code.toLong()),
+		ABNFAlternate.char('-'),
 		`date-month`,
-		ABNFRule.ABNFCharacter('-'.code.toLong()),
+		ABNFAlternate.char('-'),
 		`date-mday`,
 		name = "full-date"
 	)
 
 	val `time-delim` = ABNFAlternate(
-		ABNFAlternate(
-			ABNFRule.ABNFCharacter('T'.code.toLong()),
-			ABNFRule.ABNFCharacter('t'.code.toLong()),
-		),
-		ABNFRule.ABNFCharacter(0x20),
+		ABNFAlternate.char('T'),
+		ABNFCharacter(0x20u),
 		name = "time-delim"
 	)
 
 	val `partial-time` = ABNFString(
 		`time-hour`,
-		ABNFRule.ABNFCharacter(':'.code.toLong()),
+		ABNFAlternate.char(':'),
 		`time-minute`,
-		ABNFRule.ABNFRepetition(
-			high = 1,
+		ABNFRepetition(
+			high = 1u,
 			rule = ABNFString(
-				ABNFRule.ABNFCharacter(':'.code.toLong()),
+				ABNFAlternate.char(':'),
 				`time-second`,
-				ABNFRule.ABNFRepetition(
-					high = 1,
+				ABNFRepetition(
+					high = 1u,
 					rule = `time-secfrac`
 				)
 			)
@@ -244,19 +246,19 @@ object ABNFToml {
 
 	val `time-numoffset` = ABNFString(
 		ABNFAlternate(
-			ABNFRule.ABNFCharacter('+'.code.toLong()),
-			ABNFRule.ABNFCharacter('-'.code.toLong()),
+			ABNFAlternate.char('+'),
+			ABNFAlternate.char('-'),
 		),
 		`time-hour`,
-		ABNFRule.ABNFCharacter(':'.code.toLong()),
+		ABNFAlternate.char(':'),
 		`time-minute`,
 		name = "time-numoffset"
 	)
 
 	val `time-offset` = ABNFAlternate(
 		ABNFAlternate(
-			ABNFRule.ABNFCharacter('Z'.code.toLong()),
-			ABNFRule.ABNFCharacter('z'.code.toLong()),
+			ABNFAlternate.char('Z'),
+			ABNFAlternate.char('z'),
 		),
 		`time-numoffset`,
 		name = "time-offset"
@@ -284,19 +286,19 @@ object ABNFToml {
 	)
 
 	val `true` = ABNFString(
-		ABNFRule.ABNFCharacter(0x74),
-		ABNFRule.ABNFCharacter(0x72),
-		ABNFRule.ABNFCharacter(0x75),
-		ABNFRule.ABNFCharacter(0x65),
+		ABNFCharacter(0x74u),
+		ABNFCharacter(0x72u),
+		ABNFCharacter(0x75u),
+		ABNFCharacter(0x65u),
 		name = "true"
 	)
 
 	val `false` = ABNFString(
-		ABNFRule.ABNFCharacter(0x66),
-		ABNFRule.ABNFCharacter(0x61),
-		ABNFRule.ABNFCharacter(0x6C),
-		ABNFRule.ABNFCharacter(0x73),
-		ABNFRule.ABNFCharacter(0x65),
+		ABNFCharacter(0x66u),
+		ABNFCharacter(0x61u),
+		ABNFCharacter(0x6Cu),
+		ABNFCharacter(0x73u),
+		ABNFCharacter(0x65u),
 		name = "false"
 	)
 
@@ -306,11 +308,129 @@ object ABNFToml {
 		name = "boolean"
 	)
 
-	val toml = ABNFString(expression, ABNFRule.ABNFRepetition(rule = ABNFString(newline, expression)), name = "toml").also {
-		`val`.rule = ABNFAlternate(string, boolean, `date-time`, name = "val")
+	val underscore = ABNFCharacter(0x5Fu, name = "underscore")
+
+	val `hex-prefix` = ABNFString(
+		ABNFCharacter(0x30u),
+		ABNFCharacter(0x78u),
+		name = "hex-prefix"
+	)
+
+	val `hex-int` = ABNFString(
+		`hex-prefix`,
+		HEXDIG,
+		ABNFRepetition(
+			rule = ABNFAlternate(HEXDIG, ABNFString(underscore, HEXDIG))
+		),
+		name = "hex-int"
+	)
+
+	val `digit1-9` = ABNFCharacterRange(0x31u..0x39u, name = "digit1-9")
+	val `digit0-7` = ABNFCharacterRange(0x30u..0x37u, name = "digit0-7")
+	val `digit0-1` = ABNFCharacterRange(0x30u..0x31u, name = "digit0-1")
+
+	val `oct-prefix` = ABNFString(ABNFCharacter(0x30u), ABNFCharacter(0x6Fu), name = "oct-prefix")
+	val `oct-int` = ABNFString(
+		`oct-prefix`,
+		`digit0-7`,
+		ABNFRepetition(
+			rule = ABNFAlternate(`digit0-7`, ABNFString(underscore, `digit0-7`))
+		),
+		name = "oct-int"
+	)
+
+	val `bin-prefix` = ABNFString(ABNFCharacter(0x30u), ABNFCharacter(0x62u), name = "bin-prefix")
+	val `bin-int` = ABNFString(
+		`bin-prefix`,
+		`digit0-1`,
+		ABNFRepetition(
+			rule = ABNFAlternate(`digit0-1`, ABNFString(underscore, `digit0-1`))
+		),
+		name = "bin-int"
+	)
+
+	val `unsigned-dec-int` = ABNFAlternate(
+		DIGIT,
+		ABNFString(`digit1-9`, ABNFRepetition(1u, rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT)))),
+		name = "unsigned-dec-int"
+	)
+
+	val minus = ABNFCharacter(0x2Du, name = "minus")
+	val plus = ABNFCharacter(0x2Bu, name = "plus")
+	val `dec-int` = ABNFString(
+		ABNFRepetition(
+			high = 1u,
+			rule = ABNFAlternate(minus, plus)
+		),
+		`unsigned-dec-int`,
+		name = "dec-int"
+	)
+
+	val integer = ABNFAlternate(
+		`hex-int`,
+		`oct-int`,
+		`bin-int`,
+		`dec-int`,
+		name = "integer"
+	)
+
+	val `float-int-part` = `dec-int`
+	val `zero-prefixable-int` = ABNFString(
+		DIGIT,
+		ABNFRepetition(rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT))),
+		name = "zero-prefixable-int"
+	)
+
+	val `float-exp-part` = ABNFString(
+		ABNFRepetition(high = 1u, rule = ABNFAlternate(minus, plus)),
+		`zero-prefixable-int`,
+		name = "float-exp-part"
+	)
+
+	val exp = ABNFString(
+		ABNFAlternate(ABNFAlternate.char('e'), ABNFAlternate.char('E')),
+		`float-exp-part`,
+		name = "exp"
+	)
+
+	val `decimal-point` = ABNFCharacter(0x2Eu, name = "decimal-point")
+	val frac = ABNFString(
+		`decimal-point`,
+		`zero-prefixable-int`,
+		name = "frac"
+	)
+
+	val inf = ABNFString(
+		ABNFCharacter(0x69u),
+		ABNFCharacter(0x6Eu),
+		ABNFCharacter(0x66u),
+		name = "inf"
+	)
+
+	val nan = ABNFString(
+		ABNFCharacter(0x6Eu),
+		ABNFCharacter(0x61u),
+		ABNFCharacter(0x6Eu),
+		name = "nan"
+	)
+
+	val `special-float` = ABNFString(
+		ABNFRepetition(high = 1u, rule = ABNFAlternate(minus, plus)),
+		ABNFAlternate(inf, nan),
+		name = "special-float"
+	)
+
+	val float = ABNFAlternate(
+		ABNFString(`float-int-part`, ABNFAlternate(exp, ABNFString(frac, ABNFRepetition(high = 1u, rule = exp))), name = "_float"),
+		`special-float`,
+		name = "float"
+	)
+
+	val toml = ABNFString(expression, ABNFRepetition(rule = ABNFString(newline, expression)), name = "toml").also {
+		`val`.rule = ABNFAlternate(string, boolean, `date-time`, integer, float, name = "val")
 		`basic-string`.rule = ABNFString(
 			`quotation-mark`,
-			ABNFRule.ABNFRepetition(rule = `basic-char`),
+			ABNFRepetition(rule = `basic-char`),
 			`quotation-mark`,
 			name = "basic-string"
 		)

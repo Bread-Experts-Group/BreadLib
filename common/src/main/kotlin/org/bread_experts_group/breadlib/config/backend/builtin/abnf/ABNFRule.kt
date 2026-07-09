@@ -1,30 +1,40 @@
 package org.bread_experts_group.breadlib.config.backend.builtin.abnf
 
-val DIGIT = ABNFRule.ABNFCharacterRange(0x30..0x39L)
+val DIGIT = ABNFRule.ABNFCharacterRange(0x30u..0x39u)
 
 val HEXDIG = ABNFRule.ABNFAlternate(
 	DIGIT,
-	ABNFRule.ABNFAlternate(ABNFRule.ABNFCharacter('A'.code.toLong()), ABNFRule.ABNFCharacter('a'.code.toLong())),
-	ABNFRule.ABNFAlternate(ABNFRule.ABNFCharacter('B'.code.toLong()), ABNFRule.ABNFCharacter('b'.code.toLong())),
-	ABNFRule.ABNFAlternate(ABNFRule.ABNFCharacter('C'.code.toLong()), ABNFRule.ABNFCharacter('c'.code.toLong())),
-	ABNFRule.ABNFAlternate(ABNFRule.ABNFCharacter('D'.code.toLong()), ABNFRule.ABNFCharacter('d'.code.toLong())),
-	ABNFRule.ABNFAlternate(ABNFRule.ABNFCharacter('E'.code.toLong()), ABNFRule.ABNFCharacter('e'.code.toLong())),
-	ABNFRule.ABNFAlternate(ABNFRule.ABNFCharacter('F'.code.toLong()), ABNFRule.ABNFCharacter('f'.code.toLong()))
+	ABNFRule.ABNFAlternate.char('A'),
+	ABNFRule.ABNFAlternate.char('B'),
+	ABNFRule.ABNFAlternate.char('C'),
+	ABNFRule.ABNFAlternate.char('D'),
+	ABNFRule.ABNFAlternate.char('E'),
+	ABNFRule.ABNFAlternate.char('F')
 )
 
 val ALPHA = ABNFRule.ABNFAlternate(
-	ABNFRule.ABNFCharacterRange(0x41..0x5AL),
-	ABNFRule.ABNFCharacterRange(0x61..0x7AL)
+	ABNFRule.ABNFCharacterRange(0x41u..0x5Au),
+	ABNFRule.ABNFCharacterRange(0x61u..0x7Au)
 )
 
 sealed class ABNFRule {
 	abstract val name: String?
 	class ABNFString(vararg val concatenated: ABNFRule, override val name: String? = null) : ABNFRule()
-	class ABNFAlternate(vararg val alternates: ABNFRule, override val name: String? = null) : ABNFRule()
-	class ABNFRepetition(val low: Long = 0, val high: Long = -1, val rule: ABNFRule, override val name: String? = null) : ABNFRule()
+	class ABNFAlternate(vararg val alternates: ABNFRule, override val name: String? = null) : ABNFRule() {
+		companion object {
+			fun char(c: Char): ABNFAlternate {
+				val u = c.uppercaseChar()
+				val l = c.lowercaseChar()
+				return if (u == l) ABNFAlternate(ABNFCharacter(c.code.toUInt()))
+				else ABNFAlternate(ABNFCharacter(u.code.toUInt()), ABNFCharacter(l.code.toUInt()))
+			}
+		}
+	}
 
-	class ABNFCharacter(val character: Long, override val name: String? = null) : ABNFRule()
-	class ABNFCharacterRange(val characters: LongRange, override val name: String? = null) : ABNFRule()
+	class ABNFRepetition(val low: UInt = 0u, val high: UInt? = null, val rule: ABNFRule, override val name: String? = null) : ABNFRule()
+
+	class ABNFCharacter(val character: UInt, override val name: String? = null) : ABNFRule()
+	class ABNFCharacterRange(val characters: UIntRange, override val name: String? = null) : ABNFRule()
 
 	class ABNFReference(var rule: ABNFRule? = null) : ABNFRule() {
 		override val name: String? = rule?.name

@@ -5,7 +5,7 @@ sealed class ABNFResolved {
 	data class ABNFString(override val rule: ABNFRule, val concatenated: List<ABNFResolved>) : ABNFResolved()
 	data class ABNFAlternate(override val rule: ABNFRule, val selected: ABNFResolved) : ABNFResolved()
 	data class ABNFRepetition(override val rule: ABNFRule, val selected: List<ABNFResolved>) : ABNFResolved()
-	data class ABNFCharacter(override val rule: ABNFRule, val character: Long) : ABNFResolved()
+	data class ABNFCharacter(override val rule: ABNFRule, val character: UInt) : ABNFResolved()
 
 	object ABNFNone : ABNFResolved() {
 		override val rule: ABNFRule? = null

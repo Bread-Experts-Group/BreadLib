@@ -1,171 +1,121 @@
 package org.bread_experts_group.breadlib.config.backend.builtin.abnf
 
-// as defined in IETF RFC 5234
-// TODO: Probably a good idea to put this as a separate library when the maven exists again
-class ABNFReader {
-	private var top: Int = 0
-	private val taskPositions = IntArray(16384)
-	private val taskBacktracks = IntArray(16384)
-	private val taskRules = arrayOfNulls<ABNFRule>(16384)
-
-	private val results = Array<ABNFResolved>(16384) { ABNFResolved.ABNFNone }
-	private var resultTop: Int = 0
-
-	fun resolve(a: String, b: ABNFRule): ABNFResolved {
-		top = 0
-		resultTop = 0
-
-		fun removeLastResult(): ABNFResolved {
-			resultTop--
-			return results[resultTop]
-		}
-
-		fun lastResult(): ABNFResolved {
-			return results[resultTop - 1]
-		}
-
-		fun addResult(resolved: ABNFResolved) {
-			results[resultTop++] = resolved
-		}
-
-		fun addTask(task: ABNFRule, backtrack: Int, position: Int) {
-			taskPositions[top] = position
-			taskBacktracks[top] = backtrack
-			taskRules[top] = task
-			top++
-		}
-
-		fun removeTask() {
-			top--
-		}
-
-		addTask(b, 0, 0)
-		var offset = 0
-
-		loop@ while (top > 0) {
-			val index = top - 1
-			when (val rule = taskRules[index]) {
-				is ABNFRule.ABNFString -> {
-					val position = taskPositions[index]
-					if (position > 0) {
-						if (lastResult() === ABNFResolved.ABNFNone) {
-							repeat(position) { removeLastResult() }
-							addResult(ABNFResolved.ABNFNone)
-							offset = taskBacktracks[index]
-							removeTask()
-							continue
-						}
-						if (position == rule.concatenated.size) {
-							removeTask()
-							addResult(
-								ABNFResolved.ABNFString(rule, List(position) { removeLastResult() }.reversed())
-							)
-							continue
-						}
+class ABNFReader(
+	val input: String,
+	var offset: Int = 0,
+	var tasks: ArrayDeque<ABNFRule> = ArrayDeque(),
+	var results: ArrayDeque<ABNFResolved> = ArrayDeque(),
+	val retries: ArrayDeque<Triple<Int, ArrayDeque<ABNFRule>, ArrayDeque<ABNFResolved>>> = ArrayDeque()
+) {
+	fun resolve(): Pair<ABNFResolved, Int> {
+		var sv = offset
+		task@while (tasks.isNotEmpty()) when (val task = tasks.removeLast()) {
+			is ABNFRule.ABNFString -> {
+				val alpha = mutableListOf<ABNFResolved>()
+				val sv = offset
+				for (rule in task.concatenated) {
+					val (alp, ha) = ABNFReader(
+						input,
+						offset,
+						ArrayDeque<ABNFRule>().also { it.add(rule) },
+						ArrayDeque(),
+					).resolve()
+					if (alp == ABNFResolved.ABNFNone) {
+						offset = sv
+						results.add(ABNFResolved.ABNFNone)
+						continue@task
+					} else {
+						offset = ha
+						alpha.add(alp)
 					}
-					if (position < rule.concatenated.size) {
-						addTask(rule.concatenated[position], offset, 0)
-						taskPositions[index] = position + 1
-						continue
-					}
-					offset = taskBacktracks[index]
-					removeTask()
-					addResult(ABNFResolved.ABNFNone)
 				}
+				results.add(ABNFResolved.ABNFString(task, alpha))
+			}
 
-				is ABNFRule.ABNFRepetition -> {
-					val position = taskPositions[index]
-					if (position > 0) {
-						if (
-							lastResult() === ABNFResolved.ABNFNone ||
-							(rule.high != -1L && position >= rule.high)
-						) {
-							var position = position
-							if (lastResult() === ABNFResolved.ABNFNone) {
-								removeLastResult()
-								position--
-								taskPositions[index] = position
-							}
-							if (position >= rule.low) {
-								removeTask()
-								addResult(
-									ABNFResolved.ABNFRepetition(
-										rule,
-										List(position) { removeLastResult() }.reversed()
-									)
-								)
-								continue
-							} else {
-								offset = taskBacktracks[index]
-								removeTask()
-								addResult(ABNFResolved.ABNFNone)
-								continue
-							}
-						}
-					}
-					addTask(rule.rule, offset, 0)
-					taskPositions[index] = position + 1
-				}
-
-				is ABNFRule.ABNFCharacter -> {
-					removeTask()
-					if (offset !in a.indices) {
-						addResult(ABNFResolved.ABNFNone)
-						continue
-					}
-					addResult(
-						if (a[offset].code == rule.character.toInt()) {
-							offset++
-							ABNFResolved.ABNFCharacter(rule, rule.character)
-						} else ABNFResolved.ABNFNone
+			is ABNFRule.ABNFAlternate -> {
+				task.alternates.forEach { r ->
+					retries.add(
+						Triple(
+							offset,
+							ArrayDeque<ABNFRule>().also { it.addAll(tasks); it.add(r) },
+							ArrayDeque<ABNFResolved>().also { it.addAll(results) }
+						)
 					)
 				}
+				val (offs, nT, nR) = retries.removeLast()
+				offset = offs
+				tasks = nT
+				results = nR
+			}
 
-				is ABNFRule.ABNFCharacterRange -> {
-					removeTask()
-					if (offset !in a.indices) {
-						addResult(ABNFResolved.ABNFNone)
-						continue
+			is ABNFRule.ABNFRepetition -> {
+				var i = 0u
+				val m = mutableListOf<ABNFResolved>()
+				val sv = offset
+				while (task.high == null || i < task.high) {
+					val rsv = ABNFReader(
+						input,
+						offset,
+						ArrayDeque<ABNFRule>().also { it.add(task.rule) },
+						ArrayDeque(),
+					).resolve()
+					if (rsv.first != ABNFResolved.ABNFNone) {
+						offset = rsv.second
+						m.add(rsv.first)
+					} else {
+						break
 					}
-					val localChar = a[offset].code
-					if (rule.characters.contains(localChar)) {
-						offset++
-						addResult(ABNFResolved.ABNFCharacter(rule, localChar.toLong()))
-						continue@loop
-					}
-					addResult(ABNFResolved.ABNFNone)
+					i++
+				}
+				if (i >= task.low) {
+					results.add(ABNFResolved.ABNFRepetition(task, m))
+				} else {
+					results.add(ABNFResolved.ABNFNone)
+					offset = sv
+				}
+			}
+
+			is ABNFRule.ABNFCharacter -> {
+				if (offset !in input.indices) {
+					results.add(ABNFResolved.ABNFNone)
+					continue
 				}
 
-				is ABNFRule.ABNFAlternate -> {
-					val position = taskPositions[index]
-					if (position > 0) {
-						if (lastResult() !== ABNFResolved.ABNFNone) {
-							removeTask()
-							addResult(ABNFResolved.ABNFAlternate(rule, removeLastResult()))
-							continue
-						}
-						removeLastResult()
-					}
-					offset = taskBacktracks[index]
-					if (position < rule.alternates.size) {
-						addTask(rule.alternates[position], offset, 0)
-						taskPositions[index] = position + 1
-						continue
-					}
-					removeTask()
-					addResult(ABNFResolved.ABNFNone)
+				if (input[offset++].code.toUInt() == task.character) {
+					results.add(ABNFResolved.ABNFCharacter(task, task.character))
+				} else {
+					results.add(ABNFResolved.ABNFNone)
+				}
+			}
+
+			is ABNFRule.ABNFCharacterRange -> {
+				if (offset !in input.indices) {
+					results.add(ABNFResolved.ABNFNone)
+					continue
 				}
 
-				is ABNFRule.ABNFReference -> {
-					val backtrack = taskBacktracks[index]
-					val position = taskPositions[index]
-					removeTask()
-					addTask(rule.rule!!, backtrack, position)
+				val o = input[offset++]
+				if (o.code.toUInt() in task.characters) {
+					results.add(ABNFResolved.ABNFCharacter(task, o.code.toUInt()))
+				} else {
+					results.add(ABNFResolved.ABNFNone)
 				}
+			}
 
-				null -> throw Error()
+			is ABNFRule.ABNFReference -> {
+				tasks.add(task.rule!!)
 			}
 		}
-		return removeLastResult()
+		var l = results.removeLast()
+		while ((l == ABNFResolved.ABNFNone || sv == offset) && retries.isNotEmpty()) {
+			val (offs, nT, nR) = retries.removeLast()
+			offset = offs
+			tasks = nT
+			results = nR
+			val (a, b) = this.resolve()
+			l = a
+			offset = b
+		}
+		return l to offset
 	}
 }

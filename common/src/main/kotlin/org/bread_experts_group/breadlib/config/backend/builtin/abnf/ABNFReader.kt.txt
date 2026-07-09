@@ -1,0 +1,172 @@
+package org.bread_experts_group.breadlib.config.backend.builtin.abnf
+
+// as defined in IETF RFC 5234
+// TODO: Probably a good idea to put this as a separate library when the maven exists again
+class ABNFReader {
+	private var top: Int = 0
+	private val taskPositions = IntArray(16384)
+	private val taskBacktracks = IntArray(16384)
+	private val taskRules = arrayOfNulls<ABNFRule>(16384)
+
+	private val results = Array<ABNFResolved>(16384) { ABNFResolved.ABNFNone }
+	private var resultTop: Int = 0
+
+	fun resolve(a: String, b: ABNFRule): ABNFResolved {
+		top = 0
+		resultTop = 0
+
+		fun removeLastResult(): ABNFResolved {
+			resultTop--
+			return results[resultTop]
+		}
+
+		fun lastResult(): ABNFResolved {
+			return results[resultTop - 1]
+		}
+
+		fun addResult(resolved: ABNFResolved) {
+			results[resultTop++] = resolved
+		}
+
+		fun addTask(task: ABNFRule, backtrack: Int, position: Int) {
+			taskPositions[top] = position
+			taskBacktracks[top] = backtrack
+			taskRules[top] = task
+			top++
+		}
+
+		fun removeTask() {
+			top--
+		}
+
+		addTask(b, 0, 0)
+		var offset = 0
+
+		loop@ while (top > 0) {
+			val index = top - 1
+			when (val rule = taskRules[index]) {
+				is ABNFRule.ABNFString -> {
+					val position = taskPositions[index]
+					if (position > 0) {
+						if (lastResult() === ABNFResolved.ABNFNone) {
+							repeat(position) { removeLastResult() }
+							addResult(ABNFResolved.ABNFNone)
+							offset = taskBacktracks[index]
+							removeTask()
+							continue
+						}
+						if (position == rule.concatenated.size) {
+							removeTask()
+							addResult(
+								ABNFResolved.ABNFString(rule, List(position) { removeLastResult() }.reversed())
+							)
+							continue
+						}
+					}
+					if (position < rule.concatenated.size) {
+						addTask(rule.concatenated[position], offset, 0)
+						taskPositions[index] = position + 1
+						continue
+					}
+					offset = taskBacktracks[index]
+					removeTask()
+					addResult(ABNFResolved.ABNFNone)
+				}
+
+				is ABNFRule.ABNFRepetition -> {
+					val position = taskPositions[index]
+					if (position > 0) {
+						if (
+							lastResult() === ABNFResolved.ABNFNone ||
+							(rule.high != -1L && position >= rule.high)
+						) {
+							var position = position
+							if (lastResult() === ABNFResolved.ABNFNone) {
+								removeLastResult()
+								position--
+								taskPositions[index] = position
+							}
+							if (position >= rule.low) {
+								removeTask()
+								addResult(
+									ABNFResolved.ABNFRepetition(
+										rule,
+										List(position) { removeLastResult() }.reversed()
+									)
+								)
+								continue
+							} else {
+								offset = taskBacktracks[index]
+								removeTask()
+								addResult(ABNFResolved.ABNFNone)
+								continue
+							}
+						}
+					}
+					addTask(rule.rule, offset, 0)
+					taskPositions[index] = position + 1
+				}
+
+				is ABNFRule.ABNFCharacter -> {
+					removeTask()
+					if (offset !in a.indices) {
+						addResult(ABNFResolved.ABNFNone)
+						continue
+					}
+					addResult(
+						if (a[offset].code == rule.character.toInt()) {
+							offset++
+							ABNFResolved.ABNFCharacter(rule, rule.character)
+						} else ABNFResolved.ABNFNone
+					)
+				}
+
+				is ABNFRule.ABNFCharacterRange -> {
+					removeTask()
+					if (offset !in a.indices) {
+						addResult(ABNFResolved.ABNFNone)
+						continue
+					}
+					val localChar = a[offset].code
+					if (rule.characters.contains(localChar)) {
+						offset++
+						addResult(ABNFResolved.ABNFCharacter(rule, localChar.toLong()))
+						continue@loop
+					}
+					addResult(ABNFResolved.ABNFNone)
+				}
+
+				is ABNFRule.ABNFAlternate -> {
+					val position = taskPositions[index]
+					if (position > 0) {
+						if (lastResult() !== ABNFResolved.ABNFNone) {
+							removeTask()
+							addResult(ABNFResolved.ABNFAlternate(rule, removeLastResult()))
+							continue
+						}
+						removeLastResult()
+					}
+					offset = taskBacktracks[index]
+					if (position < rule.alternates.size) {
+						addTask(rule.alternates[position], offset, 0)
+						taskPositions[index] = position + 1
+						continue
+					}
+					removeTask()
+					addResult(ABNFResolved.ABNFNone)
+				}
+
+				is ABNFRule.ABNFReference -> {
+					val backtrack = taskBacktracks[index]
+					val position = taskPositions[index]
+					removeTask()
+					addTask(rule.rule!!, backtrack, position)
+				}
+
+				null -> throw Error()
+			}
+		}
+		if (resultTop > 1) TODO("Error $resultTop")
+		return removeLastResult()
+	}
+}
