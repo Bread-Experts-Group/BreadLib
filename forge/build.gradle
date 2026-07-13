@@ -29,10 +29,7 @@ minecraft {
     // This location is hardcoded in Forge and can not be changed.
     // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
     // Forge still uses SRG names during compile time, so we cannot use the common AT's
-    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
-    if (at.exists()) {
-        accessTransformer = at
-    }
+    accessTransformers.from project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
         configureEach {
@@ -42,10 +39,13 @@ minecraft {
             systemProperty 'forge.enabledGameTestNamespaces', "${mod_id}"
         }
 
-        register('client')
+        register('client') {
+            setWorkingDir(rootDir.toString() + "/runs/client")
+        }
 
         register('server') {
             args '--nogui'
+            it.setWorkingDir(rootDir.toString() + "/runs/server")
         }
 
         register('gameTestServer')
@@ -70,8 +70,8 @@ dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
     implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4"))
 
-    jarJar("org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}")
-    jarJar("org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}")
+    jarJarRuntimeDependencies("org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}")
+    jarJarRuntimeDependencies("org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}")
 
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }

@@ -20,6 +20,7 @@ neoForge {
         }
         client {
             client()
+            gameDirectory = rootDir.toString() + "/runs/client"
         }
         data {
             data()
@@ -27,6 +28,7 @@ neoForge {
         }
         server {
             server()
+            gameDirectory = rootDir.toString() + "/runs/server"
         }
     }
     mods {
