@@ -3,21 +3,30 @@ package org.bread_experts_group.breadlib.config.backend.builtin
 import org.bread_experts_group.breadlib.config.backend.ConfigBackend
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFReader
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFResolved
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFTask
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml._float
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`basic-string`
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`basic-unescaped`
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`bin-int`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`dec-int`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`dotted-key`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.escaped
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.exp
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.expEm
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.expKv
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`false`
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`hex-int`
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.inf
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`literal-string`
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`non-ascii`
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.nan
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`oct-int`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`quoted-key`
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.string
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`special-float`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.toml
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`true`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.`unquoted-key`
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFToml.wschar
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.readText
@@ -25,41 +34,30 @@ import kotlin.io.path.readText
 object ConfigTOMLBackend : ConfigBackend {
 	override val extension: String = "toml"
 	override fun decode(path: Path): Map<String, Any> = buildMap {
+		fun decodeBasicString(a: ABNFResolved): String {
+			var str = ""
+			((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach { char ->
+				if (char is ABNFResolved.ABNFCharacter) str += Char(char.character.toInt())
+				else if (char.rule == escaped) TODO("B")
+			}
+			return str
+		}
+
+		fun decodeLiteralString(a: ABNFResolved): String {
+			var str = ""
+			((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
+				val char = it
+				str += Char(
+					((char as? ABNFResolved.ABNFCharacter) ?: char as ABNFResolved.ABNFCharacter)
+						.character.toInt()
+				)
+			}
+			return str
+		}
+
 		fun decodeString(a: ABNFResolved): String = when (val rule = a.rule) {
-			`basic-string`.rule -> {
-				var str = ""
-				((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
-					val char = it
-					when (char.rule) {
-						`basic-unescaped` -> {
-							val char = char
-							str += Char(
-								(char as? ABNFResolved.ABNFCharacter ?: when (char.rule) {
-									wschar, `non-ascii` -> char as ABNFResolved.ABNFCharacter
-									else -> throw IllegalStateException("${char.rule?.name} - ${char.rule} - $char")
-								}).character.toInt()
-							)
-						}
-
-						escaped -> TODO("B")
-						else -> throw IllegalStateException()
-					}
-				}
-				str
-			}
-
-			`literal-string` -> {
-				var str = ""
-				((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
-					val char = it
-					str += Char(
-						((char as? ABNFResolved.ABNFCharacter) ?: char as ABNFResolved.ABNFCharacter)
-							.character.toInt()
-					)
-				}
-				str
-			}
-
+			`basic-string`.rule -> decodeBasicString(a)
+			`literal-string` -> decodeLiteralString(a)
 			else -> throw IllegalStateException("${rule?.name} - $rule - $a")
 		}
 
@@ -84,6 +82,7 @@ object ConfigTOMLBackend : ConfigBackend {
 
 		fun decodeKey(a: ABNFResolved): List<String> = when (val rule = a.rule) {
 			`unquoted-key` -> listOf(decodeSimpleKey(a))
+			`basic-string`.rule, `literal-string` -> listOf(decodeString(a))
 			`dotted-key` -> buildList {
 				a as ABNFResolved.ABNFString
 				add(decodeSimpleKey(a.concatenated[0]))
@@ -95,18 +94,110 @@ object ConfigTOMLBackend : ConfigBackend {
 			else -> throw IllegalStateException("${rule?.name} - $rule - $a")
 		}
 
+		fun decodeUInt(a: ABNFResolved): String {
+			val negative = ((a as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let {
+				(it as ABNFResolved.ABNFCharacter).character == '-'.code.toUInt()
+			} ?: false
+			val n = when (val c = a.concatenated[1]) {
+				is ABNFResolved.ABNFCharacter -> Char(c.character.toInt()).toString()
+				is ABNFResolved.ABNFString -> {
+					var str = ""
+					str += Char((c.concatenated[0] as ABNFResolved.ABNFCharacter).character.toInt())
+					(c.concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
+						val c = it as? ABNFResolved.ABNFCharacter ?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
+						str += Char(c.character.toInt())
+					}
+					str
+				}
+				else -> throw IllegalStateException()
+			}
+			return "${if (negative) "-" else ""}$n"
+		}
+
 		fun decodeVal(a: ABNFResolved): Any = when (val rule = a.rule) {
-			string -> decodeString(a)
-			`dec-int` -> {
+			`true` -> true
+			`false` -> false
+			`basic-string`.rule -> decodeBasicString(a)
+			`literal-string` -> decodeLiteralString(a)
+
+			`hex-int` -> {
+				a as ABNFResolved.ABNFString
+				var str = ""
+				str += Char((a.concatenated[1] as ABNFResolved.ABNFCharacter).character.toInt())
+				(a.concatenated[2] as ABNFResolved.ABNFRepetition).selected.forEach {
+					val c = it as? ABNFResolved.ABNFCharacter ?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
+					str += Char(c.character.toInt())
+				}
+				BigInteger(str, 16).toBigDecimal()
+			}
+
+			`oct-int` -> {
+				a as ABNFResolved.ABNFString
+				var str = ""
+				str += Char((a.concatenated[1] as ABNFResolved.ABNFCharacter).character.toInt())
+				(a.concatenated[2] as ABNFResolved.ABNFRepetition).selected.forEach {
+					val c = it as? ABNFResolved.ABNFCharacter ?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
+					str += Char(c.character.toInt())
+				}
+				BigInteger(str, 8).toBigDecimal()
+			}
+
+			`bin-int` -> {
+				a as ABNFResolved.ABNFString
+				var str = ""
+				str += Char((a.concatenated[1] as ABNFResolved.ABNFCharacter).character.toInt())
+				(a.concatenated[2] as ABNFResolved.ABNFRepetition).selected.forEach {
+					val c = it as? ABNFResolved.ABNFCharacter ?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
+					str += Char(c.character.toInt())
+				}
+				BigInteger(str, 2).toBigDecimal()
+			}
+
+			`dec-int` -> decodeUInt(a).toBigDecimal()
+			_float -> {
+				fun readZPI(a: ABNFResolved): String {
+					a as ABNFResolved.ABNFString
+					var str = Char((a.concatenated[0] as ABNFResolved.ABNFCharacter).character.toInt()).toString()
+					((a.concatenated[1]) as ABNFResolved.ABNFRepetition).selected.forEach { zpiD ->
+						str += Char(
+							((zpiD as? ABNFResolved.ABNFCharacter) ?:
+							((zpiD as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter)).character.toInt()
+						)
+					}
+					return str
+				}
+
+				fun readExp(a: ABNFResolved): String {
+					val exp = (a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFString
+					val str = "e" + ((exp.concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let {
+						if (it.rule == ABNFToml.minus) "-" else ""
+					} ?: "")
+					return str + readZPI(exp.concatenated[1])
+				}
+
+				val intPart = decodeUInt((a as ABNFResolved.ABNFString).concatenated[0])
+				val frac = a.concatenated[1].let {
+					if (it.rule == exp) readExp(it)
+					else {
+						val zpi = ((it as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFString).concatenated[1]
+						val exp = (it.concatenated[1] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let { e -> readExp(e) } ?: ""
+						".${readZPI(zpi)}${exp}"
+					}
+				}
+				BigDecimal("$intPart$frac")
+			}
+
+			`special-float` -> {
 				val negative = ((a as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let {
 					(it as ABNFResolved.ABNFCharacter).character == '-'.code.toUInt()
 				} ?: false
-				val n = when (val c = a.concatenated[1]) {
-					is ABNFResolved.ABNFCharacter -> Char(c.character.toInt()).toString()
-					is ABNFResolved.ABNFString -> TODO("STR")
+				when (a.concatenated[1].rule) {
+					inf -> if (negative) Double.NEGATIVE_INFINITY else Double.POSITIVE_INFINITY
+					nan -> if (negative) java.lang.Double.longBitsToDouble((0xfff8000000000000u).toLong()) else
+						java.lang.Double.longBitsToDouble(0x7ff8000000000000)
+
 					else -> throw IllegalStateException()
 				}
-				BigDecimal("${if (negative) "-" else ""}$n")
 			}
 
 			else -> throw IllegalStateException("${rule?.name} - $rule - $a")
@@ -144,7 +235,7 @@ object ConfigTOMLBackend : ConfigBackend {
 		}
 
 		@Suppress("UNCHECKED_CAST")
-		return decodeToml(ABNFReader(path.readText(Charsets.UTF_8)).also { it.tasks.add(toml) }.resolve().first) as Map<String, Any>
+		return decodeToml(ABNFReader(path.readText(Charsets.UTF_8)).also { it.tasks.add(ABNFTask(toml, 0, 0)) }.resolve().first) as Map<String, Any>
 	}
 
 	override fun encode(path: Path, config: Map<String, Any?>) {
@@ -172,6 +263,13 @@ object ConfigTOMLBackend : ConfigBackend {
 				}
 
 				val valueStr = when (value) {
+					is Double if value == Double.POSITIVE_INFINITY -> "+inf"
+					is Double if value == Double.NEGATIVE_INFINITY -> "-inf"
+					is Double if java.lang.Double.isNaN(value) -> {
+						if (java.lang.Double.doubleToRawLongBits(value) ushr 63 != 0L) "-nan"
+						else "+nan"
+					}
+
 					is BigDecimal -> "$value"
 					is String -> "\"$value\""
 					else -> throw IllegalArgumentException("Cannot encode ${value::class}: $value")

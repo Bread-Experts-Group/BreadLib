@@ -108,11 +108,11 @@ fun kExample() {
 
 	if (PlatformServices.PLATFORM.isModLoaded("breadlib")) info("breadlib appears loaded on the platform")
 
-//	val config = ConfigManager(BreadLib.MOD_ID)["config-test", "json"]
+	val config = ConfigManager(BreadLib.MOD_ID)["config-test", "json"]
 	val testValue = ConfigValue.builder<BigDecimal>().name("test").comment("Test comment").build()
-//	info(config.getOrNull(testValue))
-//	config[testValue] = (config.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
-//	info(config[testValue])
+	info(config.getOrNull(testValue))
+	config[testValue] = (config.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
+	info(config[testValue])
 
 	val configL = ConfigManager(BreadLib.MOD_ID)["config-test", "toml"]
 	info(configL.getOrNull(testValue))

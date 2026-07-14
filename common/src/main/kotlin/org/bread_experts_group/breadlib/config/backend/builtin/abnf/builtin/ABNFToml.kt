@@ -31,7 +31,7 @@ object ABNFToml {
 
 	val comment = ABNFString(
 		`comment-start-symbol`,
-		ABNFRepetition(rule = `non-eol`),
+		ABNFRepetition(rule = `non-eol`, name = "_non_eol_cmt"),
 		name = "comment"
 	)
 
@@ -39,7 +39,7 @@ object ABNFToml {
 
 	val `unquoted-key` = ABNFRepetition(
 		1u,
-		rule = ABNFAlternate(ALPHA, DIGIT, ABNFCharacter(0x2Du), ABNFCharacter(0x5Fu)),
+		rule = ABNFAlternate(ALPHA, DIGIT, ABNFCharacter(0x2Du), ABNFCharacter(0x5Fu), name = "_key_char_rep"),
 		name = "unquoted-key"
 	)
 
@@ -57,7 +57,7 @@ object ABNFToml {
 
 	val `literal-string` = ABNFString(
 		apostrophe,
-		ABNFRepetition(rule = `literal-char`),
+		ABNFRepetition(rule = `literal-char`, name = "_char_rep"),
 		apostrophe,
 		name = "literal-string"
 	)
@@ -77,7 +77,7 @@ object ABNFToml {
 	val `dot-sep` = ABNFString(ws, ABNFCharacter(0x2Eu), ws, name = "dot-sep")
 	val `dotted-key` = ABNFString(
 		`simple-key`,
-		ABNFRepetition(1u, rule = ABNFString(`dot-sep`, `simple-key`)),
+		ABNFRepetition(1u, rule = ABNFString(`dot-sep`, `simple-key`, name = "_dotted_key_continuation")),
 		name = "dotted-key"
 	)
 
@@ -103,9 +103,9 @@ object ABNFToml {
 		name = "table"
 	)
 
-	val expKv = ABNFString(ws, keyval, ws, ABNFRepetition(high = 1u, rule = comment), name = "_exp_kv")
-	val expTb = ABNFString(ws, table, ws, ABNFRepetition(high = 1u, rule = comment), name = "_exp_tb")
-	val expEm = ABNFString(ws, ABNFRepetition(high = 1u, rule = comment), name = "_exp_em")
+	val expKv = ABNFString(ws, keyval, ws, ABNFRepetition(high = 1u, rule = comment, name = "_com_opt"), name = "_exp_kv")
+	val expTb = ABNFString(ws, table, ws, ABNFRepetition(high = 1u, rule = comment, name = "_com_opt"), name = "_exp_tb")
+	val expEm = ABNFString(ws, ABNFRepetition(high = 1u, rule = comment, name = "_com_opt"), name = "_exp_em")
 	val expression = ABNFAlternate(
 		expKv,
 		expTb,
@@ -115,7 +115,7 @@ object ABNFToml {
 
 	val newline = ABNFAlternate(
 		ABNFCharacter(0x0Au),
-		ABNFString(ABNFCharacter(0x0Du), ABNFCharacter(0x0Au)),
+		ABNFString(ABNFCharacter(0x0Du), ABNFCharacter(0x0Au), name = "_cr_lf"),
 		name = "newline"
 	)
 
@@ -141,9 +141,9 @@ object ABNFToml {
 		ABNFCharacter(0x6Eu),
 		ABNFCharacter(0x72u),
 		ABNFCharacter(0x74u),
-		ABNFString(ABNFCharacter(0x78u), ABNFRepetition(2u, 2u, HEXDIG)),
-		ABNFString(ABNFCharacter(0x75u), ABNFRepetition(4u, 4u, HEXDIG)),
-		ABNFString(ABNFCharacter(0x55u), ABNFRepetition(8u, 8u, HEXDIG)),
+		ABNFString(ABNFCharacter(0x78u), ABNFRepetition(2u, 2u, HEXDIG, name = "_2hex"), name = "_hex2"),
+		ABNFString(ABNFCharacter(0x75u), ABNFRepetition(4u, 4u, HEXDIG, name = "_4hex"), name = "_hex4"),
+		ABNFString(ABNFCharacter(0x55u), ABNFRepetition(8u, 8u, HEXDIG, name = "_8hex"), name = "_hex8"),
 		name = "escape-seq-char"
 	)
 
@@ -165,27 +165,27 @@ object ABNFToml {
 		escape,
 		ws,
 		newline,
-		ABNFRepetition(rule = ABNFAlternate(wschar, newline)),
+		ABNFRepetition(rule = ABNFAlternate(wschar, newline), name = "_ws_nl_mlb"),
 		name = "mlb-escaped-nl"
 	)
 
 	val `mlb-content` = ABNFAlternate(
-		`mlb-escaped-nl`,
 		`basic-char`,
 		newline,
+		`mlb-escaped-nl`,
 		name = "mlb-content"
 	)
 
 	val `ml-basic-body` = ABNFString(
-		ABNFRepetition(rule = `mlb-content`),
-		ABNFRepetition(rule = ABNFString(`mlb-quotes`, ABNFRepetition(1u, rule = `mlb-content`))),
-		ABNFRepetition(high = 1u, rule = `mlb-quotes`),
+		ABNFRepetition(rule = `mlb-content`, name = "_mlb_content_rep"),
+		ABNFRepetition(rule = ABNFString(`mlb-quotes`, ABNFRepetition(1u, rule = `mlb-content`), name = "_mlb_quotes_then_content")),
+		ABNFRepetition(high = 1u, rule = `mlb-quotes`, name = "_mlb_quotes_rep"),
 		name = "ml-basic-body"
 	)
 
 	val `ml-basic-string-delim` = ABNFRepetition(3u, 3u, `quotation-mark`, name = "ml-basic-string-delim")
 	val `ml-basic-string` = ABNFString(
-		`ml-basic-string-delim`, ABNFRepetition(high = 1u, rule = newline), `ml-basic-body`,
+		`ml-basic-string-delim`, ABNFRepetition(high = 1u, rule = newline, name = "_newline_opt"), `ml-basic-body`,
 		`ml-basic-string-delim`,
 		name = "ml-basic-string"
 	)
@@ -194,6 +194,7 @@ object ABNFToml {
 
 	val string = ABNFAlternate(
 		`basic-string`,
+//		`ml-basic-string`,
 		`literal-string`,
 		name = "string"
 	)
@@ -207,7 +208,7 @@ object ABNFToml {
 	val `time-second` = ABNFRepetition(2u, 2u, DIGIT, name = "time-second")
 	val `time-secfrac` = ABNFString(
 		ABNFAlternate.char('.'),
-		ABNFRepetition(1u, rule = DIGIT),
+		ABNFRepetition(1u, rule = DIGIT, name = "_frac_digits"),
 		name = "time-secfrac"
 	)
 
@@ -238,8 +239,10 @@ object ABNFToml {
 				ABNFRepetition(
 					high = 1u,
 					rule = `time-secfrac`
-				)
-			)
+				),
+				name = "_seconds"
+			),
+			name = "_sec_opt"
 		),
 		name = "partial-time"
 	)
@@ -320,7 +323,8 @@ object ABNFToml {
 		`hex-prefix`,
 		HEXDIG,
 		ABNFRepetition(
-			rule = ABNFAlternate(HEXDIG, ABNFString(underscore, HEXDIG))
+			rule = ABNFAlternate(HEXDIG, ABNFString(underscore, HEXDIG, name = "_hex_continuation")),
+			name = "_hex_rep"
 		),
 		name = "hex-int"
 	)
@@ -334,7 +338,8 @@ object ABNFToml {
 		`oct-prefix`,
 		`digit0-7`,
 		ABNFRepetition(
-			rule = ABNFAlternate(`digit0-7`, ABNFString(underscore, `digit0-7`))
+			rule = ABNFAlternate(`digit0-7`, ABNFString(underscore, `digit0-7`, name = "_oct_continuation")),
+			name = "_oct_rep"
 		),
 		name = "oct-int"
 	)
@@ -344,14 +349,15 @@ object ABNFToml {
 		`bin-prefix`,
 		`digit0-1`,
 		ABNFRepetition(
-			rule = ABNFAlternate(`digit0-1`, ABNFString(underscore, `digit0-1`))
+			rule = ABNFAlternate(`digit0-1`, ABNFString(underscore, `digit0-1`, name = "_bin_continuatio")),
+			name = "_bin_rep"
 		),
 		name = "bin-int"
 	)
 
 	val `unsigned-dec-int` = ABNFAlternate(
 		DIGIT,
-		ABNFString(`digit1-9`, ABNFRepetition(1u, rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT)))),
+		ABNFString(`digit1-9`, ABNFRepetition(1u, rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT, name = "_dec_continuation")))),
 		name = "unsigned-dec-int"
 	)
 
@@ -360,29 +366,30 @@ object ABNFToml {
 	val `dec-int` = ABNFString(
 		ABNFRepetition(
 			high = 1u,
-			rule = ABNFAlternate(minus, plus)
+			rule = ABNFAlternate(minus, plus),
+			name = "_sign_opt"
 		),
 		`unsigned-dec-int`,
 		name = "dec-int"
 	)
 
 	val integer = ABNFAlternate(
+		`dec-int`,
 		`hex-int`,
 		`oct-int`,
 		`bin-int`,
-		`dec-int`,
 		name = "integer"
 	)
 
 	val `float-int-part` = `dec-int`
 	val `zero-prefixable-int` = ABNFString(
 		DIGIT,
-		ABNFRepetition(rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT))),
+		ABNFRepetition(rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT, name = "_int_continuation")), name = "_digit_rep"),
 		name = "zero-prefixable-int"
 	)
 
 	val `float-exp-part` = ABNFString(
-		ABNFRepetition(high = 1u, rule = ABNFAlternate(minus, plus)),
+		ABNFRepetition(high = 1u, rule = ABNFAlternate(minus, plus), name = "_float_sign_opt"),
 		`zero-prefixable-int`,
 		name = "float-exp-part"
 	)
@@ -415,22 +422,23 @@ object ABNFToml {
 	)
 
 	val `special-float` = ABNFString(
-		ABNFRepetition(high = 1u, rule = ABNFAlternate(minus, plus)),
+		ABNFRepetition(high = 1u, rule = ABNFAlternate(minus, plus), name = "_special_float_sign"),
 		ABNFAlternate(inf, nan),
 		name = "special-float"
 	)
 
+	val _float = ABNFString(`float-int-part`, ABNFAlternate(exp, ABNFString(frac, ABNFRepetition(high = 1u, rule = exp, name = "_exp_opt"), name = "_float_frac")), name = "_float")
 	val float = ABNFAlternate(
-		ABNFString(`float-int-part`, ABNFAlternate(exp, ABNFString(frac, ABNFRepetition(high = 1u, rule = exp))), name = "_float"),
+		_float,
 		`special-float`,
 		name = "float"
 	)
 
-	val toml = ABNFString(expression, ABNFRepetition(rule = ABNFString(newline, expression)), name = "toml").also {
+	val toml = ABNFString(expression, ABNFRepetition(rule = ABNFString(newline, expression, name = "_nl_expression"), name = "_nl_exp_rep"), name = "toml").also {
 		`val`.rule = ABNFAlternate(string, boolean, `date-time`, integer, float, name = "val")
 		`basic-string`.rule = ABNFString(
 			`quotation-mark`,
-			ABNFRepetition(rule = `basic-char`),
+			ABNFRepetition(rule = `basic-char`, name = "_char_rep"),
 			`quotation-mark`,
 			name = "basic-string"
 		)

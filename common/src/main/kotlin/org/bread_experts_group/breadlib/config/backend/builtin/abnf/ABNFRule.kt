@@ -9,12 +9,14 @@ val HEXDIG = ABNFRule.ABNFAlternate(
 	ABNFRule.ABNFAlternate.char('C'),
 	ABNFRule.ABNFAlternate.char('D'),
 	ABNFRule.ABNFAlternate.char('E'),
-	ABNFRule.ABNFAlternate.char('F')
+	ABNFRule.ABNFAlternate.char('F'),
+	name = "HEXDIG"
 )
 
 val ALPHA = ABNFRule.ABNFAlternate(
 	ABNFRule.ABNFCharacterRange(0x41u..0x5Au),
-	ABNFRule.ABNFCharacterRange(0x61u..0x7Au)
+	ABNFRule.ABNFCharacterRange(0x61u..0x7Au),
+	name = "ALPHA"
 )
 
 sealed class ABNFRule {
@@ -33,8 +35,13 @@ sealed class ABNFRule {
 
 	class ABNFRepetition(val low: UInt = 0u, val high: UInt? = null, val rule: ABNFRule, override val name: String? = null) : ABNFRule()
 
-	class ABNFCharacter(val character: UInt, override val name: String? = null) : ABNFRule()
-	class ABNFCharacterRange(val characters: UIntRange, override val name: String? = null) : ABNFRule()
+	class ABNFCharacter(val character: UInt, override val name: String? = null) : ABNFRule() {
+		override fun toString(): String = "ABNFCharacter '${Char(character.toInt())}'"
+	}
+
+	class ABNFCharacterRange(val characters: UIntRange, override val name: String? = null) : ABNFRule() {
+		override fun toString(): String = "ABNFCharacterRange '${Char(characters.first.toInt())}'..'${Char(characters.last.toInt())}'"
+	}
 
 	class ABNFReference(var rule: ABNFRule? = null) : ABNFRule() {
 		override val name: String? = rule?.name

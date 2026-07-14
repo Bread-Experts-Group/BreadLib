@@ -1,7 +1,9 @@
 package org.bread_experts_group.breadlib.config.backend.builtin
 
 import org.bread_experts_group.breadlib.config.backend.ConfigBackend
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFReader
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFResolved
+import org.bread_experts_group.breadlib.config.backend.builtin.abnf.ABNFTask
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson.`JSON-text`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson.array
@@ -11,11 +13,11 @@ import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNF
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson.`object`
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson.string
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson.`true`
-import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson.unescaped
 import org.bread_experts_group.breadlib.config.backend.builtin.abnf.builtin.ABNFJson.zero
 import java.math.BigDecimal
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.readText
 
 object ConfigJSONBackend : ConfigBackend {
 	override val extension: String = "json"
@@ -23,12 +25,10 @@ object ConfigJSONBackend : ConfigBackend {
 		fun decodeStr(rep: ABNFResolved.ABNFString): String {
 			var str = ""
 			(rep.concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
-				val selected = it
-				if (selected.rule == unescaped) {
-					val sel = selected
-					str += Char((sel as ABNFResolved.ABNFCharacter).character.toInt())
+				if (it is ABNFResolved.ABNFCharacter) {
+					str += Char(it.character.toInt())
 				} else {
-					val sel = (selected as ABNFResolved.ABNFString).concatenated[1]
+					val sel = (it as ABNFResolved.ABNFString).concatenated[1]
 					if (sel is ABNFResolved.ABNFCharacter) str += when (val char = Char(sel.character.toInt())) {
 						'b' -> '\b'
 						'f' -> '\u000C'
@@ -40,10 +40,9 @@ object ConfigJSONBackend : ConfigBackend {
 						val hexDig = (sel as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition
 						var hexStr = ""
 						hexDig.selected.forEach { hexAlt ->
-							val hexChar = hexAlt
-							hexStr += if (hexChar is ABNFResolved.ABNFCharacter) Char(hexChar.character.toInt())
+							hexStr += if (hexAlt is ABNFResolved.ABNFCharacter) Char(hexAlt.character.toInt())
 							else {
-								val char = hexChar as ABNFResolved.ABNFCharacter
+								val char = hexAlt as ABNFResolved.ABNFCharacter
 								Char(char.character.toInt())
 							}
 						}
@@ -66,10 +65,10 @@ object ConfigJSONBackend : ConfigBackend {
 						members.add((resolved as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFString)
 					}
 				}
-				members.associate {
+				members.map {
 					decodeStr(it.concatenated[0] as ABNFResolved.ABNFString) to
 							decodeJson(it.concatenated[2])
-				}
+				}.filterNot { it.second == null }.toMap()
 			}
 
 			array -> {
@@ -129,9 +128,8 @@ object ConfigJSONBackend : ConfigBackend {
 			else -> throw IllegalStateException("${a.rule?.name} - ${a.rule} - $a")
 		}
 
-		TODO("JSON")
-//		@Suppress("UNCHECKED_CAST")
-//		return decodeJson(ABNFReader().resolve(path.readText(Charsets.UTF_8).ifEmpty { "{}" }, `JSON-text`).first) as Map<String, Any?>
+		@Suppress("UNCHECKED_CAST")
+		return decodeJson(ABNFReader(path.readText(Charsets.UTF_8).ifEmpty { "{}" }).also { it.tasks.add(ABNFTask(`JSON-text`, 0, 0)) }.resolve().first) as Map<String, Any>
 	}
 
 	override fun encode(path: Path, config: Map<String, Any?>) = Files.newBufferedWriter(path, Charsets.UTF_8).use {
