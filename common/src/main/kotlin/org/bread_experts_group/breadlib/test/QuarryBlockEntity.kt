@@ -14,33 +14,34 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.saveddata.SavedData
+import org.bread_experts_group.breadlib.extensions.block.Tickable
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BlockEntity(
 	BlockEntityTypeTest.QUARRY_TYPE.get(), pPos, pBlockState
-) {
-	val xMine = 10
-	val zMine = 10
+), Tickable.Server {
+	private val xMine = 10
+	private val zMine = 10
 
-	var x = -xMine
-	var z = -zMine
+	private var x = -xMine
+	private var z = -zMine
 
-	var y = blockPos.y - 1
+	private var y = blockPos.y - 1
 
-	var noUpdate = false
+	private var noUpdate = false
 
 	var drillPos: BlockPos? = null
-	var drillItem = Items.NETHERITE_PICKAXE.defaultInstance
-	var correctTool = false
+	private var drillItem = Items.NETHERITE_PICKAXE.defaultInstance
+	private var correctTool = false
 
-	var breakingProgress = 0
-	var breakingTick = 0
-	var tickTime = 0f
+	private var breakingProgress = 0
+	private var breakingTick = 0
+	private var tickTime = 0f
 
 	var id: Int? = null
 
-	fun tick(level: ServerLevel, pos: BlockPos, state: BlockState) {
+	override fun serverTick(level: ServerLevel, pos: BlockPos, state: BlockState) {
 		if (id == null) id = ItemEntity(level, 0.0, 0.0, 0.0, ItemStack(this.blockState.block)).let {
 			it.discard()
 			it.id

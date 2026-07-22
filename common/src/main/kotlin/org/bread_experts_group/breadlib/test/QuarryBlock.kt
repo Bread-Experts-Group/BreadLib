@@ -13,9 +13,8 @@ private val blockProperties = BlockProperties
 	.prop(HorizontalDirectionalBlock.FACING, Direction.NORTH) { it.horizontalDirection.opposite }
 
 class QuarryBlock : BreadLibBlockWithEntity<QuarryBlockEntity>(
-	::QuarryBlockEntity,
-	Properties.ofFullCopy(Blocks.IRON_BLOCK),
-	serverTick = QuarryBlockEntity::tick
+	QuarryBlockEntity::class.java,
+	Properties.ofFullCopy(Blocks.IRON_BLOCK)
 ) {
 	override fun breadLibProperties(): BlockProperties = blockProperties
 

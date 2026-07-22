@@ -11,40 +11,38 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.ticks.TickPriority
 
-private typealias BlockEntityTickL<BE, T> = BE.(level: T, pos: BlockPos, state: BlockState) -> Unit
-
 abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
-	private val blockEntity: (pos: BlockPos, state: BlockState) -> BE,
+	blockEntity: Class<BE>,
 	blockProperties: Properties,
-	protected val commonTick: BlockEntityTickL<BE, Level>? = null,
-	protected val serverTick: BlockEntityTickL<BE, ServerLevel>? = null,
-	protected val clientTick: BlockEntityTickL<BE, ClientLevel>? = null,
 	scheduleTick: Int? = null,
 	scheduleTickPriority: TickPriority = TickPriority.NORMAL
 ) : BreadLibBlock(blockProperties, scheduleTick, scheduleTickPriority), EntityBlock {
-	override fun newBlockEntity(p0: BlockPos, p1: BlockState): BlockEntity = blockEntity(p0, p1)
+	private val beConstructor = blockEntity.getConstructor(BlockPos::class.java, BlockState::class.java)
+	private val commonTick = Tickable.Common::class.java.isAssignableFrom(blockEntity)
 
-	private val tickerServer = if (serverTick != null)
-		if (commonTick != null) BlockEntityTicker<BE> { level, pos, state, entity ->
-			serverTick(entity, level as ServerLevel, pos, state)
-			commonTick(entity, level, pos, state)
+	override fun newBlockEntity(p0: BlockPos, p1: BlockState): BlockEntity = beConstructor.newInstance(p0, p1)
+
+	private val tickerServer = if (Tickable.Server::class.java.isAssignableFrom(blockEntity))
+		if (commonTick) BlockEntityTicker<BE> { level, pos, state, entity ->
+			(entity as Tickable.Server).serverTick(level as ServerLevel, pos, state)
+			(entity as Tickable.Common).tick(level, pos, state)
 		} else BlockEntityTicker<BE> { level, pos, state, entity ->
-			serverTick(entity, level as ServerLevel, pos, state)
+			(entity as Tickable.Server).serverTick(level as ServerLevel, pos, state)
 		}
 	else null
 
-	private val tickerClient = if (clientTick != null)
-		if (commonTick != null) BlockEntityTicker<BE> { level, pos, state, entity ->
-			clientTick(entity, level as ClientLevel, pos, state)
-			commonTick(entity, level, pos, state)
+	private val tickerClient = if (Tickable.Client::class.java.isAssignableFrom(blockEntity))
+		if (commonTick) BlockEntityTicker<BE> { level, pos, state, entity ->
+			(entity as Tickable.Client).clientTick(level as ClientLevel, pos, state)
+			(entity as Tickable.Common).tick(level, pos, state)
 		} else BlockEntityTicker<BE> { level, pos, state, entity ->
-			clientTick(entity, level as ClientLevel, pos, state)
+			(entity as Tickable.Client).clientTick(level as ClientLevel, pos, state)
 		}
 	else null
 
-	private val tickerCommon = if (commonTick != null)
+	private val tickerCommon = if (commonTick)
 		BlockEntityTicker<BE> { level, pos, state, entity ->
-			commonTick(entity, level, pos, state)
+			(entity as Tickable.Common).tick(level, pos, state)
 		}
 	else null
 
