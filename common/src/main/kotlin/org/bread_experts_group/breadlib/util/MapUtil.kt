@@ -87,7 +87,7 @@ fun <K, V1, V2> Map<K, Pair<V1, V2>>.toMapKV1(): Map<K, V1> = object : Map<K, V1
 
 	override fun isEmpty(): Boolean = this@toMapKV1.isEmpty()
 	override fun containsKey(key: K): Boolean = this@toMapKV1.containsKey(key)
-	override fun containsValue(value: V1): Boolean = this@toMapKV1.any { it.value.first == value }
+	override fun containsValue(value: V1): Boolean = this@toMapKV1.any { (_, value1) -> value1.first == value }
 	override fun get(key: K): V1? = this@toMapKV1[key]?.first
 }
 
@@ -130,6 +130,6 @@ fun <K, V1, V2> Map<K, Pair<V1, V2>>.toMapKV2(): Map<K, V2> = object : Map<K, V2
 
 	override fun isEmpty(): Boolean = this@toMapKV2.isEmpty()
 	override fun containsKey(key: K): Boolean = this@toMapKV2.containsKey(key)
-	override fun containsValue(value: V2): Boolean = this@toMapKV2.any { it.value.second == value }
+	override fun containsValue(value: V2): Boolean = this@toMapKV2.any { (_, value1) -> value1.second == value }
 	override fun get(key: K): V2? = this@toMapKV2[key]?.second
 }

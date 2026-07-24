@@ -37,13 +37,13 @@ object ConfigJSONBackend : ConfigBackend {
 						't' -> '\t'
 						else -> char
 					} else {
-						val hexDig = (sel as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition
+						val (_, selected) = (sel as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition
 						var hexStr = ""
-						hexDig.selected.forEach { hexAlt ->
+						selected.forEach { hexAlt ->
 							hexStr += if (hexAlt is ABNFResolved.ABNFCharacter) Char(hexAlt.character.toInt())
 							else {
-								val char = hexAlt as ABNFResolved.ABNFCharacter
-								Char(char.character.toInt())
+								val (_, character) = hexAlt as ABNFResolved.ABNFCharacter
+								Char(character.toInt())
 							}
 						}
 						str += Char(hexStr.toInt(16))
@@ -59,25 +59,25 @@ object ConfigJSONBackend : ConfigBackend {
 				val members = mutableListOf<ABNFResolved.ABNFString>()
 				val initial = ((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected
 				if (initial.isNotEmpty()) {
-					val initialMember = initial[0] as ABNFResolved.ABNFString
-					members.add(initialMember.concatenated[0] as ABNFResolved.ABNFString)
-					for (resolved in (initialMember.concatenated[1] as ABNFResolved.ABNFRepetition).selected) {
+					val (_, concatenated) = initial[0] as ABNFResolved.ABNFString
+					members.add(concatenated[0] as ABNFResolved.ABNFString)
+					for (resolved in (concatenated[1] as ABNFResolved.ABNFRepetition).selected) {
 						members.add((resolved as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFString)
 					}
 				}
-				members.map {
-					decodeStr(it.concatenated[0] as ABNFResolved.ABNFString) to
-							decodeJson(it.concatenated[2])
-				}.filterNot { it.second == null }.toMap()
+				members.map { (_, concatenated) ->
+					decodeStr(concatenated[0] as ABNFResolved.ABNFString) to
+							decodeJson(concatenated[2])
+				}.filterNot { (_, second) -> second == null }.toMap()
 			}
 
 			array -> {
 				val members = mutableListOf<ABNFResolved>()
 				val initial = ((a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFRepetition).selected
 				if (initial.isNotEmpty()) {
-					val initialMember = initial[0] as ABNFResolved.ABNFString
-					members.add(initialMember.concatenated[0])
-					for (resolved in (initialMember.concatenated[1] as ABNFResolved.ABNFRepetition).selected) {
+					val (_, concatenated) = initial[0] as ABNFResolved.ABNFString
+					members.add(concatenated[0])
+					for (resolved in (concatenated[1] as ABNFResolved.ABNFRepetition).selected) {
 						members.add((resolved as ABNFResolved.ABNFString).concatenated[1])
 					}
 				}
@@ -129,7 +129,15 @@ object ConfigJSONBackend : ConfigBackend {
 		}
 
 		@Suppress("UNCHECKED_CAST")
-		return decodeJson(ABNFReader(path.readText(Charsets.UTF_8).ifEmpty { "{}" }).also { it.tasks.add(ABNFTask(`JSON-text`, 0, 0)) }.resolve().first) as Map<String, Any>
+		return decodeJson(ABNFReader(path.readText(Charsets.UTF_8).ifEmpty { "{}" }).also {
+			it.tasks.add(
+				ABNFTask(
+					`JSON-text`,
+					0,
+					0
+				)
+			)
+		}.resolve().first) as Map<String, Any>
 	}
 
 	override fun encode(path: Path, config: Map<String, Any?>) = Files.newBufferedWriter(path, Charsets.UTF_8).use {

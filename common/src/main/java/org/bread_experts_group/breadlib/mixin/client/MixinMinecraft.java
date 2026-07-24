@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
 
-	@Inject(at = @At("TAIL"), method = "<init>")
+	@Inject(at = @At("TAIL"), method = "<init>", remap = false)
 	private void init(CallbackInfo info) {
 		BreadLib.LOGGER.info("This line is printed by the BreadLib common mixin!");
 		BreadLib.LOGGER.info("MC Version: {}", Minecraft.getInstance().getVersionType());

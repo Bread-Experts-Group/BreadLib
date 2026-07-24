@@ -11,7 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(TitleScreen.class)
 public class MixinTitleScreen {
 
-	@Inject(at = @At("HEAD"), method = "init()V")
+	@Inject(
+			method = "<init>(Z)V",
+			at = @At("TAIL"),
+			remap = false
+	)
 	private void init(CallbackInfo info) {
 		BreadLib.LOGGER.info("This line is printed by the BreadLib mixin from Forge!");
 		BreadLib.LOGGER.info("MC Version: {}", Minecraft.getInstance().getVersionType());

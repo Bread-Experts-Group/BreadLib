@@ -16,7 +16,8 @@ class ConfigFile(private val path: Path, private val backend: ConfigBackend) {
 				while (true) {
 					val watchKey = watcher.take()
 					for (event in watchKey.pollEvents()) when (event.kind()) {
-						StandardWatchEventKinds.ENTRY_MODIFY if ((event.context() as Path).name == path.name) -> currentState = backend.decode(path).toMutableMap()
+						StandardWatchEventKinds.ENTRY_MODIFY if ((event.context() as Path).name == path.name) -> currentState =
+							backend.decode(path).toMutableMap()
 					}
 					if (!watchKey.reset()) {
 						watcher.close()
@@ -30,10 +31,10 @@ class ConfigFile(private val path: Path, private val backend: ConfigBackend) {
 
 	@Suppress("UNCHECKED_CAST")
 	fun <T> getOrNull(key: ConfigValue<T>): T? = currentState.getOrElse(key.name) {
-		key.defaultValue?.get()
+		key.defaultValue.get()
 	} as? T
 
-	operator fun <T> get(key: ConfigValue<T>): T = getOrNull(key)!!
+	operator fun <T> get(key: ConfigValue<T>): T = getOrNull(key) ?: return null
 
 	operator fun <T> set(key: ConfigValue<T>, value: T?) {
 		val previous = if (value == null) this.currentState.remove(key.name)

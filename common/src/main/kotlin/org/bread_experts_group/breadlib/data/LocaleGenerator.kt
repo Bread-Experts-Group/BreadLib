@@ -32,20 +32,18 @@ class LocaleGenerator(override val modID: String, private val locale: Locale) : 
 	)
 
 	fun addBLItems(vararg translations: Pair<RegistryItem<*>, String>) {
-		this.addItems(*translations.map { it.first.get() to it.second }.toTypedArray())
+		this.addItems(*translations.map { (first, second) -> first.get() to second }.toTypedArray())
 	}
 
 	fun addBLBlocks(vararg translations: Pair<RegistryBlock<*>, String>) {
-		this.addBlocks(*translations.map { it.first.get() to it.second }.toTypedArray())
+		this.addBlocks(*translations.map { (first, second) -> first.get() to second }.toTypedArray())
 	}
 
 	override fun getName(): String = "BreadLib LocaleGenerator ($modID, ${locale.country}, ${locale.language})"
 
 	override fun run(p0: CachedOutput): CompletableFuture<*> {
 		if (this.translations.isEmpty()) return CompletableFuture.completedFuture(null)
-		if (locale.language.isEmpty() || locale.country.isEmpty()) throw IllegalArgumentException(
-			"Please use a Locale with a country and language set."
-		)
+		require(!(locale.language.isEmpty() || locale.country.isEmpty())) { "Please use a Locale with a country and language set." }
 		return DataProvider.saveStable(
 			p0,
 			JsonObject().also {

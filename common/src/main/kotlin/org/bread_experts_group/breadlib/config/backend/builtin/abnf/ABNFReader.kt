@@ -8,8 +8,8 @@ class ABNFReader(
 	val retries: ArrayDeque<Triple<Int, ArrayDeque<ABNFTask>, ArrayDeque<ABNFResolved>>> = ArrayDeque(),
 ) {
 	fun resolve(): Pair<ABNFResolved, Int> {
-		iter@while (true) {
-			task@while (tasks.isNotEmpty()) {
+		iter@ while (true) {
+			task@ while (tasks.isNotEmpty()) {
 				val task = tasks.last()
 				when (val rule = task.rule) {
 					is ABNFRule.ABNFString -> {
@@ -27,7 +27,12 @@ class ABNFReader(
 							continue@task
 						}
 						tasks.removeLast()
-						results.add(ABNFResolved.ABNFString(rule, List(task.position) { results.removeLast() }.reversed()))
+						results.add(
+							ABNFResolved.ABNFString(
+								rule,
+								List(task.position) { results.removeLast() }.reversed()
+							)
+						)
 					}
 
 					is ABNFRule.ABNFAlternate -> {
@@ -36,7 +41,15 @@ class ABNFReader(
 							retries.add(
 								Triple(
 									offset,
-									ArrayDeque<ABNFTask>().also { it.addAll(tasks.map { ABNFTask(it.rule, it.position, it.savedOffset) }); it.add(ABNFTask(r, 0, offset)) },
+									ArrayDeque<ABNFTask>().also {
+										it.addAll(tasks.map { it, it, it ->
+											ABNFTask(
+												it.rule,
+												it.position,
+												it.savedOffset
+											)
+										}); it.add(ABNFTask(r, 0, offset))
+									},
 									ArrayDeque<ABNFResolved>().also { it.addAll(results) }
 								)
 							)
@@ -55,7 +68,12 @@ class ABNFReader(
 								tasks.removeLast()
 								results.removeLast()
 								if (hitsLow) {
-									results.add(ABNFResolved.ABNFRepetition(rule, List(task.position - 1) { results.removeLast() }.reversed()))
+									results.add(
+										ABNFResolved.ABNFRepetition(
+											rule,
+											List(task.position - 1) { results.removeLast() }.reversed()
+										)
+									)
 								} else {
 									repeat(task.position - 1) { results.removeLast() }
 									results.add(ABNFResolved.ABNFNone)
@@ -64,7 +82,12 @@ class ABNFReader(
 							}
 							if (rule.high != null && task.position.toUInt() == rule.high) {
 								tasks.removeLast()
-								results.add(ABNFResolved.ABNFRepetition(rule, List(task.position) { results.removeLast() }.reversed()))
+								results.add(
+									ABNFResolved.ABNFRepetition(
+										rule,
+										List(task.position) { results.removeLast() }.reversed()
+									)
+								)
 								continue@task
 							}
 							if (hitsLow) task.savedOffset = offset

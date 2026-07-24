@@ -103,8 +103,10 @@ object ABNFToml {
 		name = "table"
 	)
 
-	val expKv = ABNFString(ws, keyval, ws, ABNFRepetition(high = 1u, rule = comment, name = "_com_opt"), name = "_exp_kv")
-	val expTb = ABNFString(ws, table, ws, ABNFRepetition(high = 1u, rule = comment, name = "_com_opt"), name = "_exp_tb")
+	val expKv =
+		ABNFString(ws, keyval, ws, ABNFRepetition(high = 1u, rule = comment, name = "_com_opt"), name = "_exp_kv")
+	val expTb =
+		ABNFString(ws, table, ws, ABNFRepetition(high = 1u, rule = comment, name = "_com_opt"), name = "_exp_tb")
 	val expEm = ABNFString(ws, ABNFRepetition(high = 1u, rule = comment, name = "_com_opt"), name = "_exp_em")
 	val expression = ABNFAlternate(
 		expKv,
@@ -178,7 +180,13 @@ object ABNFToml {
 
 	val `ml-basic-body` = ABNFString(
 		ABNFRepetition(rule = `mlb-content`, name = "_mlb_content_rep"),
-		ABNFRepetition(rule = ABNFString(`mlb-quotes`, ABNFRepetition(1u, rule = `mlb-content`), name = "_mlb_quotes_then_content")),
+		ABNFRepetition(
+			rule = ABNFString(
+				`mlb-quotes`,
+				ABNFRepetition(1u, rule = `mlb-content`),
+				name = "_mlb_quotes_then_content"
+			)
+		),
 		ABNFRepetition(high = 1u, rule = `mlb-quotes`, name = "_mlb_quotes_rep"),
 		name = "ml-basic-body"
 	)
@@ -357,7 +365,10 @@ object ABNFToml {
 
 	val `unsigned-dec-int` = ABNFAlternate(
 		DIGIT,
-		ABNFString(`digit1-9`, ABNFRepetition(1u, rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT, name = "_dec_continuation")))),
+		ABNFString(
+			`digit1-9`,
+			ABNFRepetition(1u, rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT, name = "_dec_continuation")))
+		),
 		name = "unsigned-dec-int"
 	)
 
@@ -384,7 +395,10 @@ object ABNFToml {
 	val `float-int-part` = `dec-int`
 	val `zero-prefixable-int` = ABNFString(
 		DIGIT,
-		ABNFRepetition(rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT, name = "_int_continuation")), name = "_digit_rep"),
+		ABNFRepetition(
+			rule = ABNFAlternate(DIGIT, ABNFString(underscore, DIGIT, name = "_int_continuation")),
+			name = "_digit_rep"
+		),
 		name = "zero-prefixable-int"
 	)
 
@@ -427,14 +441,25 @@ object ABNFToml {
 		name = "special-float"
 	)
 
-	val _float = ABNFString(`float-int-part`, ABNFAlternate(exp, ABNFString(frac, ABNFRepetition(high = 1u, rule = exp, name = "_exp_opt"), name = "_float_frac")), name = "_float")
+	val _float = ABNFString(
+		`float-int-part`,
+		ABNFAlternate(
+			exp,
+			ABNFString(frac, ABNFRepetition(high = 1u, rule = exp, name = "_exp_opt"), name = "_float_frac")
+		),
+		name = "_float"
+	)
 	val float = ABNFAlternate(
 		_float,
 		`special-float`,
 		name = "float"
 	)
 
-	val toml = ABNFString(expression, ABNFRepetition(rule = ABNFString(newline, expression, name = "_nl_expression"), name = "_nl_exp_rep"), name = "toml").also {
+	val toml = ABNFString(
+		expression,
+		ABNFRepetition(rule = ABNFString(newline, expression, name = "_nl_expression"), name = "_nl_exp_rep"),
+		name = "toml"
+	).also {
 		`val`.rule = ABNFAlternate(string, boolean, `date-time`, integer, float, name = "val")
 		`basic-string`.rule = ABNFString(
 			`quotation-mark`,

@@ -19,7 +19,7 @@ public abstract class MixinLightningBolt extends Entity {
 		super(entityType, level);
 	}
 
-	@Inject(method = "powerLightningRod", at = @At("TAIL"))
+	@Inject(method = "powerLightningRod", at = @At("TAIL"), remap = false)
 	private void breadlib$strikeLightningBlock(CallbackInfo ci, @Local BlockState blockState, @Local BlockPos blockPos) {
 		if (blockState.getBlock() instanceof ILightningStrikeAction lightningBlock) {
 			lightningBlock.onLightningStruck(this.level(), blockPos, blockState);

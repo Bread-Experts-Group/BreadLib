@@ -14,13 +14,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Gui.class)
 abstract class MixinGui {
-	@Shadow @Final private LayeredDraw layers;
+	@Shadow
+	@Final
+	private LayeredDraw layers;
 
-	@Shadow private int lastHealth;
+	@Shadow
+	private int lastHealth;
 
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void breadlib$addGuiLayers(Minecraft minecraft, CallbackInfo ci) {
-		TaskManager.runTasks(new LayeredDrawTask()).getLayers().forEach(((resourceLocation, layer) ->
+		TaskManager.runTasks(new LayeredDrawTask()).layers.forEach(((resourceLocation, layer) ->
 				this.layers.add(layer)
 		));
 	}

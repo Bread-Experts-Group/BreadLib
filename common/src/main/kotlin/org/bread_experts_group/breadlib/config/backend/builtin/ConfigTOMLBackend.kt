@@ -76,6 +76,7 @@ object ConfigTOMLBackend : ConfigBackend {
 					}
 					str
 				}
+
 				else -> throw IllegalStateException("${rule?.name} - $rule - $a")
 			}
 		}
@@ -95,20 +96,24 @@ object ConfigTOMLBackend : ConfigBackend {
 		}
 
 		fun decodeUInt(a: ABNFResolved): String {
-			val negative = ((a as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let {
-				(it as ABNFResolved.ABNFCharacter).character == '-'.code.toUInt()
-			} ?: false
+			val negative =
+				((a as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()
+					?.let {
+						(it as ABNFResolved.ABNFCharacter).character == '-'.code.toUInt()
+					} ?: false
 			val n = when (val c = a.concatenated[1]) {
 				is ABNFResolved.ABNFCharacter -> Char(c.character.toInt()).toString()
 				is ABNFResolved.ABNFString -> {
 					var str = ""
 					str += Char((c.concatenated[0] as ABNFResolved.ABNFCharacter).character.toInt())
 					(c.concatenated[1] as ABNFResolved.ABNFRepetition).selected.forEach {
-						val c = it as? ABNFResolved.ABNFCharacter ?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
-						str += Char(c.character.toInt())
+						val (_, character) = it as? ABNFResolved.ABNFCharacter
+							?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
+						str += Char(character.toInt())
 					}
 					str
 				}
+
 				else -> throw IllegalStateException()
 			}
 			return "${if (negative) "-" else ""}$n"
@@ -125,8 +130,9 @@ object ConfigTOMLBackend : ConfigBackend {
 				var str = ""
 				str += Char((a.concatenated[1] as ABNFResolved.ABNFCharacter).character.toInt())
 				(a.concatenated[2] as ABNFResolved.ABNFRepetition).selected.forEach {
-					val c = it as? ABNFResolved.ABNFCharacter ?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
-					str += Char(c.character.toInt())
+					val (_, character) = it as? ABNFResolved.ABNFCharacter
+						?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
+					str += Char(character.toInt())
 				}
 				BigInteger(str, 16).toBigDecimal()
 			}
@@ -136,8 +142,9 @@ object ConfigTOMLBackend : ConfigBackend {
 				var str = ""
 				str += Char((a.concatenated[1] as ABNFResolved.ABNFCharacter).character.toInt())
 				(a.concatenated[2] as ABNFResolved.ABNFRepetition).selected.forEach {
-					val c = it as? ABNFResolved.ABNFCharacter ?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
-					str += Char(c.character.toInt())
+					val (_, character) = it as? ABNFResolved.ABNFCharacter
+						?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
+					str += Char(character.toInt())
 				}
 				BigInteger(str, 8).toBigDecimal()
 			}
@@ -147,8 +154,9 @@ object ConfigTOMLBackend : ConfigBackend {
 				var str = ""
 				str += Char((a.concatenated[1] as ABNFResolved.ABNFCharacter).character.toInt())
 				(a.concatenated[2] as ABNFResolved.ABNFRepetition).selected.forEach {
-					val c = it as? ABNFResolved.ABNFCharacter ?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
-					str += Char(c.character.toInt())
+					val (_, character) = it as? ABNFResolved.ABNFCharacter
+						?: (it as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter
+					str += Char(character.toInt())
 				}
 				BigInteger(str, 2).toBigDecimal()
 			}
@@ -160,27 +168,29 @@ object ConfigTOMLBackend : ConfigBackend {
 					var str = Char((a.concatenated[0] as ABNFResolved.ABNFCharacter).character.toInt()).toString()
 					((a.concatenated[1]) as ABNFResolved.ABNFRepetition).selected.forEach { zpiD ->
 						str += Char(
-							((zpiD as? ABNFResolved.ABNFCharacter) ?:
-							((zpiD as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter)).character.toInt()
+							((zpiD as? ABNFResolved.ABNFCharacter)
+								?: ((zpiD as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFCharacter)).character.toInt()
 						)
 					}
 					return str
 				}
 
 				fun readExp(a: ABNFResolved): String {
-					val exp = (a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFString
-					val str = "e" + ((exp.concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let {
+					val (_, concatenated) = (a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFString
+					val str = "e" + ((concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let {
 						if (it.rule == ABNFToml.minus) "-" else ""
 					} ?: "")
-					return str + readZPI(exp.concatenated[1])
+					return str + readZPI(concatenated[1])
 				}
 
 				val intPart = decodeUInt((a as ABNFResolved.ABNFString).concatenated[0])
 				val frac = a.concatenated[1].let {
 					if (it.rule == exp) readExp(it)
 					else {
-						val zpi = ((it as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFString).concatenated[1]
-						val exp = (it.concatenated[1] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let { e -> readExp(e) } ?: ""
+						val zpi =
+							((it as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFString).concatenated[1]
+						val exp = (it.concatenated[1] as ABNFResolved.ABNFRepetition).selected.firstOrNull()
+							?.let { e -> readExp(e) } ?: ""
 						".${readZPI(zpi)}${exp}"
 					}
 				}
@@ -188,9 +198,11 @@ object ConfigTOMLBackend : ConfigBackend {
 			}
 
 			`special-float` -> {
-				val negative = ((a as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()?.let {
-					(it as ABNFResolved.ABNFCharacter).character == '-'.code.toUInt()
-				} ?: false
+				val negative =
+					((a as ABNFResolved.ABNFString).concatenated[0] as ABNFResolved.ABNFRepetition).selected.firstOrNull()
+						?.let {
+							(it as ABNFResolved.ABNFCharacter).character == '-'.code.toUInt()
+						} ?: false
 				when (a.concatenated[1].rule) {
 					inf -> if (negative) Double.NEGATIVE_INFINITY else Double.POSITIVE_INFINITY
 					nan -> if (negative) java.lang.Double.longBitsToDouble((0xfff8000000000000u).toLong()) else
@@ -216,7 +228,7 @@ object ConfigTOMLBackend : ConfigBackend {
 					var element = this
 					for (i in 0..<kv.first.lastIndex) {
 						val localElement = element.getOrPut(kv.first[i]) { mutableMapOf<String, Any>() }
-						if (localElement !is Map<*, *>) throw IllegalArgumentException("${kv.first} cannot exist: at element $i, was defined as $localElement")
+						require(localElement is Map<*, *>) { "${kv.first} cannot exist: at element $i, was defined as $localElement" }
 						element = localElement as MutableMap<String, Any>
 					}
 					element[kv.first.last()] = kv.second
@@ -224,9 +236,9 @@ object ConfigTOMLBackend : ConfigBackend {
 			}
 
 			expKv -> {
-				val keyval = (a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFString
-				val key = decodeKey(keyval.concatenated[0])
-				val value = decodeVal(keyval.concatenated[2])
+				val (_, concatenated) = (a as ABNFResolved.ABNFString).concatenated[1] as ABNFResolved.ABNFString
+				val key = decodeKey(concatenated[0])
+				val value = decodeVal(concatenated[2])
 				key to value
 			}
 
@@ -235,13 +247,14 @@ object ConfigTOMLBackend : ConfigBackend {
 		}
 
 		@Suppress("UNCHECKED_CAST")
-		return decodeToml(ABNFReader(path.readText(Charsets.UTF_8)).also { it.tasks.add(ABNFTask(toml, 0, 0)) }.resolve().first) as Map<String, Any>
+		return decodeToml(ABNFReader(path.readText(Charsets.UTF_8)).also { it.tasks.add(ABNFTask(toml, 0, 0)) }
+			.resolve().first) as Map<String, Any>
 	}
 
 	override fun encode(path: Path, config: Map<String, Any?>) {
 		var toWrite = ""
 		fun write(map: Map<String, Any?>) {
-			next@for ((name, value) in map.entries.sortedBy { it.value is Map<*, *> }) {
+			next@ for ((name, value) in map.entries.sortedBy { (_, value) -> value is Map<*, *> }) {
 				if (value == null) continue
 				@Suppress("UNCHECKED_CAST")
 				if (value is Map<*, *>) {
@@ -278,17 +291,17 @@ object ConfigTOMLBackend : ConfigBackend {
 				toWrite += (if (
 					name.isNotEmpty() && name.all {
 						it in 'A'..'Z' ||
-						it in 'a'..'z' ||
-						it in '0'..'9' ||
-						it == '_' || it == '-'
+								it in 'a'..'z' ||
+								it in '0'..'9' ||
+								it == '_' || it == '-'
 					}
 				) "$name = $valueStr" else if (
 					name.all {
 						it.code == 0x09 ||
-						it.code in 0x20..0x26 ||
-						it.code in 0x28..0x7E ||
-						it.code in 0x80..0xD7FF ||
-						it.code in 0xE000..0x10FFFF
+								it.code in 0x20..0x26 ||
+								it.code in 0x28..0x7E ||
+								it.code in 0x80..0xD7FF ||
+								it.code in 0xE000..0x10FFFF
 					}
 				) "'$name' = $valueStr"
 				else "\"$name\" = $valueStr") + '\n'

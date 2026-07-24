@@ -21,6 +21,7 @@ val ALPHA = ABNFRule.ABNFAlternate(
 
 sealed class ABNFRule {
 	abstract val name: String?
+
 	class ABNFString(vararg val concatenated: ABNFRule, override val name: String? = null) : ABNFRule()
 	class ABNFAlternate(vararg val alternates: ABNFRule, override val name: String? = null) : ABNFRule() {
 		companion object {
@@ -33,14 +34,20 @@ sealed class ABNFRule {
 		}
 	}
 
-	class ABNFRepetition(val low: UInt = 0u, val high: UInt? = null, val rule: ABNFRule, override val name: String? = null) : ABNFRule()
+	class ABNFRepetition(
+		val low: UInt = 0u,
+		val high: UInt? = null,
+		val rule: ABNFRule,
+		override val name: String? = null
+	) : ABNFRule()
 
 	class ABNFCharacter(val character: UInt, override val name: String? = null) : ABNFRule() {
 		override fun toString(): String = "ABNFCharacter '${Char(character.toInt())}'"
 	}
 
 	class ABNFCharacterRange(val characters: UIntRange, override val name: String? = null) : ABNFRule() {
-		override fun toString(): String = "ABNFCharacterRange '${Char(characters.first.toInt())}'..'${Char(characters.last.toInt())}'"
+		override fun toString(): String =
+			"ABNFCharacterRange '${Char(characters.first.toInt())}'..'${Char(characters.last.toInt())}'"
 	}
 
 	class ABNFReference(var rule: ABNFRule? = null) : ABNFRule() {

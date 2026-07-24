@@ -82,7 +82,7 @@ class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BlockEntity(
 				}
 				drillPos = minePos
 
-				val tool = drillItem.get(DataComponents.TOOL)!!
+				val tool = drillItem.get(DataComponents.TOOL) ?: return
 				val speedMultiplier = tool.getMiningSpeed(currentState)
 				var damage = speedMultiplier / currentState.getDestroySpeed(level, minePos)
 				correctTool = (!currentState.requiresCorrectToolForDrops()) || tool.isCorrectForDrops(currentState)
@@ -91,7 +91,7 @@ class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BlockEntity(
 				break
 			} while (true)
 		}
-		val drillPos = drillPos!!
+		val drillPos = drillPos ?: return
 		if (tickTime > 0f) {
 			// TODO: when home: add chunk specific data if possible?
 			// TODO: if not feasible: look at level datastorage
@@ -104,7 +104,7 @@ class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BlockEntity(
 			val newProgress = ((breakingTick / tickTime) * 10).roundToInt()
 			if (newProgress != 10) {
 				if (newProgress != breakingProgress) {
-					level.destroyBlockProgress(id!!, drillPos, newProgress)
+					level.destroyBlockProgress(id ?: return, drillPos, newProgress)
 					breakingProgress = newProgress
 				}
 				return

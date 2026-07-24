@@ -21,9 +21,7 @@ import kotlin.io.path.createDirectories
 class PlaceholderTextureGenerator(override val modID: String) : DataGenerator() {
 	private val checkerboards = mutableMapOf<ResourceLocation, String>()
 	fun checkerboard(location: ResourceLocation, category: String = "item") {
-		if (checkerboards.put(location, category) != null) throw IllegalArgumentException(
-			"$location already defined for texture generation ($category, checkerboard)"
-		)
+		require(checkerboards.put(location, category) == null) { "$location already defined for texture generation ($category, checkerboard)" }
 	}
 
 	fun checkerboard(item: Item): Unit = checkerboard(item.location)
@@ -56,7 +54,7 @@ class PlaceholderTextureGenerator(override val modID: String) : DataGenerator() 
 
 					var i = 0
 					for (x in 0..<8 step 4) {
-						for (y in 0 ..<8 step 4) {
+						for (y in 0..<8 step 4) {
 							color = createColor((location.namespace.hashCode() ushr (i++ * 8)) and 0xFF)
 							fillRect(x, y, 4, 4)
 						}
@@ -64,7 +62,7 @@ class PlaceholderTextureGenerator(override val modID: String) : DataGenerator() 
 
 					i = 0
 					for (x in 8..<16 step 4) {
-						for (y in 8 ..<16 step 4) {
+						for (y in 8..<16 step 4) {
 							color = createColor((location.path.hashCode() ushr (i++ * 8)) and 0xFF)
 							fillRect(x, y, 4, 4)
 						}

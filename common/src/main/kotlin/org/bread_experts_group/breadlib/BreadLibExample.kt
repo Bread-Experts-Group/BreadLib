@@ -13,6 +13,7 @@ import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.BreadLibTasks
+import org.bread_experts_group.breadlib.task.TaskManager.newTask
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask
 import org.bread_experts_group.breadlib.test.BlockEntityTypeTest
 import org.bread_experts_group.breadlib.test.BlocksTest
@@ -21,7 +22,6 @@ import org.bread_experts_group.breadlib.test.ItemsTest
 import org.bread_experts_group.breadlib.test.client.TasksClientTest
 import org.bread_experts_group.breadlib.test.server.TasksServerTest
 import org.bread_experts_group.breadlib.util.info
-import org.bread_experts_group.breadlib.util.newTask
 import java.math.BigDecimal
 import java.util.*
 
@@ -89,7 +89,7 @@ fun kExample() {
 		BlockEntityTypeTest.BLOCK_ENTITY_TYPE_REGISTRY
 	)
 
-	if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {
+	if (PlatformServices.PLATFORM.getSide() == ApplicationSide.CLIENT) {
 		TasksClientTest.renderTest()
 		TasksClientTest.layeredDrawTest()
 		TasksClientTest.networkTest()
@@ -100,7 +100,7 @@ fun kExample() {
 		TasksServerTest.networkTest()
 	}
 
-	newTask<GenerateDataTask> { task ->
+	newTask { task: GenerateDataTask ->
 		task.addGenerator(kGetLocaleGenerator())
 		task.addGenerator(kGetModelGenerator())
 		task.addGenerator(kGetPlaceholderTextureGenerator())
@@ -109,7 +109,8 @@ fun kExample() {
 	if (PlatformServices.PLATFORM.isModLoaded("breadlib")) info("breadlib appears loaded on the platform")
 
 	val config = ConfigManager(BreadLib.MOD_ID)["config-test", "json"]
-	val testValue = ConfigValue.builder<BigDecimal>().name("test").comment("Test comment").build()
+	val testValue =
+		ConfigValue.builder<BigDecimal>().name("test").defaultValue { BigDecimal.ONE }.comment("Test comment").build()
 	info(config.getOrNull(testValue))
 	config[testValue] = (config.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
 	info(config[testValue])
