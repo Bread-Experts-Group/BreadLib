@@ -10,15 +10,26 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.ticks.TickPriority
+import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlockEntityTypes
+import java.lang.reflect.Constructor
 
 abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
 	internal val blockEntity: Class<BE>,
 	blockProperties: Properties,
 	scheduleTick: Int? = null,
-	scheduleTickPriority: TickPriority = TickPriority.NORMAL
+	scheduleTickPriority: TickPriority = TickPriority.NORMAL,
+	modID: String
 ) : BreadLibBlock(blockProperties, scheduleTick, scheduleTickPriority), EntityBlock {
 	private val beConstructor = blockEntity.getConstructor(BlockPos::class.java, BlockState::class.java)
 	private val commonTick = Tickable.Common::class.java.isAssignableFrom(blockEntity)
+
+	init {
+		val bet = getBlockEntityTypes(modID)
+		if (bet.getType(blockEntity) == null) bet.register<BlockEntityType<*>>("test_${System.currentTimeMillis()}") {
+			@Suppress("UNCHECKED_CAST")
+			create(blockEntity as Class<BlockEntity>, (beConstructor as Constructor<BlockEntity>)::newInstance)
+		}
+	}
 
 	final override fun newBlockEntity(p0: BlockPos, p1: BlockState): BlockEntity = beConstructor.newInstance(p0, p1)
 

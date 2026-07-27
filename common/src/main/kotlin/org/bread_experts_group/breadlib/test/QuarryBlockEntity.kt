@@ -11,15 +11,16 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.HorizontalDirectionalBlock
-import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.saveddata.SavedData
+import org.bread_experts_group.breadlib.BreadLib
+import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
 import org.bread_experts_group.breadlib.extensions.block.Tickable
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
-class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BlockEntity(
-	BlockEntityTypeTest.QUARRY_TYPE.get(), pPos, pBlockState
+class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BreadLibBlockEntity(
+	pPos, pBlockState, BreadLib.MOD_ID
 ), Tickable.Server {
 	private val xMine = 10
 	private val zMine = 10

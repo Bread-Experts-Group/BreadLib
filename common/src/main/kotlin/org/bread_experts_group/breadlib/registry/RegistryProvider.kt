@@ -17,6 +17,7 @@ import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockWithEntity
 import org.bread_experts_group.breadlib.registry.objects.RegistryBlock
 import org.bread_experts_group.breadlib.registry.objects.RegistryItem
 import org.bread_experts_group.breadlib.registry.objects.RegistryObject
+import org.jetbrains.annotations.ApiStatus
 import java.util.function.Supplier
 
 typealias BlockEntityTypeRegistryObject<T> = RegistryObject<BlockEntityType<*>, BlockEntityType<T>>
@@ -57,9 +58,9 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		RegistryObject.create(this.modID, name, this.registry)
 
 	open fun <I : T> register(name: String, supplier: Supplier<T>): RegistryObject<T, I> {
-		this.frozen?.let {
-			throw IllegalStateException("Provider was already frozen: $it")
-		}
+//		this.frozen?.let {
+//			throw IllegalStateException("Provider was already frozen: $it")
+//		}
 		val regObject = this.createRegistryObject<I>(name)
 		check(this.entries.putIfAbsent(regObject, supplier) == null) {
 			"Duplicate registry entry: " + this.modID + ":" + name
@@ -85,6 +86,7 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 			}
 		}
 
+		private val types = mutableMapOf<Class<*>, BlockEntityType<*>>()
 		private val applicableBlocks: List<BreadLibBlockWithEntity<*>> by lazy {
 			getBlocks(modID)
 				.also { it.register() }
@@ -96,13 +98,16 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 			noinline factory: (pos: BlockPos, state: BlockState) -> T
 		): BlockEntityTypeBuilder<T> = create(T::class.java, factory)
 
+		@ApiStatus.Internal
 		fun <T : BlockEntity> create(
-			clazz: Class<T>,
+			returnClass: Class<T>,
 			factory: (pos: BlockPos, state: BlockState) -> T
 		): BlockEntityTypeBuilder<T> {
 			val validBlocks = mutableSetOf<Block>()
-			applicableBlocks.filterTo(validBlocks) { clazz == it.blockEntity }
-			return BlockEntityTypeBuilder(factory, validBlocks)
+			applicableBlocks.filterTo(validBlocks) { returnClass == it.blockEntity }
+			val builder = BlockEntityTypeBuilder(factory, validBlocks)
+			types[returnClass] = builder
+			return builder
 		}
 
 		fun <I : BlockEntityType<*>> register(
@@ -111,6 +116,8 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		): RegistryObject<BlockEntityType<*>, I> {
 			return super.register(name) { supplier() }
 		}
+
+		internal fun getType(clazz: Class<*>): BlockEntityType<*>? = this.types[clazz]
 	}
 
 	class Items(modID: String) : RegistryProvider<Item>(BuiltInRegistries.ITEM, modID) {

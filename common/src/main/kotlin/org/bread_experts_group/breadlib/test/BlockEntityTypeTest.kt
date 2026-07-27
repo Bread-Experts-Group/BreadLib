@@ -12,7 +12,7 @@ object BlockEntityTypeTest {
 			.withRenderer(::TestBlockEntityRenderer)
 	}
 
-	val QUARRY_TYPE: BlockEntityTypeRegistryObject<QuarryBlockEntity> = this.BLOCK_ENTITY_TYPE_REGISTRY.register("quarry_block_entity") {
-		create(::QuarryBlockEntity)
-	}
+//	val QUARRY_TYPE: BlockEntityTypeRegistryObject<QuarryBlockEntity> = this.BLOCK_ENTITY_TYPE_REGISTRY.register("quarry_block_entity") {
+//		create(::QuarryBlockEntity)
+//	}
 }

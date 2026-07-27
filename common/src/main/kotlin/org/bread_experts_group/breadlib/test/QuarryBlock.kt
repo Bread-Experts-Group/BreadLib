@@ -6,6 +6,7 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.HorizontalDirectionalBlock
 import net.minecraft.world.level.block.state.BlockState
+import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.extensions.block.BlockProperties
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockWithEntity
 
@@ -14,7 +15,8 @@ private val blockProperties = BlockProperties
 
 class QuarryBlock : BreadLibBlockWithEntity<QuarryBlockEntity>(
 	QuarryBlockEntity::class.java,
-	Properties.ofFullCopy(Blocks.IRON_BLOCK)
+	Properties.ofFullCopy(Blocks.IRON_BLOCK),
+	modID = BreadLib.MOD_ID
 ) {
 	override fun breadLibProperties(): BlockProperties = blockProperties
 
