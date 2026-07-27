@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.util.Supplier
 import org.bread_experts_group.breadlib.BreadLib
 import java.nio.file.Path
+import java.util.Optional
 
 val minecraft: Minecraft?
 	get() = Minecraft.getInstance()
@@ -56,3 +57,10 @@ val Item.location: ResourceLocation
 	get() = BuiltInRegistries.ITEM.getKey(this)
 val Block.location: ResourceLocation
 	get() = BuiltInRegistries.BLOCK.getKey(this)
+
+val Item.texture: ResourceLocation
+	get() = this.location.withPrefix("textures/item/").withSuffix(".png")
+val Block.texture: ResourceLocation
+	get() = this.location.withPrefix("textures/block/").withSuffix(".png")
+
+fun <T: Any> T.optional(): Optional<T> = Optional.of(this)

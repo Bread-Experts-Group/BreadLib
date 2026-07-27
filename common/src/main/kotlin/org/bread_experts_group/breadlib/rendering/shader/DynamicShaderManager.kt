@@ -11,8 +11,8 @@ import java.io.IOException
 import java.util.function.Consumer
 
 object DynamicShaderManager {
-	val dynamicTypes: MutableMap<String, RenderType> = hashMapOf()
-	private val dynamicShaders: MutableList<String> = arrayListOf()
+	@JvmField
+	val dynamicTypes: MutableMap<String, RenderType> = mutableMapOf()
 	private val manager: ShaderResourceManager = ShaderResourceManager()
 
 	private fun gameRenderer(): GameRenderer = Minecraft.getInstance().gameRenderer
@@ -23,7 +23,11 @@ object DynamicShaderManager {
 	@JvmStatic
 	fun getType(name: String): RenderType? {
 		val type = this.dynamicTypes[name]
-		this.tryEnsuringShaderExists(name, type)
+		if (!this.gameRenderer().shaders.contains(name)) {
+			// GL error leak fix
+			this.tryEnsuringShaderExists(name, type)
+			return null
+		}
 		return type
 	}
 
@@ -31,17 +35,16 @@ object DynamicShaderManager {
 
 	fun removeShader(name: String) {
 		this.gameRenderer().shaders.remove(name)
-		this.dynamicShaders.remove(name)
 	}
 
 	private fun putShader(name: String, format: VertexFormat, onLoaded: Consumer<ShaderInstance>) {
 		try {
 			val instance = ShaderInstance(this.manager, name, format)
 			this.gameRenderer().shaders[instance.name] = instance
-			this.dynamicShaders.add(instance.name)
 			onLoaded.accept(instance)
 		} catch (e: IOException) {
 			BreadLib.LOGGER.error(e)
+			e.printStackTrace()
 		}
 	}
 

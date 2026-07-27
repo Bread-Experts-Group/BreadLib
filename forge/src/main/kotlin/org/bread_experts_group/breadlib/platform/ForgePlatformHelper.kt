@@ -20,6 +20,16 @@ class ForgePlatformHelper : IPlatformHelper {
 
 	override fun isModLoaded(modId: String): Boolean = ModList.get().isLoaded(modId)
 
+	override fun getModInfo(modId: String): ModInfo {
+		val container = ModList.get().getModContainerById(modId).get()
+		val info = container.modInfo
+		val dependencies = info.dependencies.map { it.modId }
+		val path = info.owningFile.file.filePath
+		val version = info.owningFile.versionString()
+
+		return ModInfo(modId, info.description, version, dependencies, path)
+	}
+
 	override fun getEnvironmentKind(): EnvironmentKind =
 		if (FMLLoader.isProduction()) EnvironmentKind.RELEASE else EnvironmentKind.DEVELOPMENT
 

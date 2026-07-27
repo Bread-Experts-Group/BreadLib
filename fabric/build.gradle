@@ -22,6 +22,7 @@ loom {
     }
     mixin {
         defaultRefmapName.set("${mod_id}.refmap.json")
+        useLegacyMixinAp = true
     }
     runs {
         client {

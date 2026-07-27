@@ -23,14 +23,13 @@ public class MixinMouseHandler {
 			method = "onScroll",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z",
-					shift = At.Shift.BEFORE
+					target = "Lnet/minecraft/client/player/LocalPlayer;isSpectator()Z"
 			),
 			cancellable = true
 	)
 	private void breadlib$handleScrollTask(
 			long windowPointer, double xOffset, double yOffset, CallbackInfo ci,
-			@Local(name = "e") double e, @Local(name = "f") double f
+			@Local(name = "e", ordinal = 3) double e, @Local(name = "f", ordinal = 4) double f
 	) {
 		if (TaskManager.runTasks(new MouseTasks.Scroll(breadlib$getThis(), e, f)).isCanceled()) ci.cancel();
 	}
@@ -39,8 +38,7 @@ public class MixinMouseHandler {
 			method = "onPress",
 			at = @At(
 					value = "INVOKE",
-					target = "Lnet/minecraft/client/Minecraft;getOverlay()Lnet/minecraft/client/gui/screens/Overlay;",
-					shift = At.Shift.BEFORE
+					target = "Lnet/minecraft/client/Minecraft;getOverlay()Lnet/minecraft/client/gui/screens/Overlay;"
 			),
 			cancellable = true
 	)

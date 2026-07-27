@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher
 import net.minecraft.commands.CommandBuildContext
 import net.minecraft.commands.CommandSourceStack
 import org.bread_experts_group.breadlib.task.Task
-import java.util.function.BiFunction
 
 class ClientCommandTask(
 	private val dispatcher: CommandDispatcher<CommandSourceStack>,

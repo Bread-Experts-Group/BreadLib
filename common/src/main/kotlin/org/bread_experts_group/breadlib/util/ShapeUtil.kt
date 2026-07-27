@@ -9,7 +9,7 @@ import net.minecraft.world.phys.shapes.VoxelShape
 import org.bread_experts_group.breadlib.util.VecUtil.unaryMinus
 import java.util.stream.Stream
 
-object ShapeUtils {
+object ShapeUtil {
 	private val shapesOrigin = Vec3(0.5, 0.5, 0.5)
 
 	fun AABB.rotate(rotation: Rotation): AABB =

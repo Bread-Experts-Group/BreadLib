@@ -1,11 +1,8 @@
 package org.bread_experts_group.breadlib.platform
 
-import io.netty.buffer.ByteBuf
-import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
-import org.bread_experts_group.breadlib.network.payload.PayloadInfo
 import java.nio.file.Path
 
 interface IPlatformHelper {
@@ -36,6 +33,8 @@ interface IPlatformHelper {
 	 * @return True if the mod is loaded, false otherwise.
 	 */
 	fun isModLoaded(modId: String): Boolean
+
+	fun getModInfo(modId: String): ModInfo
 
 	/**
 	 * Gets the kind of environment this platform represents.

@@ -16,17 +16,6 @@ import java.util.function.Supplier
 
 @Mod(BreadLib.MOD_ID)
 class BreadLibForge(context: FMLJavaModLoadingContext) {
-	init {
-		val eventBus = context.modEventBus
-		eventBus.addListener { event: GatherDataEvent -> TaskManager.runTasks(ForgeGenerateDataTask(event)) }
-
-		BreadLib.LOGGER.info("Hello Forge world!")
-		init()
-		registerContent(eventBus)
-		registerEvents(eventBus)
-		ForgeNetworking.setup()
-	}
-
 	companion object {
 		fun <T> registerContent(provider: RegistryProvider<T>, event: RegisterEvent) {
 			event.register<T>(
@@ -51,5 +40,16 @@ class BreadLibForge(context: FMLJavaModLoadingContext) {
 				}
 			}
 		}
+	}
+
+	init {
+		val eventBus = context.modEventBus
+		eventBus.addListener { event: GatherDataEvent -> TaskManager.runTasks(ForgeGenerateDataTask(event)) }
+
+		BreadLib.LOGGER.info("Hello Forge world!")
+		init()
+		registerContent(eventBus)
+		registerEvents(eventBus)
+		ForgeNetworking.setup()
 	}
 }

@@ -89,11 +89,11 @@ fun kExample() {
 		TasksClientTest.layeredDrawTest()
 		TasksClientTest.networkTest()
 
-		BreadLibTasks.setupInputTasks()
-		BreadLibTasks.setupCommandTasks()
 	} else {
 		TasksServerTest.networkTest()
 	}
+
+	BreadLibTasks.setup()
 
 	newTask { task: GenerateDataTask ->
 		task.addGenerator(kGetLocaleGenerator())

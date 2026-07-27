@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.fabricmc.loader.api.FabricLoader
+import net.fabricmc.loader.api.metadata.ModDependency
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
@@ -14,6 +15,17 @@ class FabricPlatformHelper : IPlatformHelper {
 	override fun getPlatformName(): String = "Fabric"
 
 	override fun isModLoaded(modId: String): Boolean = FabricLoader.getInstance().isModLoaded(modId)
+
+	override fun getModInfo(modId: String): ModInfo {
+		check(isModLoaded(modId)) { "Mod $modId is not loaded, cannot retrieve info." }
+		val container = FabricLoader.getInstance().getModContainer(modId).get()
+		val metadata = container.metadata
+		val dependencies = metadata.dependencies.filter { it.kind == ModDependency.Kind.DEPENDS }.map { it.modId }
+		val version = metadata.version.friendlyString
+		val jarPath = container.origin.paths.first()
+
+		return ModInfo(modId, metadata.description, version, dependencies, jarPath)
+	}
 
 	override fun getConfigDir(): Path = FabricLoader.getInstance().configDir
 

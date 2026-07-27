@@ -1,7 +1,5 @@
 package org.bread_experts_group.breadlib.network
 
-import com.mojang.datafixers.util.Function3
-import com.mojang.datafixers.util.Function6
 import com.mojang.serialization.Codec
 import io.netty.buffer.ByteBuf
 import net.minecraft.core.BlockPos
@@ -13,7 +11,6 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.structure.BoundingBox
 import net.minecraft.world.phys.Vec3
 import org.joml.Quaternionf
-import java.util.function.Function
 
 object BreadLibCodecs {
 	var LONG: CodecHolder<ByteBuf, Long> = CodecHolder(Codec.LONG, ByteBufCodecs.VAR_LONG)

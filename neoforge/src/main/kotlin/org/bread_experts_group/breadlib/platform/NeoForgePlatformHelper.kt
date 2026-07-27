@@ -1,21 +1,13 @@
 package org.bread_experts_group.breadlib.platform
 
-import com.google.common.eventbus.EventBus
-import io.netty.buffer.ByteBuf
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
 import net.neoforged.api.distmarker.Dist
-import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModList
-import net.neoforged.fml.ModLoadingContext
 import net.neoforged.fml.loading.FMLLoader
 import net.neoforged.fml.loading.FMLPaths
-import net.neoforged.fml.loading.FMLServiceProvider
 import net.neoforged.neoforge.network.PacketDistributor
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent
-import org.bread_experts_group.breadlib.network.NetworkDirection
-import org.bread_experts_group.breadlib.network.payload.PayloadInfo
 import java.nio.file.Path
 
 class NeoForgePlatformHelper : IPlatformHelper {
@@ -27,6 +19,16 @@ class NeoForgePlatformHelper : IPlatformHelper {
 
 	override fun isModLoaded(modId: String): Boolean {
 		return ModList.get().isLoaded(modId)
+	}
+
+	override fun getModInfo(modId: String): ModInfo {
+		val container = ModList.get().getModContainerById(modId).get()
+		val info = container.modInfo
+		val dependencies = info.dependencies.map { it.modId }
+		val path = info.owningFile.file.filePath
+		val version = info.owningFile.versionString()
+
+		return ModInfo(modId, info.description, version, dependencies, path)
 	}
 
 	override fun getEnvironmentKind(): EnvironmentKind =

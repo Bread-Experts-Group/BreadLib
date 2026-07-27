@@ -1,5 +1,6 @@
 package org.bread_experts_group.breadlib.task
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.context.CommandContext
 import net.minecraft.client.Minecraft
@@ -10,13 +11,30 @@ import net.minecraft.commands.Commands
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.extensions.item.IKeyboardItem
 import org.bread_experts_group.breadlib.extensions.item.IMouseItem
+import org.bread_experts_group.breadlib.platform.ApplicationSide
+import org.bread_experts_group.breadlib.platform.PlatformServices
+import org.bread_experts_group.breadlib.rendering.BreadLibRenderTypes
 import org.bread_experts_group.breadlib.task.command.ServerCommandTask
 import org.bread_experts_group.breadlib.task.input.KeyboardTask
 import org.bread_experts_group.breadlib.task.input.MouseTasks
+import org.bread_experts_group.breadlib.task.render.ShaderTask
 
 object BreadLibTasks {
-	fun setupInputTasks() {
-		TaskManager.newTask(MouseTasks.Scroll::class.java) { task: MouseTasks.Scroll ->
+	fun setup() {
+		when (PlatformServices.PLATFORM.getSide()) {
+			ApplicationSide.CLIENT -> {
+				this.setupInputs()
+				this.setupCommands()
+				this.setupShaders()
+			}
+			ApplicationSide.SERVER -> {
+
+			}
+		}
+	}
+
+	private fun setupInputs() {
+		TaskManager.newTask { task: MouseTasks.Scroll ->
 			val minecraft = Minecraft.getInstance()
 			val player: LocalPlayer = minecraft.player ?: return@newTask
 			val heldStack = player.mainHandItem
@@ -24,7 +42,7 @@ object BreadLibTasks {
 			if (item.onMouseScroll(heldStack, player.level() as ClientLevel, player)) task.cancel()
 		}
 
-		TaskManager.newTask(MouseTasks.Button::class.java) { task: MouseTasks.Button ->
+		TaskManager.newTask { task: MouseTasks.Button ->
 			val minecraft = Minecraft.getInstance()
 			val player: LocalPlayer = minecraft.player ?: return@newTask
 			val heldStack = player.mainHandItem
@@ -34,7 +52,7 @@ object BreadLibTasks {
 			} else if (task.isPost) item.onMouseInputPost(heldStack, player.level() as ClientLevel, player)
 		}
 
-		TaskManager.newTask(KeyboardTask::class.java) { task: KeyboardTask ->
+		TaskManager.newTask { task: KeyboardTask ->
 			val minecraft = Minecraft.getInstance()
 			val player: LocalPlayer = minecraft.player ?: return@newTask
 			val heldStack = player.mainHandItem
@@ -51,8 +69,8 @@ object BreadLibTasks {
 		}
 	}
 
-	fun setupCommandTasks() {
-		TaskManager.newTask(ServerCommandTask::class.java) { task: ServerCommandTask ->
+	private fun setupCommands() {
+		TaskManager.newTask { task: ServerCommandTask ->
 			task.registerCommand { dispatcher, context ->
 				dispatcher.register(
 					Commands.literal(BreadLib.MOD_ID)
@@ -65,6 +83,15 @@ object BreadLibTasks {
 						)
 				)
 			}
+		}
+	}
+
+	private fun setupShaders() {
+		TaskManager.newTask { task: ShaderTask ->
+			task.registerShader(
+				BreadLib.modLoc("translucent_tex"),
+				DefaultVertexFormat.BLOCK
+			) { BreadLibRenderTypes.TRANSLUCENT_TEX_INSTANCE = it }
 		}
 	}
 }

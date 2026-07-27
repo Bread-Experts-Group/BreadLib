@@ -8,11 +8,10 @@ import net.minecraft.server.packs.PackLocationInfo
 import net.minecraft.server.packs.PackResources
 import net.minecraft.server.packs.repository.KnownPack
 import net.minecraft.server.packs.repository.PackSource
-import net.minecraft.server.packs.resources.IoSupplier
 import net.minecraft.server.packs.resources.Resource
 import net.minecraft.server.packs.resources.ResourceManager
-import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.platform.PlatformServices
+import org.bread_experts_group.breadlib.util.optional
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -44,7 +43,7 @@ class ShaderResourceManager : ResourceManager {
 	override fun listPacks(): Stream<PackResources> = Stream.empty()
 
 	override fun getResource(location: ResourceLocation): Optional<Resource> {
-		BreadLib.LOGGER.info("{}, {}", PlatformServices.PLATFORM.getPlatformName(), location)
+//		BreadLib.LOGGER.info("{}, {}", PlatformServices.PLATFORM.getPlatformName(), location)
 		val isBuiltin = location.namespace == "minecraft"
 		if (isBuiltin) return Minecraft.getInstance().resourceManager.getResource(location)
 
@@ -52,9 +51,9 @@ class ShaderResourceManager : ResourceManager {
 		val rootPath = gameDir.resolve("custom-shaders").resolve(location.namespace)
 		val resolved = rootPath.resolve(location.path.replace("shaders/", ""))
 
-		BreadLib.LOGGER.info("resolved: {}", resolved)
+//		BreadLib.LOGGER.info("resolved: {}", resolved)
 		val resources: PackResources = filePackResources.openPrimary(PACK_INFO)
 
-		return Optional.of<Resource>(Resource(resources) { Files.newInputStream(resolved) })
+		return Resource(resources) { Files.newInputStream(resolved) }.optional()
 	}
 }

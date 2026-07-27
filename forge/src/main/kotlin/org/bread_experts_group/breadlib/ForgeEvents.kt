@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft
 import net.minecraftforge.client.event.AddGuiOverlayLayersEvent
 import net.minecraftforge.client.event.InputEvent
 import net.minecraftforge.client.event.RegisterClientCommandsEvent
+import net.minecraftforge.client.event.RegisterShadersEvent
 import net.minecraftforge.client.event.RenderLevelStageEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegisterCommandsEvent
@@ -20,9 +21,9 @@ import org.bread_experts_group.breadlib.task.input.MouseTasks
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage
+import org.bread_experts_group.breadlib.task.render.ShaderTask
 import org.bread_experts_group.breadlib.task.tick.ClientTickTask
 import org.bread_experts_group.breadlib.task.tick.ServerTickTask
-import org.bread_experts_group.breadlib.util.minecraft
 import java.util.function.Consumer
 
 object ForgeEvents {
@@ -54,6 +55,7 @@ object ForgeEvents {
 		this.addServerTickTasks()
 		this.addLayeredDrawTask(eventBus)
 		this.addCommandTasks()
+		this.addShaderTask(eventBus)
 	}
 
 	@Suppress("DEPRECATION", "removal")
@@ -121,7 +123,7 @@ object ForgeEvents {
 	}
 
 	private fun addClientTickTasks() {
-		val level = (minecraft ?: return).level ?: return
+		val level = (Minecraft.getInstance() ?: return).level ?: return
 		this.addListener { _: TickEvent.ClientTickEvent.Pre ->
 			TaskManager.runTasks(ClientTickTask(level, FireSide.PRE))
 		}
@@ -152,6 +154,15 @@ object ForgeEvents {
 		}
 		this.addListener { event: RegisterCommandsEvent ->
 			TaskManager.runTasks(ServerCommandTask(event.dispatcher, event.buildContext))
+		}
+	}
+
+	private fun addShaderTask(eventBus: IEventBus) {
+		eventBus.addListener { event: RegisterShadersEvent ->
+			val task = TaskManager.runTasks(ShaderTask(event.resourceProvider))
+			val list = task.getShaders()
+
+			for ((shader, consumer) in list) event.registerShader(shader, consumer)
 		}
 	}
 }

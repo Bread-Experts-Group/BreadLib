@@ -19,6 +19,7 @@ import org.bread_experts_group.breadlib.task.input.MouseTasks
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage
+import org.bread_experts_group.breadlib.task.render.ShaderTask
 import org.bread_experts_group.breadlib.task.tick.ClientTickTask
 import org.bread_experts_group.breadlib.task.tick.ServerTickTask
 import org.bread_experts_group.breadlib.util.minecraft
@@ -52,6 +53,7 @@ object NeoEvents {
 		this.addServerTickTasks()
 		this.addLayeredDrawTask(eventBus)
 		this.addCommandTasks()
+		this.addShaderTask(eventBus)
 	}
 
 	private fun addRLSETask() {
@@ -151,6 +153,15 @@ object NeoEvents {
 		}
 		this.addListener { event: RegisterCommandsEvent ->
 			TaskManager.runTasks(ServerCommandTask(event.dispatcher, event.buildContext))
+		}
+	}
+
+	private fun addShaderTask(eventBus: IEventBus) {
+		eventBus.addListener { event: RegisterShadersEvent ->
+			val task = TaskManager.runTasks(ShaderTask(event.resourceProvider))
+			val list = task.getShaders()
+
+			for ((shader, consumer) in list) event.registerShader(shader, consumer)
 		}
 	}
 }

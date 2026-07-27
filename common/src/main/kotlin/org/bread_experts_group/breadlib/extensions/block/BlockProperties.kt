@@ -1,7 +1,6 @@
 package org.bread_experts_group.breadlib.extensions.block
 
 import net.minecraft.world.item.context.BlockPlaceContext
-import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.block.state.properties.Property
 import org.bread_experts_group.breadlib.util.toMapKV1
 import org.bread_experts_group.breadlib.util.toMapKV2

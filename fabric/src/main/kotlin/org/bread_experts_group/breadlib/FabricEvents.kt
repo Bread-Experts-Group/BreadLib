@@ -130,9 +130,9 @@ object FabricEvents {
 				val builder = LiteralArgumentBuilder.literal<FabricClientCommandSource>(root.name)
 				for (node in root.getChildren()) {
 					when (node) {
-						is LiteralCommandNode<*> -> builder.then(parseLiteralNode(node, builder))
-						is ArgumentCommandNode<*, *> -> builder.then(parseArgumentNode(node, builder))
-						is RootCommandNode<*> -> builder.then(parseRootNode(node, builder))
+						is LiteralCommandNode<CommandSourceStack> -> builder.then(parseLiteralNode(node, builder))
+						is ArgumentCommandNode<CommandSourceStack, *> -> builder.then(parseArgumentNode(node, builder))
+						is RootCommandNode<CommandSourceStack> -> builder.then(parseRootNode(node, builder))
 					}
 				}
 			}
@@ -144,21 +144,21 @@ object FabricEvents {
 
 	// todo look at forge code to convert CommandSourceStack to FabricClientCommandSource
 	private fun parseLiteralNode(
-		node: LiteralCommandNode<*>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
+		node: LiteralCommandNode<CommandSourceStack>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
 	): LiteralCommandNode<FabricClientCommandSource> {
 		// TODO nightmare
 		TODO()
 	}
 
 	private fun parseArgumentNode(
-		node: CommandNode<out Any?>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
+		node: CommandNode<CommandSourceStack>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
 	): ArgumentCommandNode<FabricClientCommandSource, *> {
 		// TODO nightmare nightmare
 		TODO()
 	}
 
 	private fun parseRootNode(
-		node: RootCommandNode<out Any?>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
+		node: RootCommandNode<CommandSourceStack>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
 	): RootCommandNode<FabricClientCommandSource> {
 		// TODO nightmare nightmare nightmare nightmare
 		TODO()

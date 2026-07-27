@@ -41,9 +41,10 @@ class TestBlockEntityRenderer(
 		pPackedLight: Int,
 		pPackedOverlay: Int
 	) {
-		val rainbowType = getType("breadlib:squares_background") ?: return
+		val type = getType("breadlib:squares_background") ?: return
+//		val type = BreadLibRenderTypes.translucentTex(Blocks.BLUE_STAINED_GLASS.texture)
 		poseStack.translateOnBlockSide(blockEntity.blockState, 0.0, 0.0, 0.0)
-		simpleQuad(poseStack, bufferSource, rainbowType, Color.WHITE, Vec2(2f, 2f)) { consumer ->
+		simpleQuad(poseStack, bufferSource, type, Color.WHITE, Vec2(2f, 2f)) { consumer ->
 			consumer.putFloat(ExtraVertexFormatElements.SPEED, 1000f)
 			consumer.putVec2(ExtraVertexFormatElements.DIRECTION, Vec2(1f, -1f))
 		}

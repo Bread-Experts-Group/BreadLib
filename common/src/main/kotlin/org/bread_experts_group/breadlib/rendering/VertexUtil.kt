@@ -40,7 +40,7 @@ object VertexUtil {
 		renderType: RenderType,
 		color: Int,
 		size: Vec2,
-		extraElements: (VertexConsumer) -> Unit
+		extraElements: (VertexConsumer) -> Unit = this.NONE_CONSUMER
 	) {
 		this.drawQuad(
 			poseStack, bufferSource, size, renderType, color,
