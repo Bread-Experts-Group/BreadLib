@@ -34,7 +34,7 @@ class ConfigFile(private val path: Path, private val backend: ConfigBackend) {
 		key.defaultValue.get()
 	} as? T
 
-	operator fun <T> get(key: ConfigValue<T>): T = getOrNull(key) ?: return null
+	operator fun <T> get(key: ConfigValue<T>): T = getOrNull(key) ?: throw NoSuchElementException("No value for ${key.name}")
 
 	operator fun <T> set(key: ConfigValue<T>, value: T?) {
 		val previous = if (value == null) this.currentState.remove(key.name)

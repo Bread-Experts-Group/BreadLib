@@ -1,56 +1,65 @@
 package org.bread_experts_group.breadlib.registry
 
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
+import net.minecraft.core.BlockPos
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceKey
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.entity.BlockEntity
+import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockBehaviour
+import net.minecraft.world.level.block.state.BlockState
+import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockWithEntity
 import org.bread_experts_group.breadlib.registry.objects.RegistryBlock
 import org.bread_experts_group.breadlib.registry.objects.RegistryItem
 import org.bread_experts_group.breadlib.registry.objects.RegistryObject
-import java.util.*
 import java.util.function.Supplier
 
-open class RegistryProvider<T>(val registry: Registry<T>, val modID: String) {
-	companion object {
-		@JvmField
-		val providers: ArrayList<RegistryProvider<*>> = arrayListOf()
+typealias BlockEntityTypeRegistryObject<T> = RegistryObject<BlockEntityType<*>, BlockEntityType<T>>
 
-		@JvmStatic
+open class RegistryProvider<T> private constructor(val registry: Registry<T>, val modID: String) {
+	companion object {
+		val providers: MutableMap<String, MutableMap<Registry<*>, RegistryProvider<*>>> = mutableMapOf()
+
 		fun registerAll(vararg providers: RegistryProvider<*>) {
 			for (provider in providers) provider.register()
 		}
 
-		@JvmStatic
-		fun createBlocks(modID: String): Blocks = Blocks(modID)
+		fun getBlocks(modID: String): Blocks = BuiltInRegistries.BLOCK.get(modID) as Blocks
+		fun getBlockEntityTypes(modID: String): BlockEntityTypes = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(modID) as BlockEntityTypes
+		fun getItems(modID: String): Items = BuiltInRegistries.ITEM.get(modID) as Items
 
-		@JvmStatic
-		fun createItems(modID: String): Items = Items(modID)
+		@Suppress("UNCHECKED_CAST")
+		fun <T> Registry<T>.get(modID: String): RegistryProvider<T> = providers.getOrPut(modID) { mutableMapOf() }.getOrPut(this) {
+			when (this) {
+				BuiltInRegistries.BLOCK -> Blocks(modID)
+				BuiltInRegistries.ITEM -> Items(modID)
+				BuiltInRegistries.BLOCK_ENTITY_TYPE -> BlockEntityTypes(modID)
+				else -> RegistryProvider(this, modID)
+			}
+		} as RegistryProvider<T>
 	}
 
-	private val entries: MutableMap<RegistryObject<T, out T>, Supplier<T>> = hashMapOf()
-	private val entriesViewOnly: MutableCollection<RegistryObject<T, out T>> =
-		Collections.unmodifiableSet<RegistryObject<T, out T>>(this.entries.keys)
+	val entries: MutableMap<RegistryObject<T, out T>, Supplier<T>> = mutableMapOf()
 	val key: ResourceKey<Registry<T>> = ResourceKey.createRegistryKey(this.registry.key().location())
+	var frozen: String? = null
+		private set
 
-	private var frozen: Boolean = false
-
-	fun register() {
-		providers.add(this)
-		this.frozen = true
+	fun register(source: String? = null) {
+		this.frozen = source ?: "Mod registration"
 	}
-
-	fun entriesView(): Collection<RegistryObject<T, out T>> = this.entriesViewOnly
-
-	fun entries(): MutableMap<RegistryObject<T, out T>, Supplier<T>> = this.entries
 
 	open fun <I : T> createRegistryObject(name: String): RegistryObject<T, I> =
 		RegistryObject.create(this.modID, name, this.registry)
 
 	open fun <I : T> register(name: String, supplier: Supplier<T>): RegistryObject<T, I> {
-		check(!this.frozen) { "Provider is already frozen." }
+		this.frozen?.let {
+			throw IllegalStateException("Provider was already frozen: $it")
+		}
 		val regObject = this.createRegistryObject<I>(name)
 		check(this.entries.putIfAbsent(regObject, supplier) == null) {
 			"Duplicate registry entry: " + this.modID + ":" + name
@@ -59,30 +68,57 @@ open class RegistryProvider<T>(val registry: Registry<T>, val modID: String) {
 	}
 
 	class Blocks(modID: String) : RegistryProvider<Block>(BuiltInRegistries.BLOCK, modID) {
-
-		override fun <B : Block> createRegistryObject(name: String): RegistryBlock<B> =
-			RegistryBlock.create<B>(this.modID, name)
+		override fun <B : Block> createRegistryObject(name: String): RegistryBlock<B> = RegistryBlock.create(this.modID, name)
 
 		@Suppress("UNCHECKED_CAST")
-		override fun <B : Block> register(name: String, supplier: Supplier<Block>): RegistryBlock<B> =
-			super.register<Block>(name, supplier) as RegistryBlock<B>
+		override fun <B : Block> register(name: String, supplier: Supplier<Block>): RegistryBlock<B> = super.register<Block>(name, supplier) as RegistryBlock<B>
+		fun <B : Block> registerSimpleBlock(name: String, properties: BlockBehaviour.Properties): RegistryBlock<B> = this.register(name) { Block(properties) }
+	}
 
-		fun <B : Block> registerSimpleBlock(name: String, properties: BlockBehaviour.Properties): RegistryBlock<B> =
-			this.register(name) { Block(properties) }
+	class BlockEntityTypes(modID: String) : RegistryProvider<BlockEntityType<*>>(BuiltInRegistries.BLOCK_ENTITY_TYPE, modID) {
+		inner class BlockEntityTypeBuilder<T : BlockEntity>(
+			factory: BlockEntitySupplier<T>,
+			validBlocks: Set<Block>
+		) : BlockEntityType<T>(factory, validBlocks, null) {
+			fun withRenderer(provider: BlockEntityRendererProvider<T>): BlockEntityTypeBuilder<T> = this.also {
+				BlockEntityRenderers.register(this, provider)
+			}
+		}
+
+		private val applicableBlocks: List<BreadLibBlockWithEntity<*>> by lazy {
+			getBlocks(modID)
+				.also { it.register() }
+				.entries.keys
+				.mapNotNull { it.get() as? BreadLibBlockWithEntity<*> }
+		}
+
+		inline fun <reified T : BlockEntity> create(
+			noinline factory: (pos: BlockPos, state: BlockState) -> T
+		): BlockEntityTypeBuilder<T> = create(T::class.java, factory)
+
+		fun <T : BlockEntity> create(
+			clazz: Class<T>,
+			factory: (pos: BlockPos, state: BlockState) -> T
+		): BlockEntityTypeBuilder<T> {
+			val validBlocks = mutableSetOf<Block>()
+			applicableBlocks.filterTo(validBlocks) { clazz == it.blockEntity }
+			return BlockEntityTypeBuilder(factory, validBlocks)
+		}
+
+		fun <I : BlockEntityType<*>> register(
+			name: String,
+			supplier: BlockEntityTypes.() -> BlockEntityType<*>
+		): RegistryObject<BlockEntityType<*>, I> {
+			return super.register(name) { supplier() }
+		}
 	}
 
 	class Items(modID: String) : RegistryProvider<Item>(BuiltInRegistries.ITEM, modID) {
-
-		override fun <I : Item> createRegistryObject(name: String): RegistryItem<I> =
-			RegistryItem.create(this.modID, name)
+		override fun <I : Item> createRegistryObject(name: String): RegistryItem<I> = RegistryItem.create(this.modID, name)
 
 		@Suppress("UNCHECKED_CAST")
-		override fun <I : Item> register(name: String, supplier: Supplier<Item>): RegistryItem<I> =
-			super.register<Item>(name, supplier) as RegistryItem<I>
-
-		fun <I : Item> simpleItem(name: String, properties: Item.Properties): RegistryItem<I> =
-			this.register(name) { Item(properties) }
-
+		override fun <I : Item> register(name: String, supplier: Supplier<Item>): RegistryItem<I> = super.register<Item>(name, supplier) as RegistryItem<I>
+		fun <I : Item> simpleItem(name: String, properties: Item.Properties): RegistryItem<I> = this.register(name) { Item(properties) }
 		fun <B : BlockItem> registerSimpleBlockItem(
 			name: String,
 			block: Supplier<Block>,

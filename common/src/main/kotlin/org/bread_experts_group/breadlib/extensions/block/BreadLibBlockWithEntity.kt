@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.ticks.TickPriority
 
 abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
-	blockEntity: Class<BE>,
+	internal val blockEntity: Class<BE>,
 	blockProperties: Properties,
 	scheduleTick: Int? = null,
 	scheduleTickPriority: TickPriority = TickPriority.NORMAL
@@ -20,7 +20,7 @@ abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
 	private val beConstructor = blockEntity.getConstructor(BlockPos::class.java, BlockState::class.java)
 	private val commonTick = Tickable.Common::class.java.isAssignableFrom(blockEntity)
 
-	override fun newBlockEntity(p0: BlockPos, p1: BlockState): BlockEntity = beConstructor.newInstance(p0, p1)
+	final override fun newBlockEntity(p0: BlockPos, p1: BlockState): BlockEntity = beConstructor.newInstance(p0, p1)
 
 	private val tickerServer = if (Tickable.Server::class.java.isAssignableFrom(blockEntity))
 		if (commonTick) BlockEntityTicker<BE> { level, pos, state, entity ->

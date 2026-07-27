@@ -1,15 +1,13 @@
 package org.bread_experts_group.breadlib.config.backend
 
 import org.bread_experts_group.breadlib.BreadLib
-import org.bread_experts_group.breadlib.config.backend.builtin.ConfigJSONBackend
-import org.bread_experts_group.breadlib.config.backend.builtin.ConfigTOMLBackend
 
 object ConfigBackends {
 	private val backends = mutableMapOf<String, MutableMap<String, ConfigBackend>>()
 
 	init {
-		this.registerBackend(BreadLib.MOD_ID, ConfigTOMLBackend)
-		this.registerBackend(BreadLib.MOD_ID, ConfigJSONBackend)
+//		this.registerBackend(BreadLib.MOD_ID, ConfigTOMLBackend)
+//		this.registerBackend(BreadLib.MOD_ID, ConfigJSONBackend)
 	}
 
 	@JvmStatic

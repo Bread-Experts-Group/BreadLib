@@ -32,7 +32,7 @@ abstract class BreadLibBlock(
 		if (scheduleTick != null) level.scheduleTick(pos, this, scheduleTick, scheduleTickPriority)
 	}
 
-	override fun getStateForPlacement(
+	final override fun getStateForPlacement(
 		context: BlockPlaceContext
 	): BlockState {
 		var state = this.defaultBlockState()

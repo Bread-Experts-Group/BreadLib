@@ -2,6 +2,7 @@
 
 package org.bread_experts_group.breadlib.util
 
+import net.minecraft.client.Minecraft
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Item
@@ -10,6 +11,9 @@ import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.util.Supplier
 import org.bread_experts_group.breadlib.BreadLib
 import java.nio.file.Path
+
+val minecraft: Minecraft?
+	get() = Minecraft.getInstance()
 
 fun getFrame(backwardsDepth: Long): StackWalker.StackFrame? = StackWalker.getInstance(
 	StackWalker.Option.RETAIN_CLASS_REFERENCE

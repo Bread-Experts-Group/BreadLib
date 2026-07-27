@@ -2,8 +2,6 @@ package org.bread_experts_group.breadlib
 
 import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
-import org.bread_experts_group.breadlib.config.ConfigManager
-import org.bread_experts_group.breadlib.config.ConfigValue
 import org.bread_experts_group.breadlib.data.LocaleGenerator
 import org.bread_experts_group.breadlib.data.ModelGenerator
 import org.bread_experts_group.breadlib.data.PlaceholderTextureGenerator
@@ -22,7 +20,6 @@ import org.bread_experts_group.breadlib.test.ItemsTest
 import org.bread_experts_group.breadlib.test.client.TasksClientTest
 import org.bread_experts_group.breadlib.test.server.TasksServerTest
 import org.bread_experts_group.breadlib.util.info
-import java.math.BigDecimal
 import java.util.*
 
 private fun kGetLocaleGenerator() = LocaleGenerator(BreadLib.MOD_ID, Locale.of("en", "us")).also {
@@ -108,15 +105,15 @@ fun kExample() {
 
 	if (PlatformServices.PLATFORM.isModLoaded("breadlib")) info("breadlib appears loaded on the platform")
 
-	val config = ConfigManager(BreadLib.MOD_ID)["config-test", "json"]
-	val testValue =
-		ConfigValue.builder<BigDecimal>().name("test").defaultValue { BigDecimal.ONE }.comment("Test comment").build()
-	info(config.getOrNull(testValue))
-	config[testValue] = (config.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
-	info(config[testValue])
-
-	val configL = ConfigManager(BreadLib.MOD_ID)["config-test", "toml"]
-	info(configL.getOrNull(testValue))
-	configL[testValue] = (configL.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
-	info(configL[testValue])
+//	val config = ConfigManager(BreadLib.MOD_ID)["config-test", "json"]
+//	val testValue =
+//		ConfigValue.builder<BigDecimal>().name("test").defaultValue { BigDecimal.ONE }.comment("Test comment").build()
+//	info(config.getOrNull(testValue))
+//	config[testValue] = (config.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
+//	info(config[testValue])
+//
+//	val configL = ConfigManager(BreadLib.MOD_ID)["config-test", "toml"]
+//	info(configL.getOrNull(testValue))
+//	configL[testValue] = (configL.getOrNull(testValue) ?: BigDecimal.ZERO).inc()
+//	info(configL[testValue])
 }

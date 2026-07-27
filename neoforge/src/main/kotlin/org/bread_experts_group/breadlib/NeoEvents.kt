@@ -21,6 +21,7 @@ import org.bread_experts_group.breadlib.task.render.LevelRenderTask
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage
 import org.bread_experts_group.breadlib.task.tick.ClientTickTask
 import org.bread_experts_group.breadlib.task.tick.ServerTickTask
+import org.bread_experts_group.breadlib.util.minecraft
 import java.util.function.Consumer
 
 object NeoEvents {
@@ -117,7 +118,7 @@ object NeoEvents {
 	}
 
 	private fun addClientTickTasks() {
-		val level = Minecraft.getInstance().level ?: return
+		val level = (minecraft ?: return).level ?: return
 		this.addListener { _: ClientTickEvent.Pre ->
 			TaskManager.runTasks(ClientTickTask(level, FireSide.PRE))
 		}

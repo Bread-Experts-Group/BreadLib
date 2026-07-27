@@ -1,22 +1,14 @@
 package org.bread_experts_group.breadlib.test
 
-import net.minecraft.core.BlockPos
-import net.minecraft.world.item.context.BlockPlaceContext
-import net.minecraft.world.level.block.Block
+import net.minecraft.core.Direction
 import net.minecraft.world.level.block.EntityBlock
-import net.minecraft.world.level.block.entity.BlockEntity
-import net.minecraft.world.level.block.state.BlockState
-import net.minecraft.world.level.block.state.StateDefinition
-import net.minecraft.world.level.block.state.properties.BlockStateProperties
+import net.minecraft.world.level.block.HorizontalDirectionalBlock
+import org.bread_experts_group.breadlib.extensions.block.BlockProperties
+import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockWithEntity
 
-class TestBlock : Block(Properties.of()), EntityBlock {
-	override fun newBlockEntity(pos: BlockPos, state: BlockState): BlockEntity = TestBlockEntity(pos, state)
+private val blockProperties = BlockProperties
+	.prop(HorizontalDirectionalBlock.FACING, Direction.NORTH) { it.horizontalDirection.opposite }
 
-	override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
-		builder.add(BlockStateProperties.HORIZONTAL_FACING)
-	}
-
-	override fun getStateForPlacement(context: BlockPlaceContext): BlockState =
-		this.defaultBlockState()
-			.setValue(BlockStateProperties.HORIZONTAL_FACING, context.horizontalDirection.opposite)
+class TestBlock : BreadLibBlockWithEntity<TestBlockEntity>(TestBlockEntity::class.java, Properties.of()), EntityBlock {
+	override fun breadLibProperties(): BlockProperties = blockProperties
 }
