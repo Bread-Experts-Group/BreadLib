@@ -6,10 +6,10 @@ import net.minecraft.data.DataProvider
 import net.minecraft.data.PackOutput
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
-import org.bread_experts_group.breadlib.registry.objects.RegistryBlock
+import org.bread_experts_group.breadlib.registry.objects.AbstractRegistryBlock
 import org.bread_experts_group.breadlib.registry.objects.RegistryItem
 import org.bread_experts_group.breadlib.util.resolve
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.CompletableFuture
 
 class LocaleGenerator(override val modID: String, private val locale: Locale) : DataGenerator() {
@@ -35,7 +35,7 @@ class LocaleGenerator(override val modID: String, private val locale: Locale) : 
 		this.addItems(*translations.map { (first, second) -> first.get() to second }.toTypedArray())
 	}
 
-	fun addBLBlocks(vararg translations: Pair<RegistryBlock<*>, String>) {
+	fun addBLBlocks(vararg translations: Pair<AbstractRegistryBlock<*>, String>) {
 		this.addBlocks(*translations.map { (first, second) -> first.get() to second }.toTypedArray())
 	}
 

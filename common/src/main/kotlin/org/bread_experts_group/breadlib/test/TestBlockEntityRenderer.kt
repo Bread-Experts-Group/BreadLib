@@ -1,7 +1,6 @@
 package org.bread_experts_group.breadlib.test
 
 import com.mojang.blaze3d.vertex.PoseStack
-import com.mojang.blaze3d.vertex.VertexConsumer
 import com.mojang.blaze3d.vertex.VertexFormat
 import com.mojang.blaze3d.vertex.VertexFormatElement
 import net.minecraft.client.renderer.MultiBufferSource
@@ -31,7 +30,7 @@ class TestBlockEntityRenderer(
 	}
 
 	init {
-		tryAddTypeAndShader("breadlib:rainbow", format, VertexFormat.Mode.QUADS)
+		tryAddTypeAndShader("breadlib:squares_background", format, VertexFormat.Mode.QUADS)
 	}
 
 	override fun render(
@@ -42,7 +41,7 @@ class TestBlockEntityRenderer(
 		pPackedLight: Int,
 		pPackedOverlay: Int
 	) {
-		val rainbowType = getType("breadlib:rainbow") ?: return
+		val rainbowType = getType("breadlib:squares_background") ?: return
 		poseStack.translateOnBlockSide(blockEntity.blockState, 0.0, 0.0, 0.0)
 		simpleQuad(poseStack, bufferSource, rainbowType, Color.WHITE, Vec2(2f, 2f)) { consumer ->
 			consumer.putFloat(ExtraVertexFormatElements.SPEED, 1000f)

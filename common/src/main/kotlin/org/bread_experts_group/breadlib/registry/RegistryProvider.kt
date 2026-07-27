@@ -20,15 +20,11 @@ import org.bread_experts_group.breadlib.registry.objects.RegistryObject
 import org.jetbrains.annotations.ApiStatus
 import java.util.function.Supplier
 
-typealias BlockEntityTypeRegistryObject<T> = RegistryObject<BlockEntityType<*>, BlockEntityType<T>>
-
 open class RegistryProvider<T> private constructor(val registry: Registry<T>, val modID: String) {
 	companion object {
 		val providers: MutableMap<String, MutableMap<Registry<*>, RegistryProvider<*>>> = mutableMapOf()
 
-		fun registerAll(vararg providers: RegistryProvider<*>) {
-			for (provider in providers) provider.register()
-		}
+		fun initialize(vararg providers: RegistryProvider<*>): Unit = Unit
 
 		fun getBlocks(modID: String): Blocks = BuiltInRegistries.BLOCK.get(modID) as Blocks
 		fun getBlockEntityTypes(modID: String): BlockEntityTypes = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(modID) as BlockEntityTypes
@@ -47,11 +43,13 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 
 	val entries: MutableMap<RegistryObject<T, out T>, Supplier<T>> = mutableMapOf()
 	val key: ResourceKey<Registry<T>> = ResourceKey.createRegistryKey(this.registry.key().location())
-	var frozen: String? = null
+	var frozen: Exception? = null
 		private set
 
-	fun register(source: String? = null) {
-		this.frozen = source ?: "Mod registration"
+	@ApiStatus.Internal
+	fun freeze() {
+		this.frozen?.let { throw IllegalStateException("Already frozen.").initCause(this.frozen) }
+		this.frozen = Exception()
 	}
 
 	open fun <I : T> createRegistryObject(name: String): RegistryObject<T, I> =
@@ -89,7 +87,7 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		private val types = mutableMapOf<Class<*>, BlockEntityType<*>>()
 		private val applicableBlocks: List<BreadLibBlockWithEntity<*>> by lazy {
 			getBlocks(modID)
-				.also { it.register() }
+				.also { if (it.frozen == null) it.freeze() }
 				.entries.keys
 				.mapNotNull { it.get() as? BreadLibBlockWithEntity<*> }
 		}
@@ -126,10 +124,10 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		@Suppress("UNCHECKED_CAST")
 		override fun <I : Item> register(name: String, supplier: Supplier<Item>): RegistryItem<I> = super.register<Item>(name, supplier) as RegistryItem<I>
 		fun <I : Item> simpleItem(name: String, properties: Item.Properties): RegistryItem<I> = this.register(name) { Item(properties) }
-		fun <B : BlockItem> registerSimpleBlockItem(
+		fun registerSimpleBlockItem(
 			name: String,
 			block: Supplier<Block>,
 			properties: Item.Properties
-		): RegistryItem<B> = this.register(name) { BlockItem(block.get(), properties) }
+		): RegistryItem<BlockItem> = this.register(name) { BlockItem(block.get(), properties) }
 	}
 }

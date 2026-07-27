@@ -9,11 +9,11 @@ import org.bread_experts_group.breadlib.data.model.ObjectResourceLocation
 import org.bread_experts_group.breadlib.data.model.block.BlockStateSingleVariant
 import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
-import org.bread_experts_group.breadlib.registry.RegistryProvider
+import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlockEntityTypes
+import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.initialize
 import org.bread_experts_group.breadlib.task.BreadLibTasks
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask
-import org.bread_experts_group.breadlib.test.BlockEntityTypeTest
 import org.bread_experts_group.breadlib.test.BlocksTest
 import org.bread_experts_group.breadlib.test.CreativeTabTest
 import org.bread_experts_group.breadlib.test.ItemsTest
@@ -79,11 +79,9 @@ private fun kGetPlaceholderTextureGenerator() = PlaceholderTextureGenerator(Brea
 }
 
 fun kExample() {
-	RegistryProvider.registerAll(
-		BlocksTest.BLOCK_REGISTRY,
-		ItemsTest.ITEM_REGISTRY,
-		CreativeTabTest.CREATIVE_TABS_REGISTRY,
-		BlockEntityTypeTest.BLOCK_ENTITY_TYPE_REGISTRY
+	initialize(
+		BlocksTest.REGISTRY, ItemsTest.REGISTRY, CreativeTabTest.REGISTRY,
+		getBlockEntityTypes(BreadLib.MOD_ID)
 	)
 
 	if (PlatformServices.PLATFORM.getSide() == ApplicationSide.CLIENT) {

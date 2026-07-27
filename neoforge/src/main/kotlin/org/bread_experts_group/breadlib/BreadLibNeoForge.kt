@@ -14,7 +14,6 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 	companion object {
 		@JvmStatic
 		fun <T> registerContent(provider: RegistryProvider<T>, event: RegisterEvent) {
-			if (provider.frozen == null) return
 			event.register(
 				provider.key
 			) { helper ->
@@ -23,6 +22,7 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 					key.bind()
 				}
 			}
+			provider.freeze()
 		}
 
 		@JvmStatic

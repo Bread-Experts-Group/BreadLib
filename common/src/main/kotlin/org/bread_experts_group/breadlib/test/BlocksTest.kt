@@ -1,13 +1,16 @@
 package org.bread_experts_group.breadlib.test
 
+import net.minecraft.world.item.BlockItem
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlocks
-import org.bread_experts_group.breadlib.registry.objects.RegistryBlock
+import org.bread_experts_group.breadlib.registry.objects.RegistryBlockItem
 
 object BlocksTest {
-	val BLOCK_REGISTRY: RegistryProvider.Blocks = getBlocks(BreadLib.MOD_ID)
+	val REGISTRY: RegistryProvider.Blocks = getBlocks(BreadLib.MOD_ID)
 
-	val TEST_BLOCK: RegistryBlock<TestBlock> = BLOCK_REGISTRY.register("test_block", ::TestBlock)
-	val QUARRY: RegistryBlock<QuarryBlock> = BLOCK_REGISTRY.register("quarry", ::QuarryBlock)
+	val TEST_BLOCK: RegistryBlockItem<TestBlock, BlockItem> = REGISTRY.register<TestBlock>("test_block", ::TestBlock)
+		.withItem()
+	val QUARRY: RegistryBlockItem<QuarryBlock, BlockItem> = REGISTRY.register<QuarryBlock>("quarry", ::QuarryBlock)
+		.withItem()
 }

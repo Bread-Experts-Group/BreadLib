@@ -1,6 +1,8 @@
 package org.bread_experts_group.breadlib.extensions.block
 
 import net.minecraft.client.multiplayer.ClientLevel
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.core.BlockPos
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.Level
@@ -27,11 +29,14 @@ abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
 		val bet = getBlockEntityTypes(modID)
 		if (bet.getType(blockEntity) == null) bet.register<BlockEntityType<*>>("test_${System.currentTimeMillis()}") {
 			@Suppress("UNCHECKED_CAST")
-			create(blockEntity as Class<BlockEntity>, (beConstructor as Constructor<BlockEntity>)::newInstance)
+			create(blockEntity as Class<BlockEntity>, (beConstructor as Constructor<BlockEntity>)::newInstance).also { builder ->
+				blockEntityRenderer()?.let { renderer -> builder.withRenderer { renderer(it) as BlockEntityRenderer<BlockEntity> } }
+			}
 		}
 	}
 
 	final override fun newBlockEntity(p0: BlockPos, p1: BlockState): BlockEntity = beConstructor.newInstance(p0, p1)
+	open fun blockEntityRenderer(): ((BlockEntityRendererProvider.Context) -> BlockEntityRenderer<BE>)? = null
 
 	private val tickerServer = if (Tickable.Server::class.java.isAssignableFrom(blockEntity))
 		if (commonTick) BlockEntityTicker<BE> { level, pos, state, entity ->

@@ -29,7 +29,6 @@ class BreadLibForge(context: FMLJavaModLoadingContext) {
 
 	companion object {
 		fun <T> registerContent(provider: RegistryProvider<T>, event: RegisterEvent) {
-			if (provider.frozen == null) return
 			event.register<T>(
 				provider.key
 			) { helper: RegisterEvent.RegisterHelper<T> ->
@@ -38,6 +37,7 @@ class BreadLibForge(context: FMLJavaModLoadingContext) {
 					key.bind()
 				}
 			}
+			provider.freeze()
 		}
 
 		fun registerContent(eventBus: IEventBus) {

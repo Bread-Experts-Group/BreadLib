@@ -16,11 +16,11 @@ class BreadLibFabric : ModInitializer {
 
 	companion object {
 		private fun <T> registerContent(provider: RegistryProvider<T>) {
-			if (provider.frozen == null) return
 			provider.entries.forEach { (key, value) ->
 				Registry.registerForHolder<T>(provider.registry, key.name, value.get())
 				key.bind()
 			}
+			provider.freeze()
 		}
 
 		fun registerContent() {

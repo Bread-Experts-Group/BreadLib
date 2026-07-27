@@ -14,7 +14,7 @@ import org.bread_experts_group.breadlib.data.model.block.BlockStateVariant
 import org.bread_experts_group.breadlib.data.model.item.GUILight
 import org.bread_experts_group.breadlib.data.model.item.ItemModelOverride
 import org.bread_experts_group.breadlib.data.model.item.ItemModelPerspective
-import org.bread_experts_group.breadlib.registry.objects.RegistryBlock
+import org.bread_experts_group.breadlib.registry.objects.AbstractRegistryBlock
 import org.bread_experts_group.breadlib.registry.objects.RegistryItem
 import org.bread_experts_group.breadlib.util.location
 import org.bread_experts_group.breadlib.util.resolve
@@ -138,7 +138,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 	}
 
 	fun flat3D(
-		block: RegistryBlock<*>,
+		block: AbstractRegistryBlock<*>,
 		all: ObjectResourceLocation = ObjectResourceLocation(block.get()),
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
@@ -167,7 +167,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 	}
 
 	fun verticalHorizontalFront3D(
-		block: RegistryBlock<*>,
+		block: AbstractRegistryBlock<*>,
 		vertical: ObjectResourceLocation,
 		horizontal: ObjectResourceLocation,
 		front: ObjectResourceLocation,
@@ -179,7 +179,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 	)
 
 	fun model2D(
-		block: RegistryBlock<*>
+		block: AbstractRegistryBlock<*>
 	): Unit = model2D(
 		ObjectResourceLocation(block),
 		ObjectResourceLocation(block.get().location, "item")
@@ -212,7 +212,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 	}
 
 	fun blockState(
-		block: RegistryBlock<*>,
+		block: AbstractRegistryBlock<*>,
 		variants: Map<String, BlockStateVariant> = mapOf(
 			"" to BlockStateSingleVariant(ObjectResourceLocation(block))
 		)
