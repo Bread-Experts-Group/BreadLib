@@ -21,7 +21,7 @@ data class ModInfo(
 		val channel = Files.newByteChannel(this.jarPath)
 		val buffer = ByteBuffer.allocate(8192)
 
-		while (channel.read(buffer.clear()) != 1) {
+		while (channel.read(buffer.clear()) != -1) {
 			digest.update(buffer.flip())
 		}
 

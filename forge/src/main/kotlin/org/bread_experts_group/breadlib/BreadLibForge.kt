@@ -1,7 +1,6 @@
 package org.bread_experts_group.breadlib
 
 import net.minecraftforge.data.event.GatherDataEvent
-import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.IEventBus
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
@@ -10,31 +9,23 @@ import org.bread_experts_group.breadlib.BreadLib.init
 import org.bread_experts_group.breadlib.ForgeEvents.registerEvents
 import org.bread_experts_group.breadlib.platform.ForgeGenerateDataTask
 import org.bread_experts_group.breadlib.registry.RegistryProvider
-import org.bread_experts_group.breadlib.registry.objects.RegistryObject
 import org.bread_experts_group.breadlib.task.TaskManager
-import java.util.function.Supplier
 
 @Mod(BreadLib.MOD_ID)
 class BreadLibForge(context: FMLJavaModLoadingContext) {
 	companion object {
 		fun <T> registerContent(provider: RegistryProvider<T>, event: RegisterEvent) {
-			event.register<T>(
-				provider.key
-			) { helper: RegisterEvent.RegisterHelper<T> ->
-				provider.entries.forEach { (key: RegistryObject<T, out T>, value: Supplier<T>) ->
+			event.register(provider.key) { helper ->
+				provider.entries.forEach { (key, value) ->
 					helper.register(key.name, value.get())
 					key.bind()
 				}
+				provider.freeze()
 			}
-			provider.freeze()
 		}
 
 		fun registerContent(eventBus: IEventBus) {
-			eventBus.addListener(
-				EventPriority.NORMAL,
-				false,
-				RegisterEvent::class.java
-			) { event: RegisterEvent ->
+			eventBus.addListener { event: RegisterEvent ->
 				for ((_, registries) in RegistryProvider.providers) {
 					for ((_, registry) in registries) registerContent(registry, event)
 				}

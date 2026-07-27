@@ -44,4 +44,8 @@ subprojects {
             enabled = false
         }
     }
+
+    tasks.test {
+        failOnNoDiscoveredTests = false
+    }
 }

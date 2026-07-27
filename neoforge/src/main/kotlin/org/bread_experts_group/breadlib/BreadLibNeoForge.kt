@@ -12,24 +12,21 @@ import org.bread_experts_group.breadlib.task.TaskManager
 @Mod(BreadLib.MOD_ID)
 class BreadLibNeoForge(eventBus: IEventBus) {
 	companion object {
-		@JvmStatic
+		@Suppress("TYPE_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 		fun <T> registerContent(provider: RegistryProvider<T>, event: RegisterEvent) {
-			event.register(
-				provider.key
-			) { helper ->
+			event.register(provider.key) { helper ->
 				provider.entries.forEach { (key, value) ->
 					helper.register(key.name, value.get())
 					key.bind()
 				}
+				provider.freeze()
 			}
-			provider.freeze()
 		}
 
-		@JvmStatic
 		fun registerContent(eventBus: IEventBus) {
-			eventBus.addListener(RegisterEvent::class.java) { event ->
+			eventBus.addListener { event: RegisterEvent ->
 				for ((_, registries) in RegistryProvider.providers) {
-					for ((_, registry) in registries) registerContent(registry, event)
+					for ((_, registry) in registries) this.registerContent(registry, event)
 				}
 			}
 		}

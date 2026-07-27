@@ -3,6 +3,7 @@ package org.bread_experts_group.breadlib.test.client
 import net.minecraft.client.DeltaTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.network.chat.Component
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.BreadLib.modLoc
 import org.bread_experts_group.breadlib.platform.PlatformServices
@@ -20,11 +21,10 @@ object TasksClientTest {
 	fun layeredDrawTest() {
 		newTask { task: LayeredDrawTask ->
 			val platform = PlatformServices.PLATFORM.getPlatformName()
-			val debugInfo =
-				"${BreadLib.MOD_ID} v${BreadLib.MOD_VERSION} | $platform"
-			val width = Minecraft.getInstance().font.width(platform)
+			val debugInfo = Component.literal("${BreadLib.MOD_ID} v${BreadLib.MOD_VERSION} | $platform")
+			val width = Minecraft.getInstance().font.width(debugInfo)
 			task.add(modLoc("layered_draw", "test_layer")) { guiGraphics: GuiGraphics, _: DeltaTracker ->
-				guiGraphics.fill(0, 0, 40 + width, 12, Color.BLACK)
+				guiGraphics.fill(0, 0, width, 12, Color.BLACK)
 				guiGraphics.drawString(Minecraft.getInstance().font, debugInfo, 2, 2, Color.ORANGE, false)
 			}
 		}

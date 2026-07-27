@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+// todo Fabric crashes when not using remap on common mixins, but forge requires remap to be false
 @Mixin(LightningBolt.class)
 public abstract class MixinLightningBolt extends Entity {
 	public MixinLightningBolt(EntityType<?> entityType, Level level) {

@@ -8,6 +8,11 @@ open class RegistryObject<T, I : T>(
 	val name: ResourceLocation,
 	val registry: Registry<T>
 ) : Supplier<T> {
+	companion object {
+		fun <T, I : T> create(modID: String, name: String, registry: Registry<T>): RegistryObject<T, I> =
+			RegistryObject(ResourceLocation.fromNamespaceAndPath(modID, name), registry)
+	}
+
 	private var value: I? = null
 
 	@Suppress("UNCHECKED_CAST")
@@ -17,10 +22,5 @@ open class RegistryObject<T, I : T>(
 
 	override fun get(): I {
 		return this.value ?: throw NullPointerException("Value for $name was null.")
-	}
-
-	companion object {
-		fun <T, I : T> create(modID: String, name: String, registry: Registry<T>): RegistryObject<T, I> =
-			RegistryObject(ResourceLocation.fromNamespaceAndPath(modID, name), registry)
 	}
 }

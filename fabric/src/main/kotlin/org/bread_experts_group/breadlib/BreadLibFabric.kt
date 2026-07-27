@@ -5,19 +5,11 @@ import net.minecraft.core.Registry
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 
 class BreadLibFabric : ModInitializer {
-	override fun onInitialize() {
-		BreadLib.LOGGER.info("Hello Fabric world!")
-		BreadLib.init()
-		registerContent()
-
-		FabricEvents.registerEvents()
-		FabricNetworking.registerPackets()
-	}
-
 	companion object {
+		@Suppress("TYPE_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 		private fun <T> registerContent(provider: RegistryProvider<T>) {
 			provider.entries.forEach { (key, value) ->
-				Registry.registerForHolder<T>(provider.registry, key.name, value.get())
+				Registry.registerForHolder(provider.registry, key.name, value.get())
 				key.bind()
 			}
 			provider.freeze()
@@ -28,5 +20,14 @@ class BreadLibFabric : ModInitializer {
 				for ((_, registry) in registries) registerContent(registry)
 			}
 		}
+	}
+
+	override fun onInitialize() {
+		BreadLib.LOGGER.info("Hello Fabric world!")
+		BreadLib.init()
+		registerContent()
+
+		FabricEvents.registerEvents()
+		FabricNetworking.registerPackets()
 	}
 }

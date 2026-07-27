@@ -27,18 +27,21 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		fun initialize(vararg providers: RegistryProvider<*>): Unit = Unit
 
 		fun getBlocks(modID: String): Blocks = BuiltInRegistries.BLOCK.get(modID) as Blocks
-		fun getBlockEntityTypes(modID: String): BlockEntityTypes = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(modID) as BlockEntityTypes
+		fun getBlockEntityTypes(modID: String): BlockEntityTypes =
+			BuiltInRegistries.BLOCK_ENTITY_TYPE.get(modID) as BlockEntityTypes
+
 		fun getItems(modID: String): Items = BuiltInRegistries.ITEM.get(modID) as Items
 
 		@Suppress("UNCHECKED_CAST")
-		fun <T> Registry<T>.get(modID: String): RegistryProvider<T> = providers.getOrPut(modID) { mutableMapOf() }.getOrPut(this) {
-			when (this) {
-				BuiltInRegistries.BLOCK -> Blocks(modID)
-				BuiltInRegistries.ITEM -> Items(modID)
-				BuiltInRegistries.BLOCK_ENTITY_TYPE -> BlockEntityTypes(modID)
-				else -> RegistryProvider(this, modID)
-			}
-		} as RegistryProvider<T>
+		fun <T> Registry<T>.get(modID: String): RegistryProvider<T> =
+			providers.getOrPut(modID) { mutableMapOf() }.getOrPut(this) {
+				when (this) {
+					BuiltInRegistries.BLOCK -> Blocks(modID)
+					BuiltInRegistries.ITEM -> Items(modID)
+					BuiltInRegistries.BLOCK_ENTITY_TYPE -> BlockEntityTypes(modID)
+					else -> RegistryProvider(this, modID)
+				}
+			} as RegistryProvider<T>
 	}
 
 	val entries: MutableMap<RegistryObject<T, out T>, Supplier<T>> = mutableMapOf()
@@ -67,14 +70,19 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 	}
 
 	class Blocks(modID: String) : RegistryProvider<Block>(BuiltInRegistries.BLOCK, modID) {
-		override fun <B : Block> createRegistryObject(name: String): RegistryBlock<B> = RegistryBlock.create(this.modID, name)
+		override fun <B : Block> createRegistryObject(name: String): RegistryBlock<B> =
+			RegistryBlock.create(this.modID, name)
 
 		@Suppress("UNCHECKED_CAST")
-		override fun <B : Block> register(name: String, supplier: Supplier<Block>): RegistryBlock<B> = super.register<Block>(name, supplier) as RegistryBlock<B>
-		fun <B : Block> registerSimpleBlock(name: String, properties: BlockBehaviour.Properties): RegistryBlock<B> = this.register(name) { Block(properties) }
+		override fun <B : Block> register(name: String, supplier: Supplier<Block>): RegistryBlock<B> =
+			super.register<Block>(name, supplier) as RegistryBlock<B>
+
+		fun <B : Block> registerSimpleBlock(name: String, properties: BlockBehaviour.Properties): RegistryBlock<B> =
+			this.register(name) { Block(properties) }
 	}
 
-	class BlockEntityTypes(modID: String) : RegistryProvider<BlockEntityType<*>>(BuiltInRegistries.BLOCK_ENTITY_TYPE, modID) {
+	class BlockEntityTypes(modID: String) :
+		RegistryProvider<BlockEntityType<*>>(BuiltInRegistries.BLOCK_ENTITY_TYPE, modID) {
 		inner class BlockEntityTypeBuilder<T : BlockEntity>(
 			factory: BlockEntitySupplier<T>,
 			validBlocks: Set<Block>
@@ -94,7 +102,7 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 
 		inline fun <reified T : BlockEntity> create(
 			noinline factory: (pos: BlockPos, state: BlockState) -> T
-		): BlockEntityTypeBuilder<T> = create(T::class.java, factory)
+		): BlockEntityTypeBuilder<T> = this.create(T::class.java, factory)
 
 		@ApiStatus.Internal
 		fun <T : BlockEntity> create(
@@ -102,9 +110,9 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 			factory: (pos: BlockPos, state: BlockState) -> T
 		): BlockEntityTypeBuilder<T> {
 			val validBlocks = mutableSetOf<Block>()
-			applicableBlocks.filterTo(validBlocks) { returnClass == it.blockEntity }
+			this.applicableBlocks.filterTo(validBlocks) { returnClass == it.blockEntity }
 			val builder = BlockEntityTypeBuilder(factory, validBlocks)
-			types[returnClass] = builder
+			this.types[returnClass] = builder
 			return builder
 		}
 
@@ -112,18 +120,23 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 			name: String,
 			supplier: BlockEntityTypes.() -> BlockEntityType<*>
 		): RegistryObject<BlockEntityType<*>, I> {
-			return super.register(name) { supplier() }
+			return super.register(name) { this.supplier() }
 		}
 
 		internal fun getType(clazz: Class<*>): BlockEntityType<*>? = this.types[clazz]
 	}
 
 	class Items(modID: String) : RegistryProvider<Item>(BuiltInRegistries.ITEM, modID) {
-		override fun <I : Item> createRegistryObject(name: String): RegistryItem<I> = RegistryItem.create(this.modID, name)
+		override fun <I : Item> createRegistryObject(name: String): RegistryItem<I> =
+			RegistryItem.create(this.modID, name)
 
 		@Suppress("UNCHECKED_CAST")
-		override fun <I : Item> register(name: String, supplier: Supplier<Item>): RegistryItem<I> = super.register<Item>(name, supplier) as RegistryItem<I>
-		fun <I : Item> simpleItem(name: String, properties: Item.Properties): RegistryItem<I> = this.register(name) { Item(properties) }
+		override fun <I : Item> register(name: String, supplier: Supplier<Item>): RegistryItem<I> =
+			super.register<Item>(name, supplier) as RegistryItem<I>
+
+		fun <I : Item> simpleItem(name: String, properties: Item.Properties): RegistryItem<I> =
+			this.register(name) { Item(properties) }
+
 		fun registerSimpleBlockItem(
 			name: String,
 			block: Supplier<Block>,
