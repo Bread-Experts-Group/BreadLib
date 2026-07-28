@@ -1,6 +1,8 @@
 //file:noinspection GroovyAssignabilityCheck
 //file:noinspection DependencyNotationArgument
 
+// todo update to kts, or drop this platform i dunno yet
+
 plugins {
     id 'multiloader-loader'
     id 'net.minecraftforge.gradle' version '7.0.31'

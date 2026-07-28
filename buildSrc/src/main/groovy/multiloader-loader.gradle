@@ -1,3 +1,5 @@
+// todo update to kts
+
 plugins {
     id 'multiloader-common'
 }
