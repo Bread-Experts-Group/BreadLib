@@ -13,12 +13,12 @@ import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.util.minecraft
 import org.bread_experts_group.breadlib.util.optional
 import org.bread_experts_group.breadlib.util.resolve
-import java.io.IOException
 import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.util.*
 import java.util.function.Predicate
 import java.util.stream.Stream
+import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 import kotlin.io.path.isDirectory
 
@@ -60,10 +60,7 @@ class ShaderResourceManager : ResourceManager {
 			val info = PlatformServices.PLATFORM.getModInfo(location.namespace)
 			val resolution = arrayOf("bl_shaders", location.namespace, location.path.substringAfter("shaders/"))
 			val dynamicShaders = PlatformServices.PLATFORM.gameDir.resolve(*resolution)
-			try {
-				return createResource(dynamicShaders).optional()
-			} catch (_: IOException) {
-			}
+			if (dynamicShaders.exists()) return createResource(dynamicShaders).optional()
 
 			val path = info.path.let {
 				if (it.isDirectory()) it
