@@ -7,7 +7,6 @@ plugins {
     id 'multiloader-loader'
     id 'net.minecraftforge.gradle' version '7.0.31'
     id 'net.minecraftforge.jarjar' version '0.2.3'
-
 }
 base {
     archivesName = "${mod_name}-forge-${minecraft_version}"
@@ -84,8 +83,8 @@ repositories {
 
 dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}")
-    implementation(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4"))
-    annotationProcessor 'net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7'
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4"))
+    annotationProcessor("net.fabricmc:sponge-mixin:0.17.3+mixin.0.8.7")
 
     jarJar "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}"
     jarJar "org.jetbrains.kotlin:kotlin-reflect:${kotlin_version}"

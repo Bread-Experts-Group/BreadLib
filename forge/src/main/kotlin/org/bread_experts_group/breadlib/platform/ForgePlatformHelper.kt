@@ -9,6 +9,7 @@ import net.minecraftforge.fml.loading.FMLLoader
 import net.minecraftforge.fml.loading.FMLPaths
 import net.minecraftforge.network.PacketDistributor
 import org.bread_experts_group.breadlib.ForgeNetworking
+import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
 import java.nio.file.Path
 
 class ForgePlatformHelper : IPlatformHelper {
@@ -28,7 +29,7 @@ class ForgePlatformHelper : IPlatformHelper {
 		val container = ModList.get().getModContainerById(modId).get()
 		val info = container.modInfo
 		val dependencies = info.dependencies.map { it.modId }
-		val path = info.owningFile.file.findResource("/")
+		val path = info.owningFile.file.filePath
 		val version = info.owningFile.versionString()
 
 		return ModInfo(modId, info.description, version, dependencies, path)
@@ -54,5 +55,9 @@ class ForgePlatformHelper : IPlatformHelper {
 	override fun sendToPlayersInDimension(payload: CustomPacketPayload, level: ServerLevel) {
 		ForgeNetworking.checkChannelNotNull()
 		ForgeNetworking.NETWORK_CHANNEL.send(payload, PacketDistributor.DIMENSION.with(level.dimension()))
+	}
+
+	override fun capabilitiesChanged(blockEntity: BreadLibBlockEntity) {
+		blockEntity.invalidateCaps()
 	}
 }
