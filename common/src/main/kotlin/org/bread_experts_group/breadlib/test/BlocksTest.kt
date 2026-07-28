@@ -13,4 +13,6 @@ object BlocksTest {
 		.withItem()
 	val QUARRY: RegistryBlockItem<QuarryBlock, BlockItem> = REGISTRY.register<QuarryBlock>("quarry", ::QuarryBlock)
 		.withItem()
+	val MP_CABLE: RegistryBlockItem<MultipartCableBlock, BlockItem> = REGISTRY.register<MultipartCableBlock>("multipart_cable", ::MultipartCableBlock)
+		.withItem()
 }

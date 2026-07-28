@@ -5,13 +5,13 @@
   "refmap": "${mod_id}.refmap.json",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "common.MixinLightningBolt"
+	"common.MixinLightningBolt"
   ],
   "client": [
     "client.MixinMinecraft"
   ],
   "server": [],
   "injectors": {
-    "defaultRequire": 1
+	"defaultRequire": 1
   }
 }

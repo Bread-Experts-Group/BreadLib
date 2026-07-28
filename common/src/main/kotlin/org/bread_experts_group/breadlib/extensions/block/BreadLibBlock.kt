@@ -2,6 +2,7 @@ package org.bread_experts_group.breadlib.extensions.block
 
 import net.minecraft.core.BlockPos
 import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.BlockAndTintGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
@@ -49,4 +50,8 @@ abstract class BreadLibBlock(
 	final override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
 		breadLibProperties().getProperties().forEach(builder::add)
 	}
+
+	fun generateQuads(
+		level: BlockAndTintGetter, state: BlockState, pos: BlockPos
+	): Any? = null
 }

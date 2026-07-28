@@ -20,6 +20,9 @@
     ],
     "main": [
       "org.bread_experts_group.breadlib.BreadLibFabric"
+    ],
+    "client": [
+      "org.bread_experts_group.breadlib.BreadLibFabric"
     ]
   },
   "mixins": [

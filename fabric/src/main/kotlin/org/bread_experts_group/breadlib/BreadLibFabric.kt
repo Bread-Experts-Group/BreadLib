@@ -1,11 +1,13 @@
 package org.bread_experts_group.breadlib
 
+import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.ModInitializer
 import net.minecraft.core.Registry
 import org.bread_experts_group.breadlib.platform.PlatformInitialization
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 
-class BreadLibFabric : ModInitializer {
+
+class BreadLibFabric : ClientModInitializer, ModInitializer {
 	companion object {
 		@Suppress("TYPE_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 		private fun <T> registerContent(provider: RegistryProvider<T>) {
@@ -32,5 +34,8 @@ class BreadLibFabric : ModInitializer {
 		FabricNetworking.registerPackets()
 
 		PlatformInitialization.registerCapabilities(BreadLib.MOD_ID)
+	}
+
+	override fun onInitializeClient() {
 	}
 }
