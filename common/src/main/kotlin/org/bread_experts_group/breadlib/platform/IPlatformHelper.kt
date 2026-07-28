@@ -11,21 +11,28 @@ interface IPlatformHelper {
 	 * @return The side of the current platform environment.
 	 * @see ApplicationSide
 	 */
-	fun getSide(): ApplicationSide
+	val side: ApplicationSide
 
 	/**
 	 * Gets the config directory for the current platform.
 	 * @return The path of the mod configuration directory
 	 */
-	fun getConfigDir(): Path
+	val configDir: Path
 
-	fun getGameDir(): Path
+	val gameDir: Path
 
 	/**
 	 * Gets the name of the current platform.
 	 * @return The name of the current platform
 	 */
-	fun getPlatformName(): String
+	val platformName: String
+
+	/**
+	 * Gets the kind of environment this platform represents.
+	 * @return The environment kind.
+	 * @see EnvironmentKind
+	 */
+	val environmentKind: EnvironmentKind
 
 	/**
 	 * Checks if a mod with the given id is loaded.
@@ -35,13 +42,6 @@ interface IPlatformHelper {
 	fun isModLoaded(modId: String): Boolean
 
 	fun getModInfo(modId: String): ModInfo
-
-	/**
-	 * Gets the kind of environment this platform represents.
-	 * @return The environment kind.
-	 * @see EnvironmentKind
-	 */
-	fun getEnvironmentKind(): EnvironmentKind
 
 	/**
 	 * Sends a packet to the server.

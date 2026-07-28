@@ -12,13 +12,25 @@ import net.minecraft.world.level.ChunkPos
 import java.nio.file.Path
 
 class FabricPlatformHelper : IPlatformHelper {
-	override fun getPlatformName(): String = "Fabric"
+	private val fabricLoader = FabricLoader.getInstance()
 
-	override fun isModLoaded(modId: String): Boolean = FabricLoader.getInstance().isModLoaded(modId)
+	override val platformName: String = "Fabric"
+	override val configDir: Path
+		get() = fabricLoader.configDir
+	override val gameDir: Path
+		get() = fabricLoader.gameDir
+	override val environmentKind: EnvironmentKind
+		get() = if (fabricLoader.isDevelopmentEnvironment) EnvironmentKind.DEVELOPMENT
+		else EnvironmentKind.RELEASE
+	override val side: ApplicationSide
+		get() = if (fabricLoader.environmentType == EnvType.CLIENT) ApplicationSide.CLIENT
+		else ApplicationSide.SERVER
+
+	override fun isModLoaded(modId: String): Boolean = fabricLoader.isModLoaded(modId)
 
 	override fun getModInfo(modId: String): ModInfo {
 		check(isModLoaded(modId)) { "Mod $modId is not loaded, cannot retrieve info." }
-		val container = FabricLoader.getInstance().getModContainer(modId).get()
+		val container = fabricLoader.getModContainer(modId).get()
 		val metadata = container.metadata
 		val dependencies = metadata.dependencies.filter { it.kind == ModDependency.Kind.DEPENDS }.map { it.modId }
 		val version = metadata.version.friendlyString
@@ -26,18 +38,6 @@ class FabricPlatformHelper : IPlatformHelper {
 
 		return ModInfo(modId, metadata.description, version, dependencies, jarPath)
 	}
-
-	override fun getConfigDir(): Path = FabricLoader.getInstance().configDir
-
-	override fun getGameDir(): Path = FabricLoader.getInstance().gameDir
-
-	override fun getEnvironmentKind(): EnvironmentKind =
-		if (FabricLoader.getInstance().isDevelopmentEnvironment) EnvironmentKind.DEVELOPMENT
-		else EnvironmentKind.RELEASE
-
-	override fun getSide(): ApplicationSide =
-		if (FabricLoader.getInstance().environmentType == EnvType.CLIENT) ApplicationSide.CLIENT
-		else ApplicationSide.SERVER
 
 	override fun sendToServer(payload: CustomPacketPayload) {
 		ClientPlayNetworking.send(payload)

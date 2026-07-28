@@ -84,7 +84,7 @@ fun kExample() {
 		getBlockEntityTypes(BreadLib.MOD_ID)
 	)
 
-	if (PlatformServices.PLATFORM.getSide() == ApplicationSide.CLIENT) {
+	if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {
 		TasksClientTest.renderTest()
 		TasksClientTest.layeredDrawTest()
 		TasksClientTest.networkTest()

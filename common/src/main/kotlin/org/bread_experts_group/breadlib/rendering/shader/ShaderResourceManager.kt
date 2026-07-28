@@ -13,7 +13,6 @@ import net.minecraft.server.packs.resources.ResourceManager
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.util.optional
 import java.nio.file.Files
-import java.nio.file.Path
 import java.util.*
 import java.util.function.Predicate
 import java.util.stream.Stream
@@ -24,7 +23,7 @@ class ShaderResourceManager : ResourceManager {
 			"breadlib_shaders", Component.literal("Breadlib Shaders"), PackSource.BUILT_IN, Optional.empty<KnownPack?>()
 		)
 		private val filePackResources =
-			FilePackResources.FileResourcesSupplier(PlatformServices.PLATFORM.getGameDir().resolve("shaders"))
+			FilePackResources.FileResourcesSupplier(PlatformServices.PLATFORM.gameDir.resolve("shaders"))
 	}
 
 	override fun getNamespaces(): MutableSet<String> = mutableSetOf()
@@ -47,8 +46,7 @@ class ShaderResourceManager : ResourceManager {
 		val isBuiltin = location.namespace == "minecraft"
 		if (isBuiltin) return Minecraft.getInstance().resourceManager.getResource(location)
 
-		val gameDir: Path = PlatformServices.PLATFORM.getGameDir()
-		val rootPath = gameDir.resolve("custom-shaders").resolve(location.namespace)
+		val rootPath = PlatformServices.PLATFORM.gameDir.resolve("custom-shaders").resolve(location.namespace)
 		val resolved = rootPath.resolve(location.path.replace("shaders/", ""))
 
 //		BreadLib.LOGGER.info("resolved: {}", resolved)

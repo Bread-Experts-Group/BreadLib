@@ -20,7 +20,7 @@ object TasksClientTest {
 
 	fun layeredDrawTest() {
 		newTask { task: LayeredDrawTask ->
-			val platform = PlatformServices.PLATFORM.getPlatformName()
+			val platform = PlatformServices.PLATFORM.platformName
 			val debugInfo = Component.literal("${BreadLib.MOD_ID} v${BreadLib.MOD_VERSION} | $platform")
 			val width = Minecraft.getInstance().font.width(debugInfo)
 			task.add(modLoc("layered_draw", "test_layer")) { guiGraphics: GuiGraphics, _: DeltaTracker ->

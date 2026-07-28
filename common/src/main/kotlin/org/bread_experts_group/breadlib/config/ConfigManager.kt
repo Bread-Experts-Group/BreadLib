@@ -10,7 +10,7 @@ import kotlin.io.path.createFile
 
 class ConfigManager(private val modID: String) {
 	operator fun get(name: String, backend: ConfigBackend): ConfigFile = ConfigFile(
-		PlatformServices.PLATFORM.getConfigDir().resolve(modID).createDirectories()
+		PlatformServices.PLATFORM.configDir.resolve(modID).createDirectories()
 			.resolve("$name.${backend.extension}").also {
 			it.parent.createDirectories()
 			try {

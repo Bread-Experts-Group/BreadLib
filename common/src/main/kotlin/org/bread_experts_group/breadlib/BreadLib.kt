@@ -21,12 +21,12 @@ object BreadLib {
 	fun init() {
 		LOGGER.info(
 			"Hello from Common init on {}! we are currently in a {} environment on the {}!",
-			PlatformServices.PLATFORM.getPlatformName(),
-			PlatformServices.PLATFORM.getEnvironmentKind(),
-			PlatformServices.PLATFORM.getSide()
+			PlatformServices.PLATFORM.platformName,
+			PlatformServices.PLATFORM.environmentKind,
+			PlatformServices.PLATFORM.side
 		)
 		kExample()
 
-		BreadLib.LOGGER.info(PlatformServices.PLATFORM.getModInfo("breadlib").jarHash())
+		LOGGER.info(PlatformServices.PLATFORM.getModInfo("breadlib").hash)
 	}
 }

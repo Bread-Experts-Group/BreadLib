@@ -11,20 +11,25 @@ data class ModInfo(
 	val description: String,
 	val version: String,
 	val dependencies: List<String>,
-	val jarPath: Path
+	val path: Path
 ) {
+	companion object {
+		private val DIGEST = MessageDigest.getInstance("MD5")
+		private val HASH_BUFFER = ByteBuffer.allocate(8192)
+	}
+
 	fun dependsOn(modId: String): Boolean = modId in this.dependencies
 
-	fun jarHash(): String? {
-		if (this.jarPath.isDirectory()) return null
-		val digest = MessageDigest.getInstance("SHA-256")
-		val channel = Files.newByteChannel(this.jarPath)
-		val buffer = ByteBuffer.allocate(8192)
-
-		while (channel.read(buffer.clear()) != -1) {
-			digest.update(buffer.flip())
+	val hash: String? by lazy {
+		if (this.path.isDirectory()) return@lazy null
+		synchronized(DIGEST) {
+			DIGEST.reset()
+			Files.newByteChannel(this.path).use { channel ->
+				synchronized(HASH_BUFFER) {
+					while (channel.read(HASH_BUFFER.clear()) != -1) DIGEST.update(HASH_BUFFER.flip())
+					DIGEST.digest().toHexString()
+				}
+			}
 		}
-
-		return digest.digest().toHexString()
 	}
 }

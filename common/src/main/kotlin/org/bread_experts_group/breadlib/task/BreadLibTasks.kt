@@ -21,7 +21,7 @@ import org.bread_experts_group.breadlib.task.render.ShaderTask
 
 object BreadLibTasks {
 	fun setup() {
-		when (PlatformServices.PLATFORM.getSide()) {
+		when (PlatformServices.PLATFORM.side) {
 			ApplicationSide.CLIENT -> {
 				this.setupInputs()
 				this.setupCommands()

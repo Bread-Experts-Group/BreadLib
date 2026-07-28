@@ -12,11 +12,15 @@ import org.bread_experts_group.breadlib.ForgeNetworking
 import java.nio.file.Path
 
 class ForgePlatformHelper : IPlatformHelper {
-	override fun getPlatformName(): String = "Forge"
-
-	override fun getConfigDir(): Path = FMLPaths.CONFIGDIR.get()
-
-	override fun getGameDir(): Path = FMLPaths.GAMEDIR.get()
+	override val platformName: String = "Forge"
+	override val configDir: Path
+		get() = FMLPaths.CONFIGDIR.get()
+	override val gameDir: Path
+		get() = FMLPaths.GAMEDIR.get()
+	override val environmentKind: EnvironmentKind
+		get() = if (FMLLoader.isProduction()) EnvironmentKind.RELEASE else EnvironmentKind.DEVELOPMENT
+	override val side: ApplicationSide
+		get() = if (FMLLoader.getDist() == Dist.CLIENT) ApplicationSide.CLIENT else ApplicationSide.SERVER
 
 	override fun isModLoaded(modId: String): Boolean = ModList.get().isLoaded(modId)
 
@@ -29,12 +33,6 @@ class ForgePlatformHelper : IPlatformHelper {
 
 		return ModInfo(modId, info.description, version, dependencies, path)
 	}
-
-	override fun getEnvironmentKind(): EnvironmentKind =
-		if (FMLLoader.isProduction()) EnvironmentKind.RELEASE else EnvironmentKind.DEVELOPMENT
-
-	override fun getSide(): ApplicationSide =
-		if (FMLLoader.getDist() == Dist.CLIENT) ApplicationSide.CLIENT else ApplicationSide.SERVER
 
 	override fun sendToServer(payload: CustomPacketPayload) {
 		ForgeNetworking.checkChannelNotNull()
