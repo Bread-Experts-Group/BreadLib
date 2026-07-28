@@ -29,7 +29,7 @@ class NeoForgePlatformHelper : IPlatformHelper {
 		val container = ModList.get().getModContainerById(modId).get()
 		val info = container.modInfo
 		val dependencies = info.dependencies.map { it.modId }
-		val path = info.owningFile.file.filePath
+		val path = info.owningFile.file.findResource("/")
 		val version = info.owningFile.versionString()
 
 		return ModInfo(modId, info.description, version, dependencies, path)
