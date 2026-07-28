@@ -2,10 +2,12 @@ package org.bread_experts_group.breadlib
 
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.common.Mod
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent
 import net.neoforged.neoforge.data.event.GatherDataEvent
 import net.neoforged.neoforge.registries.RegisterEvent
 import org.bread_experts_group.breadlib.BreadLib.init
 import org.bread_experts_group.breadlib.platform.NeoForgeGenerateDataTask
+import org.bread_experts_group.breadlib.platform.PlatformInitialization
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.TaskManager
 
@@ -34,6 +36,7 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 
 	init {
 		eventBus.addListener { event: GatherDataEvent -> TaskManager.runTasks(NeoForgeGenerateDataTask(event)) }
+		eventBus.addListener { event: RegisterCapabilitiesEvent -> PlatformInitialization.registerCapabilities(event, BreadLib.MOD_ID) }
 
 		BreadLib.LOGGER.info("Hello NeoForge world!")
 		init()

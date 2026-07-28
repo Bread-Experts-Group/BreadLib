@@ -13,10 +13,12 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.ticks.TickPriority
 import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlockEntityTypes
+import org.jetbrains.annotations.ApiStatus
 import java.lang.reflect.Constructor
 
 abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
-	internal val blockEntity: Class<BE>,
+	@ApiStatus.Internal
+	val blockEntity: Class<BE>,
 	blockProperties: Properties,
 	scheduleTick: Int? = null,
 	scheduleTickPriority: TickPriority = TickPriority.NORMAL,

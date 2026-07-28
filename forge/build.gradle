@@ -67,6 +67,17 @@ repositories {
     minecraft.mavenizer(it) // In Kotlin, it = this
     maven fg.forgeMaven
     maven fg.minecraftLibsMaven
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -79,6 +90,10 @@ dependencies {
 
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
+    // https://modrinth.com/mod/wthit/version/forge-12.10.2
+    runtimeOnly "maven.modrinth:6AQIaxuO:goffbZcc"
+    // https://modrinth.com/mod/badpackets/version/forge-0.8.2 (dependency of wthit)
+    runtimeOnly "maven.modrinth:ftdbN0KK:PXf9r02i"
 }
 
 compileJava.dependsOn(processResources)

@@ -8,6 +8,7 @@ import net.neoforged.fml.ModList
 import net.neoforged.fml.loading.FMLLoader
 import net.neoforged.fml.loading.FMLPaths
 import net.neoforged.neoforge.network.PacketDistributor
+import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
 import java.nio.file.Path
 
 class NeoForgePlatformHelper : IPlatformHelper {
@@ -49,5 +50,9 @@ class NeoForgePlatformHelper : IPlatformHelper {
 
 	override fun sendToPlayersInDimension(payload: CustomPacketPayload, level: ServerLevel) {
 		PacketDistributor.sendToPlayersInDimension(level, payload)
+	}
+
+	override fun capabilitiesChanged(blockEntity: BreadLibBlockEntity) {
+		blockEntity.level?.invalidateCapabilities(blockEntity.blockPos)
 	}
 }

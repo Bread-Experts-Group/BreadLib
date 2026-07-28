@@ -93,7 +93,9 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		}
 
 		private val types = mutableMapOf<Class<*>, BlockEntityType<*>>()
-		private val applicableBlocks: List<BreadLibBlockWithEntity<*>> by lazy {
+
+		@get:ApiStatus.Internal
+		val applicableBlocks: List<BreadLibBlockWithEntity<*>> by lazy {
 			getBlocks(modID)
 				.also { if (it.frozen == null) it.freeze() }
 				.entries.keys
@@ -123,7 +125,8 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 			return super.register(name) { this.supplier() }
 		}
 
-		internal fun getType(clazz: Class<*>): BlockEntityType<*>? = this.types[clazz]
+		@ApiStatus.Internal
+		fun getType(clazz: Class<*>): BlockEntityType<*>? = this.types[clazz]
 	}
 
 	class Items(modID: String) : RegistryProvider<Item>(BuiltInRegistries.ITEM, modID) {

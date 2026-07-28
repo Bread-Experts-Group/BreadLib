@@ -14,14 +14,17 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.saveddata.SavedData
 import org.bread_experts_group.breadlib.BreadLib
+import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
+import org.bread_experts_group.breadlib.capability.EnergyPacket
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
 import org.bread_experts_group.breadlib.extensions.block.Tickable
+import org.bread_experts_group.breadlib.util.warn
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BreadLibBlockEntity(
 	pPos, pBlockState, BreadLib.MOD_ID
-), Tickable.Server {
+), Tickable.Server, BlockEnergyCapability {
 	private val xMine = 10
 	private val zMine = 10
 
@@ -43,6 +46,12 @@ class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BreadLibBlock
 	var id: Int? = null
 
 	override fun serverTick(level: ServerLevel, pos: BlockPos, state: BlockState) {
+		capabilitySides[BlockEnergyCapability::class.java]!!.also {
+			it.clear()
+			it.add(Direction.entries.random())
+			level.updateNeighborsAt(pos, state.block)
+		}
+
 		if (id == null) id = ItemEntity(level, 0.0, 0.0, 0.0, ItemStack(this.blockState.block)).let {
 			it.discard()
 			it.id
@@ -115,5 +124,18 @@ class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BreadLibBlock
 		this.drillPos = null
 		this.breakingTick = 0
 		this.breakingProgress = 0
+	}
+
+	override fun pull(side: Direction?, what: EnergyPacket?, simulate: Boolean): EnergyPacket {
+		if (what == null) {
+			if (simulate) return EnergyPacket(4096)
+			return EnergyPacket(1000)
+		}
+		return EnergyPacket(0)
+	}
+
+	override fun push(side: Direction?, what: EnergyPacket, simulate: Boolean): EnergyPacket {
+		warn("Not yet implemented $side $what $simulate")
+		return EnergyPacket(0)
 	}
 }

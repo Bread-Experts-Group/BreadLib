@@ -9,6 +9,7 @@ import net.fabricmc.loader.api.metadata.ModDependency
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
+import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
 import java.nio.file.Path
 
 class FabricPlatformHelper : IPlatformHelper {
@@ -53,5 +54,8 @@ class FabricPlatformHelper : IPlatformHelper {
 
 	override fun sendToPlayersInDimension(payload: CustomPacketPayload, level: ServerLevel) {
 		for (player in PlayerLookup.world(level)) ServerPlayNetworking.send(player, payload)
+	}
+
+	override fun capabilitiesChanged(blockEntity: BreadLibBlockEntity) {
 	}
 }

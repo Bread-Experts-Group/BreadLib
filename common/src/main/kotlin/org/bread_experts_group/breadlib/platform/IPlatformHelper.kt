@@ -3,6 +3,7 @@ package org.bread_experts_group.breadlib.platform
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
+import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
 import java.nio.file.Path
 
 interface IPlatformHelper {
@@ -70,4 +71,6 @@ interface IPlatformHelper {
 	 * @param level The current dimension
 	 */
 	fun sendToPlayersInDimension(payload: CustomPacketPayload, level: ServerLevel)
+
+	fun capabilitiesChanged(blockEntity: BreadLibBlockEntity)
 }
