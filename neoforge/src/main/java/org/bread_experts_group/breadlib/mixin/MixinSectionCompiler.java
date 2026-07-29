@@ -39,8 +39,9 @@ abstract class MixinSectionCompiler {
 			RenderType renderType
 	) {
 		var level = Minecraft.getInstance().level;
-		if (state.getBlock() instanceof BreadLibBlock block && level != null) {
-			ModelShim.doom(state, pos, level, poseStack, vertexConsumer, randomSource);
-		} else instance.renderBatched(state, pos, blockAndTintGetter, poseStack, vertexConsumer, checkSides, randomSource);
+		if (state.getBlock() instanceof BreadLibBlock && level != null) {
+			if (ModelShim.doom(state, pos, level, poseStack, vertexConsumer, randomSource)) return;
+		}
+		instance.renderBatched(state, pos, blockAndTintGetter, poseStack, vertexConsumer, checkSides, randomSource);
 	}
 }

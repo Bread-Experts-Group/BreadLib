@@ -1,8 +1,10 @@
 package org.bread_experts_group.breadlib.extensions.block
 
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import net.minecraft.core.BlockPos
+import net.minecraft.util.RandomSource
 import net.minecraft.world.item.context.BlockPlaceContext
-import net.minecraft.world.level.BlockAndTintGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
@@ -51,7 +53,12 @@ abstract class BreadLibBlock(
 		breadLibProperties().getProperties().forEach(builder::add)
 	}
 
-	fun generateQuads(
-		level: BlockAndTintGetter, state: BlockState, pos: BlockPos
-	): Any? = null
+	open val generateQuads: ((
+		state: BlockState,
+		pos: BlockPos,
+		level: Level,
+		poseStack: PoseStack,
+		vertexConsumer: VertexConsumer,
+		randomSource: RandomSource
+	) -> Unit)? = null
 }

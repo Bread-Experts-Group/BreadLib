@@ -36,7 +36,8 @@ abstract class MixinSectionCompiler {
 	) {
 		var level = Minecraft.getInstance().level;
 		if (blockState.getBlock() instanceof BreadLibBlock && level != null) {
-			ModelShim.doom(blockState, blockPos, level, poseStack, vertexConsumer, randomSource);
-		} else original.call(instance, blockState, blockPos, blockAndTintGetter, poseStack, vertexConsumer, checkSides, randomSource);
+			if (ModelShim.doom(blockState, blockPos, level, poseStack, vertexConsumer, randomSource)) return;
+		}
+		original.call(instance, blockState, blockPos, blockAndTintGetter, poseStack, vertexConsumer, checkSides, randomSource);
 	}
 }
