@@ -37,7 +37,7 @@ pluginManagement {
 		val kotlinVersion: String = providers.gradleProperty("kotlin_version").get()
 		id("org.jetbrains.kotlin.jvm") version kotlinVersion
 		id("org.jetbrains.kotlin.plugin.serialization") version kotlinVersion
-	}
+    }
 }
 
 plugins {

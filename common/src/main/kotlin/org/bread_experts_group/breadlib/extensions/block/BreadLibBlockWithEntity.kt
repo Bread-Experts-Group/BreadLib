@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.ticks.TickPriority
+import org.bread_experts_group.breadlib.platform.ApplicationSide
+import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlockEntityTypes
 import org.jetbrains.annotations.ApiStatus
 import java.lang.reflect.Constructor
@@ -32,7 +34,9 @@ abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
 		if (bet.getType(blockEntity) == null) bet.register<BlockEntityType<*>>("test_${System.currentTimeMillis()}") {
 			@Suppress("UNCHECKED_CAST")
 			create(blockEntity as Class<BlockEntity>, (beConstructor as Constructor<BlockEntity>)::newInstance).also { builder ->
-				blockEntityRenderer()?.let { renderer -> builder.withRenderer { renderer(it) as BlockEntityRenderer<BlockEntity> } }
+				if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {
+					blockEntityRenderer()?.let { renderer -> builder.withRenderer { renderer(it) as BlockEntityRenderer<BlockEntity> } }
+				}
 			}
 		}
 	}
