@@ -21,9 +21,8 @@ public class FabricNetworking {
 		}
 		if (PlatformServices.PLATFORM.getSide() == ApplicationSide.CLIENT) for (PayloadInfo info : task.clientboundPayloads()) {
 			PayloadTypeRegistry.playS2C().register(info.type, info.streamCodec);
-			ClientPlayNetworking.registerGlobalReceiver(info.type, (payload, context) ->
-					info.handler.handle(payload, context.player())
-			);
+			FabricNetworkingExt ext = new FabricNetworkingExt(info);
+			ClientPlayNetworking.registerGlobalReceiver(info.type, ext::impl);
 		}
 	}
 }

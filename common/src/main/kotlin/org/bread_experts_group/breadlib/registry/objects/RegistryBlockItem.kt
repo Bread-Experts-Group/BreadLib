@@ -4,8 +4,9 @@ import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
 
-class RegistryBlockItem<B : Block, I : BlockItem>(source: RegistryBlock<B>, val registryItem: RegistryItem<I>) : AbstractRegistryBlock<B>(
+class RegistryBlockItem<B : Block, I : BlockItem>(private val source: RegistryBlock<B>, val registryItem: RegistryItem<I>) : AbstractRegistryBlock<B>(
 	source.name
 ) {
 	override fun asItem(): Item = registryItem.get()
+	override fun get(): B = source.get()
 }
