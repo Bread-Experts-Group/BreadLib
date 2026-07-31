@@ -1,9 +1,6 @@
 package org.bread_experts_group.breadlib.extensions.block
 
-import com.mojang.blaze3d.vertex.PoseStack
-import com.mojang.blaze3d.vertex.VertexConsumer
 import net.minecraft.core.BlockPos
-import net.minecraft.util.RandomSource
 import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
@@ -52,13 +49,4 @@ abstract class BreadLibBlock(
 	final override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
 		breadLibProperties().getProperties().forEach(builder::add)
 	}
-
-	open val generateQuads: ((
-		state: BlockState,
-		pos: BlockPos,
-		level: Level,
-		poseStack: PoseStack,
-		vertexConsumer: VertexConsumer,
-		randomSource: RandomSource
-	) -> Unit)? = null
 }

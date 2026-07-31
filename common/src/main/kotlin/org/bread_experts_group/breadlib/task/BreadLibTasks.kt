@@ -24,11 +24,10 @@ object BreadLibTasks {
 		when (PlatformServices.PLATFORM.side) {
 			ApplicationSide.CLIENT -> {
 				this.setupInputs()
-				this.setupCommands()
 				this.setupShaders()
 			}
 			ApplicationSide.SERVER -> {
-
+				this.setupServerCommands()
 			}
 		}
 	}
@@ -69,7 +68,7 @@ object BreadLibTasks {
 		}
 	}
 
-	private fun setupCommands() {
+	private fun setupServerCommands() {
 		TaskManager.newTask { task: ServerCommandTask ->
 			task.registerCommand { dispatcher, context ->
 				dispatcher.register(

@@ -88,7 +88,6 @@ fun kExample() {
 		TasksClientTest.renderTest()
 		TasksClientTest.layeredDrawTest()
 		TasksClientTest.networkTest()
-
 	} else {
 		TasksServerTest.networkTest()
 	}
