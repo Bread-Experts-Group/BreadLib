@@ -9,7 +9,6 @@ import org.bread_experts_group.breadlib.BreadLib.modLoc
 import org.bread_experts_group.breadlib.network.NetworkContext
 import org.bread_experts_group.breadlib.platform.PlatformServices
 
-@JvmRecord
 data class ServerboundPacketTest(val testInt: Int, val testString: String) : CustomPacketPayload {
 	companion object {
 		@JvmField

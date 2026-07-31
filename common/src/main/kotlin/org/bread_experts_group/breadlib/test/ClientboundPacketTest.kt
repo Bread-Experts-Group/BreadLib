@@ -8,7 +8,6 @@ import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.BreadLib.modLoc
 import org.bread_experts_group.breadlib.network.NetworkContext
 
-@JvmRecord
 data class ClientboundPacketTest(val testInt: Int, val testString: String) : CustomPacketPayload {
 	companion object {
 		val TYPE: CustomPacketPayload.Type<ClientboundPacketTest> =

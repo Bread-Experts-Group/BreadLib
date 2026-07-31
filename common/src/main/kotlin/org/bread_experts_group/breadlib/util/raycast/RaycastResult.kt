@@ -5,7 +5,6 @@ import net.minecraft.core.Direction
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.phys.shapes.VoxelShape
 
-@JvmRecord
 data class RaycastResult<T>(
 	val positionFrom: Vec3,
 	val positionTo: Vec3,

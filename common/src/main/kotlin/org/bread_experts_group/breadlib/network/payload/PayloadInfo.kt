@@ -5,7 +5,6 @@ import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import org.bread_experts_group.breadlib.network.NetworkDirection
 
-@JvmRecord
 data class PayloadInfo<B : ByteBuf, T : CustomPacketPayload>(
 	@JvmField val packetClass: Class<T>,
 	@JvmField val handler: PayloadHandler<T>,

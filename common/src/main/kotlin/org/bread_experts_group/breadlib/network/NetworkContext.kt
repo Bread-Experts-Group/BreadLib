@@ -6,7 +6,6 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.Level
 import org.bread_experts_group.breadlib.platform.ApplicationSide
 
-@JvmRecord
 data class NetworkContext(val player: Player) {
 	val side: ApplicationSide
 		get() = if (level().isClientSide) ApplicationSide.CLIENT else ApplicationSide.SERVER

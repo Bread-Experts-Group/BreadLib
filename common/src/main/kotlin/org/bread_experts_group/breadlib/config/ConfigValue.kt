@@ -2,10 +2,9 @@ package org.bread_experts_group.breadlib.config
 
 import java.util.function.Supplier
 
-@JvmRecord
 data class ConfigValue<T>(val name: String, val defaultValue: Supplier<T>, val comment: String) {
 	companion object {
-		fun <T> builder(): Builder<T> = ConfigValue.Builder()
+		fun <T> builder(): Builder<T> = Builder()
 	}
 
 	class Builder<T> {

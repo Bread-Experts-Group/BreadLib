@@ -4,6 +4,7 @@ plugins {
     id("multiloader-common")
     id("net.neoforged.moddev")
 //    kotlin("kapt")
+    kotlin("kapt")
 }
 
 private fun getProp(property: String): String = providers.gradleProperty(property).get()
@@ -25,6 +26,7 @@ dependencies {
     // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
     compileOnly("io.github.llamalad7:mixinextras-common:0.5.4")
     annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.4")
+    kapt("io.github.llamalad7:mixinextras-common:0.5.4")
 //    kapt("io.github.llamalad7:mixinextras-common:0.5.4")
     testImplementation(kotlin("test"))
 }
