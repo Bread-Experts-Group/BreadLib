@@ -15,7 +15,7 @@ jarJar.register()
 tasks.named('jar', Jar) {
     manifest {
         // Add our config to the manifest of our jar to have Mixin detect us at runtime.
-        attributes['MixinConfigs'] = "${mod_id}.forge.mixins.json"
+        attributes['MixinConfigs'] = "[${mod_id}.forge.mixins.json, ${mod_id}.mixins.json]"
     }
 }
 tasks.named('jarJar') {
@@ -37,10 +37,9 @@ minecraft {
 
     runs {
         configureEach {
-            workingDir = layout.projectDirectory.dir('run')
-
             systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
             systemProperty 'forge.enabledGameTestNamespaces', "${mod_id}"
+            args("--mixin.config=${mod_id}.forge.mixins.json", "--mixin.config=${mod_id}.mixins.json")
         }
 
         register('client') {
