@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import org.bread_experts_group.breadlib.BreadLib;
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlock;
-import org.bread_experts_group.breadlib.rendering.model.CustomMeshProvider;
+import org.bread_experts_group.breadlib.rendering.model.BreadLibMeshProvider;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,7 +45,7 @@ abstract class MixinSectionCompiler {
 		var level = Minecraft.getInstance().level;
 		if (state.getBlock() instanceof BreadLibBlock && level != null) {
 			BreadLib.LOGGER.info("Render redirect passed");
-			if (CustomMeshProvider.renderMesh(state, pos, level, poseStack, vertexConsumer, randomSource)) return;
+			if (BreadLibMeshProvider.renderMesh(state, pos, level, poseStack, vertexConsumer, randomSource)) return;
 		}
 		//noinspection deprecation
 		instance.renderBatched(state, pos, blockAndTintGetter, poseStack, vertexConsumer, checkSides, randomSource);

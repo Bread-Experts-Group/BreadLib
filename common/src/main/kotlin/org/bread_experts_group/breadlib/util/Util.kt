@@ -3,10 +3,12 @@
 package org.bread_experts_group.breadlib.util
 
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.state.BlockState
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.util.Supplier
 import org.bread_experts_group.breadlib.BreadLib
@@ -57,6 +59,8 @@ val Item.location: ResourceLocation
 	get() = BuiltInRegistries.ITEM.getKey(this)
 val Block.location: ResourceLocation
 	get() = BuiltInRegistries.BLOCK.getKey(this)
+val BlockState.particleSprite: TextureAtlasSprite
+	get() = minecraft!!.blockRenderer.blockModelShaper.getParticleIcon(this)
 
 val Item.texture: ResourceLocation
 	get() = this.location.withPrefix("textures/item/").withSuffix(".png")

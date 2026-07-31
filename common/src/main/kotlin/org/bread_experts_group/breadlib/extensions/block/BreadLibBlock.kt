@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.StateDefinition
 import net.minecraft.world.level.block.state.properties.Property
 import net.minecraft.world.ticks.TickPriority
+import org.bread_experts_group.breadlib.rendering.model.MeshProvider
 
 abstract class BreadLibBlock(
 	blockProperties: Properties,
@@ -49,4 +50,6 @@ abstract class BreadLibBlock(
 	final override fun createBlockStateDefinition(builder: StateDefinition.Builder<Block, BlockState>) {
 		breadLibProperties().getProperties().forEach(builder::add)
 	}
+
+	open val meshProvider: MeshProvider? = null
 }
