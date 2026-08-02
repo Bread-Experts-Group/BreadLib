@@ -61,44 +61,42 @@ object ModelUtil {
     private val RESCALE_22_5 = 1.0f / cos((Math.PI / 8).toFloat().toDouble()).toFloat() - 1.0f
     private val RESCALE_45 = 1.0f / cos((Math.PI / 4).toFloat().toDouble()).toFloat() - 1.0f
 
-    private fun applyElementRotation(vec: Vector3f, partRotation: BlockElementRotation?) {
-        if (partRotation != null) {
-            val vector3f: Vector3f?
-            val vector3f1: Vector3f?
-            when (partRotation.axis()) {
-                Direction.Axis.X -> {
-                    vector3f = Vector3f(1.0f, 0.0f, 0.0f)
-                    vector3f1 = Vector3f(0.0f, 1.0f, 1.0f)
-                }
-
-                Direction.Axis.Y -> {
-                    vector3f = Vector3f(0.0f, 1.0f, 0.0f)
-                    vector3f1 = Vector3f(1.0f, 0.0f, 1.0f)
-                }
-
-                Direction.Axis.Z -> {
-                    vector3f = Vector3f(0.0f, 0.0f, 1.0f)
-                    vector3f1 = Vector3f(1.0f, 1.0f, 0.0f)
-                }
-
-                else -> throw IllegalArgumentException("There are only 3 axes")
+    private fun applyElementRotation(vec: Vector3f, partRotation: BlockElementRotation) {
+        val vector3f: Vector3f?
+        val vector3f1: Vector3f?
+        when (partRotation.axis()) {
+            Direction.Axis.X -> {
+                vector3f = Vector3f(1.0f, 0.0f, 0.0f)
+                vector3f1 = Vector3f(0.0f, 1.0f, 1.0f)
             }
 
-            val quaternion = Quaternionf().rotationAxis(partRotation.angle() * (Math.PI / 180.0).toFloat(), vector3f)
-            if (partRotation.rescale()) {
-                if (abs(partRotation.angle()) == 22.5f) {
-                    vector3f1.mul(RESCALE_22_5)
-                } else {
-                    vector3f1.mul(RESCALE_45)
-                }
-
-                vector3f1.add(1.0f, 1.0f, 1.0f)
-            } else {
-                vector3f1.set(1.0f, 1.0f, 1.0f)
+            Direction.Axis.Y -> {
+                vector3f = Vector3f(0.0f, 1.0f, 0.0f)
+                vector3f1 = Vector3f(1.0f, 0.0f, 1.0f)
             }
 
-            this.rotateVertexBy(vec, Vector3f(partRotation.origin()), Matrix4f().rotation(quaternion), vector3f1)
+            Direction.Axis.Z -> {
+                vector3f = Vector3f(0.0f, 0.0f, 1.0f)
+                vector3f1 = Vector3f(1.0f, 1.0f, 0.0f)
+            }
+
+            else -> throw IllegalArgumentException("There are only 3 axes")
         }
+
+        val quaternion = Quaternionf().rotationAxis(partRotation.angle() * (Math.PI / 180.0).toFloat(), vector3f)
+        if (partRotation.rescale()) {
+            if (abs(partRotation.angle()) == 22.5f) {
+                vector3f1.mul(RESCALE_22_5)
+            } else {
+                vector3f1.mul(RESCALE_45)
+            }
+
+            vector3f1.add(1.0f, 1.0f, 1.0f)
+        } else {
+            vector3f1.set(1.0f, 1.0f, 1.0f)
+        }
+
+        this.rotateVertexBy(vec, Vector3f(partRotation.origin()), Matrix4f().rotation(quaternion), vector3f1)
     }
 
     fun applyModelRotation(pos: Vector3f, transform: Transformation) {
@@ -133,7 +131,7 @@ object ModelUtil {
         blockFaceUV: BlockFaceUV,
         posDiv16: FloatArray,
         sprite: TextureAtlasSprite,
-        rotation: Transformation,
+        transform: Transformation,
         partRotation: BlockElementRotation?
     ) {
         val vertexInfo = FaceInfo.fromFacing(facing).getVertexInfo(vertexIndex)
@@ -142,8 +140,8 @@ object ModelUtil {
             posDiv16[vertexInfo.yFace],
             posDiv16[vertexInfo.zFace]
         )
-        this.applyElementRotation(vector3f, partRotation)
-        this.applyModelRotation(vector3f, rotation)
+        if (partRotation != null) this.applyElementRotation(vector3f, partRotation)
+        this.applyModelRotation(vector3f, transform)
         this.fillVertex(vertexData, vertexIndex, vector3f, sprite, blockFaceUV)
     }
 
@@ -152,12 +150,12 @@ object ModelUtil {
         sprite: TextureAtlasSprite,
         facing: Direction,
         posDiv16: FloatArray,
-        rotation: Transformation,
-        partRotation: BlockElementRotation?
+        transform: Transformation,
+        partRotation: BlockElementRotation? = null
     ): IntArray = IntArray(32).also { vertexData ->
         for (vertexIndex in 0..3) this.bakeVertex(
             vertexData, vertexIndex,
-            facing, blockFaceUV, posDiv16, sprite, rotation, partRotation
+            facing, blockFaceUV, posDiv16, sprite, transform, partRotation
         )
     }
 
