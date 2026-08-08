@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.util.Supplier
 import org.bread_experts_group.breadlib.BreadLib
 import java.nio.file.Path
-import java.util.Optional
+import java.util.*
 
 val minecraft: Minecraft?
 	get() = Minecraft.getInstance()

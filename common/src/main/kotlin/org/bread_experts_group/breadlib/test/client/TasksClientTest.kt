@@ -8,10 +8,9 @@ import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.BreadLib.modLoc
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
-import org.bread_experts_group.breadlib.task.network.NetworkTask
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask
-import org.bread_experts_group.breadlib.test.ClientboundPacketTest
 import org.bread_experts_group.breadlib.util.Color
+import org.bread_experts_group.breadlib.util.minecraft
 
 object TasksClientTest {
 	fun renderTest() {
@@ -27,17 +26,11 @@ object TasksClientTest {
 				guiGraphics.fill(0, 0, width, 12, Color.BLACK)
 				guiGraphics.drawString(Minecraft.getInstance().font, debugInfo, 2, 2, Color.ORANGE, false)
 			}
-		}
-	}
 
-	fun networkTest() {
-		newTask { task: NetworkTask ->
-			task.addClientbound(
-				ClientboundPacketTest::class.java,
-				ClientboundPacketTest.TYPE,
-				ClientboundPacketTest.STREAM_CODEC,
-				ClientboundPacketTest::handleClientbound
-			)
+			task.add(BreadLib.modLoc("dim_overlay")) { guiGraphics, deltaTracker ->
+				val dimension = minecraft!!.level!!.dimension()
+				guiGraphics.drawString(minecraft!!.font, "current dim: ${dimension.location()}", 0, 15, Color.WHITE)
+			}
 		}
 	}
 }

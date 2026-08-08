@@ -11,11 +11,9 @@ import org.bread_experts_group.breadlib.platform.PlatformServices
 
 data class ServerboundPacketTest(val testInt: Int, val testString: String) : CustomPacketPayload {
 	companion object {
-		@JvmField
 		var TYPE: CustomPacketPayload.Type<ServerboundPacketTest> =
-			CustomPacketPayload.Type(modLoc("serverbound", "test"))
+			CustomPacketPayload.Type(modLoc("serverbound_packets", "test"))
 
-		@JvmField
 		var STREAM_CODEC: StreamCodec<ByteBuf, ServerboundPacketTest> =
 			StreamCodec.composite(
 				ByteBufCodecs.INT, ServerboundPacketTest::testInt,
@@ -23,7 +21,6 @@ data class ServerboundPacketTest(val testInt: Int, val testString: String) : Cus
 				::ServerboundPacketTest
 			)
 
-		@JvmStatic
 		fun handleServerbound(data: ServerboundPacketTest, context: NetworkContext) {
 			BreadLib.LOGGER.info("Serverbound packet test: {}, {}", data.testInt, data.testString)
 			PlatformServices.PLATFORM.sendToAllPlayers(

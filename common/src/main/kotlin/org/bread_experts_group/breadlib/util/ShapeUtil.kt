@@ -10,7 +10,7 @@ import org.bread_experts_group.breadlib.util.VecUtil.unaryMinus
 import java.util.stream.Stream
 
 object ShapeUtil {
-	private val shapesOrigin = Vec3(0.5, 0.5, 0.5)
+	private val shapesOrigin: Vec3 = Vec3(0.5, 0.5, 0.5)
 
 	fun AABB.rotate(rotation: Rotation): AABB =
 		when (rotation) {

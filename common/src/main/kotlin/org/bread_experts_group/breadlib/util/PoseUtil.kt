@@ -7,9 +7,8 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
 
 object PoseUtil {
-	const val TRANSLATE_OFFSET = 0.0001
+	const val TRANSLATE_OFFSET: Double = 0.0001
 
-	@JvmStatic
 	fun PoseStack.translateOnBlockSide(state: BlockState, posX: Double, posY: Double, posZ: Double) {
 		val horizontal = state.getOptionalValue(BlockStateProperties.HORIZONTAL_FACING)
 		val facing = state.getOptionalValue(BlockStateProperties.FACING)
