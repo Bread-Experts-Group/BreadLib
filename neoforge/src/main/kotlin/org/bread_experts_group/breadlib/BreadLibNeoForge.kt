@@ -35,7 +35,22 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 	}
 
 	init {
-		eventBus.addListener { event: GatherDataEvent -> TaskManager.runTasks(NeoForgeGenerateDataTask(event)) }
+		eventBus.addListener { event: GatherDataEvent ->
+			TaskManager.runTasks(NeoForgeGenerateDataTask(event))
+
+//			val generator = event.generator
+//			val packOutput = generator.packOutput
+//			TaskManager.runTasks(BootstrapDatapackEntriesTask()).getSuppliers().forEach { (modID, supplier) ->
+//				val builder = RegistrySetBuilder().also { supplier(it) }
+//				val provider = DatapackBuiltinEntriesProvider(
+//					packOutput,
+//					event.lookupProvider,
+//					builder,
+//					setOf(modID)
+//				)
+//				generator.addProvider(true, provider)
+//			}
+		}
 		eventBus.addListener { event: RegisterCapabilitiesEvent -> PlatformInitialization.registerCapabilities(event, BreadLib.MOD_ID) }
 
 		BreadLib.LOGGER.info("Hello NeoForge world!")

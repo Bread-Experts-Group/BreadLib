@@ -3,6 +3,7 @@ package org.bread_experts_group.breadlib.test.client
 import net.minecraft.client.DeltaTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.BreadLib.modLoc
@@ -28,8 +29,12 @@ object TasksClientTest {
 			}
 
 			task.add(BreadLib.modLoc("dim_overlay")) { guiGraphics, deltaTracker ->
-				val dimension = minecraft!!.level!!.dimension()
-				guiGraphics.drawString(minecraft!!.font, "current dim: ${dimension.location()}", 0, 15, Color.WHITE)
+				val level = minecraft!!.level!!
+				val player = minecraft!!.player!!
+				val biomeReg = level.registryAccess().registryOrThrow(Registries.BIOME)
+				val biome = biomeReg.getKey(level.getBiome(player.blockPosition()).value())
+				guiGraphics.drawString(minecraft!!.font, "current dim: ${level.dimension().location()}", 0, 15, Color.ORANGE)
+				guiGraphics.drawString(minecraft!!.font, "biome: $biome", 0, 25, Color.ORANGE)
 			}
 		}
 	}

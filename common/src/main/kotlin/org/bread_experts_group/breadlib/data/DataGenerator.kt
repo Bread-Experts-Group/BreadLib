@@ -1,1 +1,19 @@
-package org.bread_experts_group.breadlib.dataimport net.minecraft.data.DataProviderimport net.minecraft.data.PackOutputabstract class DataGenerator : DataProvider {	abstract val modID: String	open val generateForServer: Boolean = true	open val generateForClient: Boolean = true	private var internalPackOutput: PackOutput? = null	protected val packOutput: PackOutput		get() = internalPackOutput ?: throw IllegalStateException("Pack output hasn't been configured yet.")	fun setPackOutput(packOutput: PackOutput) {		this.internalPackOutput = packOutput	}}
+package org.bread_experts_group.breadlib.data
+
+import net.minecraft.data.DataProvider
+import net.minecraft.data.PackOutput
+
+abstract class DataGenerator : DataProvider {
+	abstract val modID: String
+
+	open val generateForServer: Boolean = true
+	open val generateForClient: Boolean = true
+
+	private var internalPackOutput: PackOutput? = null
+	protected val packOutput: PackOutput
+		get() = this.internalPackOutput ?: throw IllegalStateException("Pack output hasn't been configured yet.")
+
+	fun setPackOutput(packOutput: PackOutput) {
+		this.internalPackOutput = packOutput
+	}
+}

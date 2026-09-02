@@ -10,28 +10,18 @@ import net.minecraft.world.level.Level
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.network.NetworkContext
 
-class DimensionUpdatePacket(
-	private val levelKey: ResourceKey<Level>,
-//	private val dimType: Holder<DimensionType>
-) : CustomPacketPayload {
+class DimensionUpdatePacket(private val levelKey: ResourceKey<Level>) : CustomPacketPayload {
 	companion object {
 		val TYPE: CustomPacketPayload.Type<DimensionUpdatePacket> =
 			CustomPacketPayload.Type(BreadLib.modLoc("clientbound_packets", "dimension_update"))
 		val STREAM_CODEC: StreamCodec<RegistryFriendlyByteBuf, DimensionUpdatePacket> = StreamCodec.composite(
 			ResourceKey.streamCodec(Registries.DIMENSION), DimensionUpdatePacket::levelKey,
-//			DimensionType.STREAM_CODEC, DimensionUpdatePacket::dimType,
 			::DimensionUpdatePacket
 		)
 
 		fun handleClientbound(data: DimensionUpdatePacket, context: NetworkContext) {
 			val player = context.player as LocalPlayer
 			player.connection.levels().add(data.levelKey)
-			val key = ResourceKey.create(Registries.DIMENSION_TYPE, data.levelKey.location())
-
-//			val registry = context.level().registryAccess().registryOrThrow(Registries.DIMENSION_TYPE)
-//			(registry as IRegistryExtension).unfreeze()
-//			Registry.register(registry, key, data.dimType.value())
-//			registry.freeze()
 		}
 	}
 

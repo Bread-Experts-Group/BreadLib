@@ -109,6 +109,9 @@ publishing {
         register('mavenJava', MavenPublication) {
             artifactId base.archivesName.get()
             from components.java
+            pom.withXml {
+                asNode().dependencies.each { it.parent().remove(it) }
+            }
         }
     }
     repositories {
