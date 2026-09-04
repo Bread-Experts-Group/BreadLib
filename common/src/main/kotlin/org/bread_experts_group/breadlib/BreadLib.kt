@@ -3,7 +3,10 @@ package org.bread_experts_group.breadlib
 import net.minecraft.resources.ResourceLocation
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntityCapabilitiesSynchronizationPacket
 import org.bread_experts_group.breadlib.platform.PlatformServices
+import org.bread_experts_group.breadlib.task.TaskManager.newTask
+import org.bread_experts_group.breadlib.task.network.NetworkTask
 
 object BreadLib {
 	const val MOD_ID: String = "breadlib"
@@ -26,6 +29,15 @@ object BreadLib {
 			PlatformServices.PLATFORM.side
 		)
 		kExample()
+
+		newTask { task: NetworkTask ->
+			task.addClientbound(
+				BreadLibBlockEntityCapabilitiesSynchronizationPacket::class.java,
+				BreadLibBlockEntityCapabilitiesSynchronizationPacket.TYPE,
+				BreadLibBlockEntityCapabilitiesSynchronizationPacket.STREAM_CODEC,
+				BreadLibBlockEntityCapabilitiesSynchronizationPacket::handleClientbound
+			)
+		}
 
 		LOGGER.info(PlatformServices.PLATFORM.getModInfo("breadlib").hash)
 	}

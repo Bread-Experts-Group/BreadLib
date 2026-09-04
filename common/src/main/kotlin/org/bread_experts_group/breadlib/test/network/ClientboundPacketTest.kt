@@ -1,4 +1,4 @@
-package org.bread_experts_group.breadlib.test
+package org.bread_experts_group.breadlib.test.network
 
 import io.netty.buffer.ByteBuf
 import net.minecraft.network.codec.ByteBufCodecs

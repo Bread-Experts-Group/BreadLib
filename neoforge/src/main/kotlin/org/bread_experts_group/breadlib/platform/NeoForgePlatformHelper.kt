@@ -1,13 +1,17 @@
 package org.bread_experts_group.breadlib.platform
 
+import net.minecraft.core.Direction
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.block.entity.BlockEntity
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.fml.ModList
 import net.neoforged.fml.loading.FMLLoader
 import net.neoforged.fml.loading.FMLPaths
 import net.neoforged.neoforge.network.PacketDistributor
+import org.bread_experts_group.breadlib.capability.base.BlockCapability
+import org.bread_experts_group.breadlib.capability.base.Capability
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
 import java.nio.file.Path
 
@@ -54,5 +58,24 @@ class NeoForgePlatformHelper : IPlatformHelper {
 
 	override fun capabilitiesChanged(blockEntity: BreadLibBlockEntity) {
 		blockEntity.level?.invalidateCapabilities(blockEntity.blockPos)
+	}
+
+	private val capConverter = mutableMapOf<Class<*>, (BlockEntity, Direction?) -> Capability<*>?>()
+
+	@Suppress("UNCHECKED_CAST")
+	override fun <C : Capability<*>> capability(
+		blockEntity: BlockEntity, side: Direction?, clazz: Class<C>
+	): C? {
+		if (blockEntity is BreadLibBlockEntity && clazz.isAssignableFrom(blockEntity::class.java)) {
+			val sides = blockEntity.capabilitySides[clazz] ?: return null
+			if (side != null && side !in sides) return null
+			return blockEntity as C
+		}
+
+		return (capConverter[clazz] ?: return null)(blockEntity, side) as C?
+	}
+
+	override fun <T : Capability<*>> installCapabilityConverter(forC: Class<T>, to: (BlockEntity, Direction?) -> T?) {
+		capConverter[forC] = to
 	}
 }

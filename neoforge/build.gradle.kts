@@ -82,4 +82,6 @@ dependencies {
 	// https://modrinth.com/mod/jade/version/15.10.5+fabric
 	runtimeOnly("maven.modrinth:nvQzSEkH:yd8FKCmx")
 	runtimeOnly("maven.modrinth:iRmWy6ga:BPGKb8pi")
+	// https://modrinth.com/mod/mekanism/version/5KzzycBT
+	implementation("maven.modrinth:Ce6I4WUE:5KzzycBT")
 }

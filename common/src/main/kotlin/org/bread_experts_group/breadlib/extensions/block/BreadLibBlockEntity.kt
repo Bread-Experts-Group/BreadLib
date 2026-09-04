@@ -2,6 +2,8 @@ package org.bread_experts_group.breadlib.extensions.block
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.server.level.ServerLevel
+import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.state.BlockState
 import org.bread_experts_group.breadlib.capability.base.Capability
@@ -18,12 +20,24 @@ abstract class BreadLibBlockEntity(pos: BlockPos, state: BlockState, modID: Stri
 	private fun platformInformCapsChanged() {
 		synchronized(capabilitySides) {
 			PlatformServices.PLATFORM.capabilitiesChanged(this)
+
+			val level = level as? ServerLevel ?: return
+			level.updateNeighborsAt(blockPos, blockState.block)
+			PlatformServices.PLATFORM.sendToPlayersTrackingChunk(
+				BreadLibBlockEntityCapabilitiesSynchronizationPacket(
+					blockPos,
+					capabilitySides.entries.associate { (clazz, directions) ->
+						clazz.canonicalName!! to directions.toList()
+					}
+				),
+				level, ChunkPos(blockPos)
+			)
 		}
 	}
 
 	@Suppress("UNCHECKED_CAST")
 	@ApiStatus.Internal
-	val capabilitySides: Map<Class<out Capability<*>>, MutableSet<Direction>> = this::class.java.interfaces
+    val capabilitySides: Map<Class<out Capability<*>>, MutableSet<Direction>> = this::class.java.interfaces
 		.filter { Capability::class.java.isAssignableFrom(it) }
 		.associateWith {
 			object : MutableSet<Direction> {

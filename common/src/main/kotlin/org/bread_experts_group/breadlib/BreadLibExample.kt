@@ -18,6 +18,8 @@ import org.bread_experts_group.breadlib.task.data.GenerateDataTask
 import org.bread_experts_group.breadlib.task.network.NetworkTask
 import org.bread_experts_group.breadlib.test.*
 import org.bread_experts_group.breadlib.test.client.TasksClientTest
+import org.bread_experts_group.breadlib.test.network.ClientboundPacketTest
+import org.bread_experts_group.breadlib.test.network.ServerboundPacketTest
 import org.bread_experts_group.breadlib.util.info
 import java.util.*
 

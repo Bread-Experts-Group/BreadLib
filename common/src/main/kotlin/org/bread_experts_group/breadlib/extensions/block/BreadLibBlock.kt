@@ -1,6 +1,7 @@
 package org.bread_experts_group.breadlib.extensions.block
 
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.world.item.context.BlockPlaceContext
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
@@ -52,4 +53,7 @@ abstract class BreadLibBlock(
 	}
 
 	open val meshProvider: MeshProvider? = null
+
+	open val capabilityProvider: Class<out Any>? = null
+	open val capabilityProviderPreCheck: ((Level, BlockPos, BlockState, Direction?) -> Boolean)? = null
 }

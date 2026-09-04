@@ -49,7 +49,6 @@ class QuarryBlockEntity(pPos: BlockPos, pBlockState: BlockState) : BreadLibBlock
 		capabilitySides[BlockEnergyCapability::class.java]!!.also {
 			it.clear()
 			it.add(Direction.entries.random())
-			level.updateNeighborsAt(pos, state.block)
 		}
 
 		if (id == null) id = ItemEntity(level, 0.0, 0.0, 0.0, ItemStack(this.blockState.block)).let {

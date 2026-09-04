@@ -1,5 +1,6 @@
 package org.bread_experts_group.breadlib.test
 
+import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.BlockElementFace
 import net.minecraft.client.renderer.block.model.BlockFaceUV
@@ -11,14 +12,18 @@ import net.minecraft.core.Direction
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.inventory.InventoryMenu
 import net.minecraft.world.level.BlockGetter
+import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.chunk.LevelChunk
 import net.minecraft.world.phys.shapes.BooleanOp
 import net.minecraft.world.phys.shapes.CollisionContext
 import net.minecraft.world.phys.shapes.Shapes
 import net.minecraft.world.phys.shapes.VoxelShape
-import org.bread_experts_group.breadlib.BreadLib
+import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
+import org.bread_experts_group.breadlib.capability.EnergyPacket
 import org.bread_experts_group.breadlib.extensions.block.BlockProperties
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlock
+import org.bread_experts_group.breadlib.platform.capability
 import org.bread_experts_group.breadlib.rendering.model.MeshProvider
 import org.bread_experts_group.breadlib.rendering.model.ModelUtil.makeVertices
 import org.bread_experts_group.breadlib.rendering.model.ModelUtil.model
@@ -64,17 +69,46 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 		)
 	}
 
+	private fun getNeighbors(
+		level: BlockGetter,
+		pos: BlockPos
+	) = Direction.entries.filterTo(EnumSet.noneOf(Direction::class.java)) { neighborDirection ->
+		val neighborPos = pos.relative(neighborDirection)
+		val neighborState = level.getBlockState(neighborPos)
+		if (neighborState.block == BlocksTest.MP_CABLE.get()) return@filterTo true
+
+		if (neighborState.hasBlockEntity() && level is Level) {
+			val neighborEntity = level
+				.getChunkAt(neighborPos)
+				.getBlockEntity(neighborPos, LevelChunk.EntityCreationType.CHECK) ?: return@filterTo false
+			val energy = neighborEntity.capability<BlockEnergyCapability>(neighborDirection)
+            return@filterTo energy != null
+        }
+		false
+	}
+
+	class CableCapabilityProvider : BlockEnergyCapability {
+		override fun pull(side: Direction?, what: EnergyPacket?, simulate: Boolean): EnergyPacket {
+			println("Not yet implemented: $side, $what, $simulate")
+			return EnergyPacket(0)
+		}
+
+		override fun push(side: Direction?, what: EnergyPacket, simulate: Boolean): EnergyPacket {
+			println("Not yet implemented: $side, $what, $simulate")
+			return EnergyPacket(0)
+		}
+	}
+
+	override val capabilityProvider: Class<out Any> = CableCapabilityProvider::class.java
+
 	override val meshProvider: MeshProvider by lazy {
 		MeshProvider { state, pos, level, poseStack, vertexConsumer, randomSource ->
 			val sprite = minecraft!!.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(
 				ResourceLocation.withDefaultNamespace("block/iron_block")
 			)
 
-			val presentNeighbors = Direction.entries.filterTo(EnumSet.noneOf(Direction::class.java)) {
-				level.getBlockState(pos.relative(it)).block == BlocksTest.MP_CABLE.get()
-			}
+			val presentNeighbors = getNeighbors(level, pos)
 			val nonPresentNeighbors = EnumSet.complementOf(presentNeighbors)
-
 
 			val quads = mutableListOf<BakedQuad>()
 
@@ -214,32 +248,43 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 		}
 	}
 
+	private companion object {
+		const val BLOCK_DIVISIONS = 1.0 / 16.0
+
+		const val BY_6 = BLOCK_DIVISIONS * 6   // cap
+		const val BY_10 = BLOCK_DIVISIONS * 10 // cap
+
+		const val BY_16 = BLOCK_DIVISIONS * 16 // run
+		// run (divisions * 0)
+	}
+
 	override fun getShape(
 		state: BlockState,
 		level: BlockGetter,
 		pos: BlockPos,
 		context: CollisionContext
 	): VoxelShape {
-		val divisions = 1.0 / 16.0
+		// TODO: This allows the cable to update immediately to local changes,
+		// TODO: but is costly (especially when loading many many cables),
+		// TODO: it may be prudent to find a better solution.
+		if (level is ClientLevel) minecraft!!.levelRenderer.setBlocksDirty(
+			pos.x, pos.y, pos.z,
+			pos.x, pos.y, pos.z
+		)
 
-		val presentNeighbors = EnumSet.noneOf(Direction::class.java)
-
-		Direction.entries.forEach {
-			val present = level.getBlockState(pos.relative(it)).block == BlocksTest.MP_CABLE.get()
-			if (present) presentNeighbors.add(it)
-		}
-
+		val presentNeighbors = getNeighbors(level, pos)
 		var shape = Shapes.create(
-			divisions * 6, divisions * 6, divisions * 6,
-			divisions * 10, divisions * 10, divisions * 10
+			BY_6, BY_6, BY_6,
+			BY_10, BY_10, BY_10
 		)
 
 		for (pNeighbor in presentNeighbors) when (pNeighbor) {
-			Direction.UP -> shape = Shapes.join(
+			// NEGATIVE AXIS
+			Direction.WEST -> shape = Shapes.join(
 				shape,
 				Shapes.create(
-					divisions * 6, divisions * 10, divisions * 6,
-					divisions * 10, divisions * 16, divisions * 10
+					0.0, BY_6, BY_6,   // D B B
+					BY_6, BY_10, BY_10 // B A A
 				),
 				BooleanOp.OR
 			)
@@ -247,26 +292,8 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 			Direction.DOWN -> shape = Shapes.join(
 				shape,
 				Shapes.create(
-					divisions * 6, divisions * 0, divisions * 6,
-					divisions * 10, divisions * 6, divisions * 10
-				),
-				BooleanOp.OR
-			)
-
-			Direction.EAST -> shape = Shapes.join(
-				shape,
-				Shapes.create(
-					divisions * 10, divisions * 6, divisions * 6,
-					divisions * 16, divisions * 10, divisions * 10
-				),
-				BooleanOp.OR
-			)
-
-			Direction.WEST -> shape = Shapes.join(
-				shape,
-				Shapes.create(
-					divisions * 0, divisions * 6, divisions * 6,
-					divisions * 6, divisions * 10, divisions * 10
+					BY_6, 0.0, BY_6,   // B D B
+					BY_10, BY_6, BY_10 // A B A
 				),
 				BooleanOp.OR
 			)
@@ -274,8 +301,27 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 			Direction.NORTH -> shape = Shapes.join(
 				shape,
 				Shapes.create(
-					divisions * 6, divisions * 6, divisions * 0,
-					divisions * 10, divisions * 10, divisions * 6
+					BY_6, BY_6, 0.0,   // B B D
+					BY_10, BY_10, BY_6 // A A B
+				),
+				BooleanOp.OR
+			)
+
+			// POSITIVE AXIS
+			Direction.EAST -> shape = Shapes.join(
+				shape,
+				Shapes.create(
+					BY_10, BY_6, BY_6,   // A B B
+					BY_16, BY_10, BY_10 // C A A
+				),
+				BooleanOp.OR
+			)
+
+			Direction.UP -> shape = Shapes.join(
+				shape,
+				Shapes.create(
+					BY_6, BY_10, BY_6,   // B A B
+					BY_10, BY_16, BY_10 // A C A
 				),
 				BooleanOp.OR
 			)
@@ -283,13 +329,11 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 			Direction.SOUTH -> shape = Shapes.join(
 				shape,
 				Shapes.create(
-					divisions * 6, divisions * 6, divisions * 10,
-					divisions * 10, divisions * 10, divisions * 16
+					BY_6, BY_6, BY_10,   // B B A
+					BY_10, BY_10, BY_16 // A A C
 				),
 				BooleanOp.OR
 			)
-
-			else -> {}
 		}
 
 		return shape

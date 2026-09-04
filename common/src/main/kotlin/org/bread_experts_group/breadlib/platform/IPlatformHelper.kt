@@ -1,8 +1,12 @@
 package org.bread_experts_group.breadlib.platform
 
+import net.minecraft.core.Direction
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.block.entity.BlockEntity
+import org.bread_experts_group.breadlib.capability.base.BlockCapability
+import org.bread_experts_group.breadlib.capability.base.Capability
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
 import java.nio.file.Path
 
@@ -73,4 +77,12 @@ interface IPlatformHelper {
 	fun sendToPlayersInDimension(payload: CustomPacketPayload, level: ServerLevel)
 
 	fun capabilitiesChanged(blockEntity: BreadLibBlockEntity)
+
+	fun <C : Capability<*>> capability(blockEntity: BlockEntity, side: Direction? = null, clazz: Class<C>): C?
+
+	fun <T : Capability<*>> installCapabilityConverter(forC: Class<T>, to: (BlockEntity, Direction?) -> T?)
+}
+
+inline fun <reified C : Capability<*>> BlockEntity.capability(side: Direction? = null): C? {
+	return PlatformServices.PLATFORM.capability(this, side, C::class.java)
 }
