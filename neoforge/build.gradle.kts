@@ -5,9 +5,6 @@ plugins {
 	id("net.neoforged.moddev")
 }
 
-private fun getProp(property: String): String = providers.gradleProperty(property).get()
-val kotlinVersion: String = getProp("kotlin_version")
-
 repositories {
 	exclusiveContent {
 		forRepository {
@@ -23,25 +20,25 @@ repositories {
 }
 
 neoForge {
-	version = getProp("neoforge_version")
-	accessTransformers.from(project(":common").file("src/main/resources/META-INF/accesstransformer.cfg"))
+	version = neoforge_Version
+	accessTransformers.from(forgeATLocation)
 	parchment {
-		minecraftVersion = getProp("minecraft_version")
-		mappingsVersion = getProp("parchment_version")
+		minecraftVersion = minecraft_Version
+		mappingsVersion = parchment_Version
 	}
 	runs {
 		configureEach {
-			systemProperty("neoforge.enabledGameTestNamespaces", getProp("mod_id"))
+			systemProperty("neoforge.enabledGameTestNamespaces", mod_Id)
 			ideName = "NeoForge ${this.name.capitalize()} (${project.path})" // Unify the run config names with fabric
 
 			additionalRuntimeClasspathConfiguration.dependencies.addAll(
 				listOf(
-				dependencies.create("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion") { isTransitive = false },
-				dependencies.create("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion") { isTransitive = false },
-				dependencies.create("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion") {
+				dependencies.create("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_Version") { isTransitive = false },
+				dependencies.create("org.jetbrains.kotlin:kotlin-reflect:$kotlin_Version") { isTransitive = false },
+				dependencies.create("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_Version") {
 					isTransitive = false
 				},
-				dependencies.create("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion") {
+				dependencies.create("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_Version") {
 					isTransitive = false
 				}
 			))
@@ -77,8 +74,8 @@ sourceSets.main.get().resources {
 }
 
 dependencies {
-	jarJar(implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion") {})
-	jarJar(implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion") {})
+	jarJar(implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlin_Version") {})
+	jarJar(implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_Version") {})
 	// https://modrinth.com/mod/jade/version/15.10.5+fabric
 	runtimeOnly("maven.modrinth:nvQzSEkH:yd8FKCmx")
 	runtimeOnly("maven.modrinth:iRmWy6ga:BPGKb8pi")

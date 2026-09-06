@@ -5,8 +5,6 @@ plugins {
 	id("fabric-loom")
 }
 
-private fun getProp(property: String): String = providers.gradleProperty(property).get()
-
 repositories {
 	exclusiveContent {
 		forRepository {
@@ -22,13 +20,13 @@ repositories {
 }
 
 dependencies {
-	minecraft("com.mojang:minecraft:${getProp("minecraft_version")}")
+	minecraft("com.mojang:minecraft:$minecraft_Version")
 	mappings(loom.layered {
 		officialMojangMappings()
-		parchment("org.parchmentmc.data:parchment-${getProp("minecraft_version")}:${getProp("parchment_version")}@zip")
+		parchment("org.parchmentmc.data:parchment-$minecraft_Version:$parchment_Version@zip")
 	})
-	modImplementation("net.fabricmc:fabric-loader:${getProp("fabric_loader_version")}")
-	modImplementation("net.fabricmc.fabric-api:fabric-api:${getProp("fabric_version")}")
+	modImplementation("net.fabricmc:fabric-loader:$fabric_loader_Version")
+	modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_Version")
 	modImplementation("teamreborn:energy:4.1.0")
 	// https://modrinth.com/mod/jade/version/15.10.5+fabric
 	modImplementation("maven.modrinth:nvQzSEkH:5Sbkzz4O")
@@ -39,10 +37,10 @@ dependencies {
 }
 
 loom {
-	val aw = project(":common").file("src/main/resources/${getProp("mod_id")}.accesswidener")
+	val aw = project(":common").file("src/main/resources/$mod_Id.accesswidener")
 	if (aw.exists()) accessWidenerPath.set(aw)
 	mixin {
-		defaultRefmapName.set("${getProp("mod_id")}.refmap.json")
+		defaultRefmapName.set("$mod_Id.refmap.json")
 		useLegacyMixinAp = true
 	}
 	runs {

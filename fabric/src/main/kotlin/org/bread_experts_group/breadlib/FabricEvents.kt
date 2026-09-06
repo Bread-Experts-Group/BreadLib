@@ -120,21 +120,25 @@ object FabricEvents {
 		})
 	}
 
-	// todo nightmare
-	private fun addCommandTasks(envType: EnvType?) {
+	private fun parseNodes(node: CommandNode<CommandSourceStack>, builder: LiteralArgumentBuilder<FabricClientCommandSource>) {
+		for (node in node.children) {
+			when (node) {
+				is LiteralCommandNode<CommandSourceStack> -> builder.then(parseLiteralNode(node, builder))
+				is ArgumentCommandNode<CommandSourceStack, *> -> builder.then(parseArgumentNode(node, builder))
+				is RootCommandNode<CommandSourceStack> -> builder.then(parseRootNode(node, builder))
+			}
+		}
+	}
+
+	private fun addCommandTasks(envType: EnvType) {
 		if (envType == EnvType.CLIENT) ClientCommandRegistrationCallback.EVENT.register(
 			ClientCommandRegistrationCallback { dispatcher, context ->
 				val sourceStackDispatcher = CommandDispatcher<CommandSourceStack>()
 				TaskManager.runTasks(ClientCommandTask(sourceStackDispatcher, context))
 				val root = sourceStackDispatcher.getRoot()
 				val builder = LiteralArgumentBuilder.literal<FabricClientCommandSource>(root.name)
-				for (node in root.getChildren()) {
-					when (node) {
-						is LiteralCommandNode<CommandSourceStack> -> builder.then(parseLiteralNode(node, builder))
-						is ArgumentCommandNode<CommandSourceStack, *> -> builder.then(parseArgumentNode(node, builder))
-						is RootCommandNode<CommandSourceStack> -> builder.then(parseRootNode(node, builder))
-					}
-				}
+				for (node in root.getChildren()) this.parseNodes(node, builder)
+				dispatcher.register(builder)
 			}
 		)
 		else CommandRegistrationCallback.EVENT.register(CommandRegistrationCallback { dispatcher, context, env ->
@@ -142,25 +146,28 @@ object FabricEvents {
 		})
 	}
 
-	// todo look at forge code to convert CommandSourceStack to FabricClientCommandSource
+	// todo i have no idea if this is gonna work, or why fabric has a separate dedicated command source class in the first place.
 	private fun parseLiteralNode(
-		node: LiteralCommandNode<CommandSourceStack>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
+		node: LiteralCommandNode<CommandSourceStack>,
+		builder: LiteralArgumentBuilder<FabricClientCommandSource>
 	): LiteralCommandNode<FabricClientCommandSource> {
-		// TODO nightmare
-		TODO()
+		this.parseNodes(node, builder)
+		return node as LiteralCommandNode<FabricClientCommandSource>
 	}
 
 	private fun parseArgumentNode(
-		node: CommandNode<CommandSourceStack>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
+		node: CommandNode<CommandSourceStack>,
+		builder: LiteralArgumentBuilder<FabricClientCommandSource>
 	): ArgumentCommandNode<FabricClientCommandSource, *> {
-		// TODO nightmare nightmare
-		TODO()
+		this.parseNodes(node, builder)
+		return node as ArgumentCommandNode<FabricClientCommandSource, *>
 	}
 
 	private fun parseRootNode(
-		node: RootCommandNode<CommandSourceStack>, builder: LiteralArgumentBuilder<FabricClientCommandSource>
+		node: RootCommandNode<CommandSourceStack>,
+		builder: LiteralArgumentBuilder<FabricClientCommandSource>
 	): RootCommandNode<FabricClientCommandSource> {
-		// TODO nightmare nightmare nightmare nightmare
-		TODO()
+		this.parseNodes(node, builder)
+		return node as RootCommandNode<FabricClientCommandSource>
 	}
 }

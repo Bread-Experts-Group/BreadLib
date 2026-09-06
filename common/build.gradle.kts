@@ -5,17 +5,15 @@ plugins {
 	id("net.neoforged.moddev")
 }
 
-private fun getProp(property: String): String = providers.gradleProperty(property).get()
-
 neoForge {
-	neoFormVersion = getProp("neo_form_version")
+	neoFormVersion = neoForm_Version
 	// Automatically enable AccessTransformers if the file exists
 	accessTransformers {
 		file("src/main/resources/META-INF/accesstransformer.cfg")
 	}
 	parchment {
-		minecraftVersion = getProp("minecraft_version")
-		mappingsVersion = getProp("parchment_version")
+		minecraftVersion = minecraft_Version
+		mappingsVersion = parchment_Version
 	}
 }
 
@@ -44,4 +42,5 @@ artifacts {
 }
 repositories {
 	mavenCentral()
+	mavenLocal()
 }

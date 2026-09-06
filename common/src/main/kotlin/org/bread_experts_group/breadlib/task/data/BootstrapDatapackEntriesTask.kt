@@ -3,8 +3,10 @@ package org.bread_experts_group.breadlib.task.data
 import net.minecraft.core.RegistrySetBuilder
 import org.bread_experts_group.breadlib.task.Task
 
+// todo bootstrap helper methods to be implemented by mods, provide example datagen code in example mod
+
 // todo i think it'll be better to just have implementing mods do their own bootstrap stuff, and we just provide helper methods for them
-//  (the loaders don't seem to support bootstrapping data for other mods while this one adds the tasks for them)
+//  (the loaders don't seem to support bootstrapping data for other mods when a different mod does the processing for them)
 class BootstrapDatapackEntriesTask : Task() {
 	private val suppliers: MutableMap<String, (RegistrySetBuilder) -> Unit> = mutableMapOf()
 

@@ -24,16 +24,20 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 	companion object {
 		val providers: MutableMap<String, MutableMap<Registry<*>, RegistryProvider<*>>> = mutableMapOf()
 
+		/**
+		 * Method for statically initializing the classes holding providers and their contents.
+		 */
+		@Suppress("unused")
 		fun initialize(vararg providers: RegistryProvider<*>): Unit = Unit
 
-		fun getBlocks(modID: String): Blocks = BuiltInRegistries.BLOCK.get(modID) as Blocks
+		fun getBlocks(modID: String): Blocks = BuiltInRegistries.BLOCK.getProvider(modID) as Blocks
 		fun getBlockEntityTypes(modID: String): BlockEntityTypes =
-			BuiltInRegistries.BLOCK_ENTITY_TYPE.get(modID) as BlockEntityTypes
+			BuiltInRegistries.BLOCK_ENTITY_TYPE.getProvider(modID) as BlockEntityTypes
 
-		fun getItems(modID: String): Items = BuiltInRegistries.ITEM.get(modID) as Items
+		fun getItems(modID: String): Items = BuiltInRegistries.ITEM.getProvider(modID) as Items
 
 		@Suppress("UNCHECKED_CAST")
-		fun <T> Registry<T>.get(modID: String): RegistryProvider<T> =
+		fun <T> Registry<T>.getProvider(modID: String): RegistryProvider<T> =
 			providers.getOrPut(modID) { mutableMapOf() }.getOrPut(this) {
 				when (this) {
 					BuiltInRegistries.BLOCK -> Blocks(modID)
@@ -59,9 +63,6 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		RegistryObject.create(this.modID, name, this.registry)
 
 	open fun <I : T> register(name: String, supplier: Supplier<T>): RegistryObject<T, I> {
-//		this.frozen?.let {
-//			throw IllegalStateException("Provider was already frozen: $it")
-//		}
 		val regObject = this.createRegistryObject<I>(name)
 		check(this.entries.putIfAbsent(regObject, supplier) == null) {
 			"Duplicate registry entry: " + this.modID + ":" + name

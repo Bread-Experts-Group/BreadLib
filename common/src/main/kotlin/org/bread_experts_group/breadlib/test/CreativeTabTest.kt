@@ -5,11 +5,11 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.CreativeModeTab
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.registry.RegistryProvider
-import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.get
+import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getProvider
 import org.bread_experts_group.breadlib.registry.objects.RegistryObject
 
 object CreativeTabTest {
-	val REGISTRY: RegistryProvider<CreativeModeTab> = BuiltInRegistries.CREATIVE_MODE_TAB.get(BreadLib.MOD_ID)
+	val REGISTRY: RegistryProvider<CreativeModeTab> = BuiltInRegistries.CREATIVE_MODE_TAB.getProvider(BreadLib.MOD_ID)
 
 	var TEST_TAB: RegistryObject<CreativeModeTab, CreativeModeTab> = REGISTRY.register("test_tab") {
 		CreativeModeTab
