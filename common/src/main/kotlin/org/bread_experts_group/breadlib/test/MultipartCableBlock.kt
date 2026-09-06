@@ -23,16 +23,16 @@ import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
 import org.bread_experts_group.breadlib.capability.EnergyPacket
 import org.bread_experts_group.breadlib.extensions.block.BlockProperties
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlock
-import org.bread_experts_group.breadlib.platform.capability
+import org.bread_experts_group.breadlib.platform.ICapabilityHelper.Companion.capability
 import org.bread_experts_group.breadlib.rendering.model.MeshProvider
 import org.bread_experts_group.breadlib.rendering.model.ModelUtil.makeVertices
 import org.bread_experts_group.breadlib.rendering.model.ModelUtil.model
 import org.bread_experts_group.breadlib.rendering.model.ModelUtil.setupShape
 import org.bread_experts_group.breadlib.util.minecraft
 import org.joml.Vector3f
-import java.util.EnumSet
+import java.util.*
 
-private val blockProperties = BlockProperties()
+private val blockProperties: BlockProperties = BlockProperties()
 
 class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 	override fun breadLibProperties(): BlockProperties = blockProperties
@@ -82,8 +82,8 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 				.getChunkAt(neighborPos)
 				.getBlockEntity(neighborPos, LevelChunk.EntityCreationType.CHECK) ?: return@filterTo false
 			val energy = neighborEntity.capability<BlockEnergyCapability>(neighborDirection)
-            return@filterTo energy != null
-        }
+			return@filterTo energy != null
+		}
 		false
 	}
 

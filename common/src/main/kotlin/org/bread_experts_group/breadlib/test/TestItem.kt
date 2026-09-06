@@ -24,7 +24,7 @@ class TestItem : Item(Properties()), IMouseItem, IKeyboardItem {
 		if (player.isShiftKeyDown) {
 			level.playLocalSound(player, SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.AMBIENT, 1f, 1f)
 			player.displayClientMessage(Component.literal("pling!"), false)
-			PlatformServices.PLATFORM.sendToServer(ServerboundPacketTest(10, "test"))
+			PlatformServices.NETWORK.sendToServer(ServerboundPacketTest(10, "test"))
 			return true
 		}
 		return false

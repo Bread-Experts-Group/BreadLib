@@ -7,6 +7,8 @@ import java.util.function.Supplier
 object PlatformServices {
 	@JvmField
 	val PLATFORM: IPlatformHelper = load(IPlatformHelper::class.java)
+	val NETWORK: INetworkHelper = load(INetworkHelper::class.java)
+	val CAPABILITY: ICapabilityHelper = load(ICapabilityHelper::class.java)
 
 	private fun <T> load(clazz: Class<T>): T {
 		val loadedService = ServiceLoader.load(clazz).findFirst()

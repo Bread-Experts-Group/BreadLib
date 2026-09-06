@@ -14,16 +14,17 @@ import org.jetbrains.annotations.ApiStatus
 private val WALKER = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE)
 
 abstract class BreadLibBlockEntity(pos: BlockPos, state: BlockState, modID: String) : BlockEntity(
-	getBlockEntityTypes(modID).getType(WALKER.callerClass) ?: throw IllegalStateException("Unable to find BlockEntityType<${WALKER.callerClass.name}> for $modID"),
+	getBlockEntityTypes(modID).getType(WALKER.callerClass)
+		?: throw IllegalStateException("Unable to find BlockEntityType<${WALKER.callerClass.name}> for $modID"),
 	pos, state
 ) {
 	private fun platformInformCapsChanged() {
 		synchronized(capabilitySides) {
-			PlatformServices.PLATFORM.capabilitiesChanged(this)
+			PlatformServices.CAPABILITY.capabilitiesChanged(this)
 
 			val level = level as? ServerLevel ?: return
 			level.updateNeighborsAt(blockPos, blockState.block)
-			PlatformServices.PLATFORM.sendToPlayersTrackingChunk(
+			PlatformServices.NETWORK.sendToPlayersTrackingChunk(
 				BreadLibBlockEntityCapabilitiesSynchronizationPacket(
 					blockPos,
 					capabilitySides.entries.associate { (clazz, directions) ->
@@ -37,7 +38,7 @@ abstract class BreadLibBlockEntity(pos: BlockPos, state: BlockState, modID: Stri
 
 	@Suppress("UNCHECKED_CAST")
 	@ApiStatus.Internal
-    val capabilitySides: Map<Class<out Capability<*>>, MutableSet<Direction>> = this::class.java.interfaces
+	val capabilitySides: Map<Class<out Capability<*>>, MutableSet<Direction>> = this::class.java.interfaces
 		.filter { Capability::class.java.isAssignableFrom(it) }
 		.associateWith {
 			object : MutableSet<Direction> {
@@ -53,11 +54,21 @@ abstract class BreadLibBlockEntity(pos: BlockPos, state: BlockState, modID: Stri
 					override fun hasNext(): Boolean = iterator.hasNext()
 				}
 
-				override fun add(element: Direction): Boolean = set.add(element).also { if (it) platformInformCapsChanged() }
-				override fun remove(element: Direction): Boolean = set.remove(element).also { if (it) platformInformCapsChanged() }
-				override fun addAll(elements: Collection<Direction>): Boolean = set.addAll(elements).also { if (it) platformInformCapsChanged() }
-				override fun removeAll(elements: Collection<Direction>): Boolean = set.removeAll(elements.toSet()).also { if (it) platformInformCapsChanged() }
-				override fun retainAll(elements: Collection<Direction>): Boolean = set.retainAll(elements.toSet()).also { if (it) platformInformCapsChanged() }
+				override fun add(element: Direction): Boolean =
+					set.add(element).also { if (it) platformInformCapsChanged() }
+
+				override fun remove(element: Direction): Boolean =
+					set.remove(element).also { if (it) platformInformCapsChanged() }
+
+				override fun addAll(elements: Collection<Direction>): Boolean =
+					set.addAll(elements).also { if (it) platformInformCapsChanged() }
+
+				override fun removeAll(elements: Collection<Direction>): Boolean =
+					set.removeAll(elements.toSet()).also { if (it) platformInformCapsChanged() }
+
+				override fun retainAll(elements: Collection<Direction>): Boolean =
+					set.retainAll(elements.toSet()).also { if (it) platformInformCapsChanged() }
+
 				override fun clear() {
 					val before = set.isNotEmpty()
 					set.clear()

@@ -8,5 +8,3 @@ accessible field net/minecraft/server/MinecraftServer executor Ljava/util/concur
 accessible field net/minecraft/server/MinecraftServer storageSource Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;
 accessible field net/minecraft/server/MinecraftServer progressListenerFactory Lnet/minecraft/server/level/progress/ChunkProgressListenerFactory;
 accessible field net/minecraft/server/MinecraftServer levels Ljava/util/Map;
-
-accessible field net/minecraft/core/RegistryAccess/ImmutableRegistryAccess registries Ljava/util/Map;

@@ -12,8 +12,8 @@ import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
 import org.bread_experts_group.breadlib.capability.EnergyPacket
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlock
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntity
-import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.get
 import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlockEntityTypes
+import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getProvider
 import java.lang.reflect.Constructor
 
 object PlatformInitialization {
@@ -26,7 +26,7 @@ object PlatformInitialization {
 				bet.getType(blBlock.blockEntity) ?: throw IllegalStateException("Unable to find BlockEntityType for ${blBlock.blockEntity} for energy capability registration"),
 			) { be, side ->
 				be as BreadLibBlockEntity
-				if (side == null || be.capabilitySides[BlockEnergyCapability::class.java]!!.contains(side)) {
+				if (side == null || (be.capabilitySides[BlockEnergyCapability::class.java] ?: error("")).contains(side)) {
 					be as BlockEnergyCapability
 					object : IEnergyStorage {
 						override fun receiveEnergy(toReceive: Int, simulate: Boolean): Int = be.push(side, EnergyPacket(toReceive), simulate).energy
@@ -40,7 +40,7 @@ object PlatformInitialization {
 			}
 		}
 
-		BuiltInRegistries.BLOCK.get(modID).entries.map { it.key.get() }.forEach { blBlock ->
+		BuiltInRegistries.BLOCK.getProvider(modID).entries.map { it.key.get() }.forEach { blBlock ->
 			val provider = (blBlock as? BreadLibBlock)?.capabilityProvider ?: return@forEach
 			if (BlockEnergyCapability::class.java.isAssignableFrom(provider)) event.registerBlock(
 				Capabilities.EnergyStorage.BLOCK,

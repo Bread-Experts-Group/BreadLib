@@ -3,7 +3,6 @@ package org.bread_experts_group.breadlib
 import net.minecraft.core.Direction
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.common.Mod
-import net.neoforged.neoforge.capabilities.BlockCapability
 import net.neoforged.neoforge.capabilities.Capabilities
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent
 import net.neoforged.neoforge.data.event.GatherDataEvent
@@ -11,7 +10,6 @@ import net.neoforged.neoforge.registries.RegisterEvent
 import org.bread_experts_group.breadlib.BreadLib.init
 import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
 import org.bread_experts_group.breadlib.capability.EnergyPacket
-import org.bread_experts_group.breadlib.capability.base.Capability
 import org.bread_experts_group.breadlib.platform.NeoForgeGenerateDataTask
 import org.bread_experts_group.breadlib.platform.PlatformInitialization
 import org.bread_experts_group.breadlib.platform.PlatformServices
@@ -42,7 +40,7 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 	}
 
 	init {
-		PlatformServices.PLATFORM.installCapabilityConverter(
+		PlatformServices.CAPABILITY.installCapabilityConverter(
 			BlockEnergyCapability::class.java,
 		) { blockEntity, direction ->
 			val level = blockEntity.level ?: return@installCapabilityConverter null

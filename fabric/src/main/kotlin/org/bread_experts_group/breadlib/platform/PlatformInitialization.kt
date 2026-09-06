@@ -10,11 +10,13 @@ import team.reborn.energy.api.EnergyStorage
 object PlatformInitialization {
 	fun registerCapabilities(modID: String) {
 		val bet = getBlockEntityTypes(modID)
+		// todo band-aid so the example mod doesn't fail to load
+		val techRebornLoaded = PlatformServices.PLATFORM.isModLoaded("tech_reborn")
 		bet.applicableBlocks.forEach { blBlock ->
-			if (BlockEnergyCapability::class.java.isAssignableFrom(blBlock.blockEntity)) EnergyStorage.SIDED.registerForBlockEntity(
+			if (BlockEnergyCapability::class.java.isAssignableFrom(blBlock.blockEntity) && techRebornLoaded) EnergyStorage.SIDED.registerForBlockEntity(
 				{ be, side ->
 					be as BreadLibBlockEntity
-					if (side == null || be.capabilitySides[BlockEnergyCapability::class.java]!!.contains(side)) {
+					if (side == null || (be.capabilitySides[BlockEnergyCapability::class.java] ?: error("")).contains(side)) {
 						be as BlockEnergyCapability
 						object : EnergyStorage {
 							override fun insert(maxAmount: Long, transaction: TransactionContext): Long {

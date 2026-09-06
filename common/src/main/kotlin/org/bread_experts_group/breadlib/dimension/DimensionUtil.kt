@@ -153,6 +153,6 @@ object DimensionUtil {
 
 		level.worldBorder.addListener(BorderChangeListener.DelegateBorderChangeListener(level.worldBorder))
 		server.levels[levelKey] = newLevel
-		PlatformServices.PLATFORM.sendToAllPlayers(DimensionUpdatePacket(levelKey), level)
+		PlatformServices.NETWORK.sendToAllPlayers(DimensionUpdatePacket(levelKey), level)
 	}
 }
