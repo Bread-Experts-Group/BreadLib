@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
@@ -14,13 +15,19 @@ import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.block.state.BlockState
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockWithEntity
+import org.bread_experts_group.breadlib.platform.ApplicationSide
+import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.objects.RegistryBlock
 import org.bread_experts_group.breadlib.registry.objects.RegistryItem
 import org.bread_experts_group.breadlib.registry.objects.RegistryObject
+import org.bread_experts_group.breadlib.util.DimUtil.register
 import org.jetbrains.annotations.ApiStatus
 import java.util.function.Supplier
 
-open class RegistryProvider<T> private constructor(val registry: Registry<T>, val modID: String) {
+open class RegistryProvider<T> private constructor(
+	val registry: Registry<T>,
+	val modID: String
+) {
 	companion object {
 		val providers: MutableMap<String, MutableMap<Registry<*>, RegistryProvider<*>>> = mutableMapOf()
 
@@ -37,35 +44,49 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		fun getItems(modID: String): Items = BuiltInRegistries.ITEM.getProvider(modID) as Items
 
 		@Suppress("UNCHECKED_CAST")
-		fun <T> Registry<T>.getProvider(modID: String): RegistryProvider<T> =
-			providers.getOrPut(modID) { mutableMapOf() }.getOrPut(this) {
-				when (this) {
-					BuiltInRegistries.BLOCK -> Blocks(modID)
-					BuiltInRegistries.ITEM -> Items(modID)
-					BuiltInRegistries.BLOCK_ENTITY_TYPE -> BlockEntityTypes(modID)
-					else -> RegistryProvider(this, modID)
-				}
-			} as RegistryProvider<T>
+		fun <T> Registry<T>.getProvider(modID: String): RegistryProvider<T> = providers.getOrPut(
+			modID
+		) { mutableMapOf() }.getOrPut(this) {
+			when (this) {
+				BuiltInRegistries.BLOCK -> Blocks(modID)
+				BuiltInRegistries.ITEM -> Items(modID)
+				BuiltInRegistries.BLOCK_ENTITY_TYPE -> BlockEntityTypes(modID)
+				else -> RegistryProvider(this, modID)
+			}
+		} as RegistryProvider<T>
 	}
 
 	val entries: MutableMap<RegistryObject<T, out T>, Supplier<T>> = mutableMapOf()
 	val key: ResourceKey<Registry<T>> = ResourceKey.createRegistryKey(this.registry.key().location())
-	var frozen: Exception? = null
+	var frozen: Boolean = false
 		private set
 
 	@ApiStatus.Internal
 	fun freeze() {
-		this.frozen?.let { throw IllegalStateException("Already frozen.").initCause(this.frozen) }
-		this.frozen = Exception()
+		this.frozen = true
 	}
 
-	open fun <I : T> createRegistryObject(name: String): RegistryObject<T, I> =
-		RegistryObject.create(this.modID, name, this.registry)
+	open fun <I : T> createRegistryObject(name: String): RegistryObject<T, I> = RegistryObject.create(
+		this.modID, name,
+		this.registry
+	)
 
 	open fun <I : T> register(name: String, supplier: Supplier<T>): RegistryObject<T, I> {
 		val regObject = this.createRegistryObject<I>(name)
 		check(this.entries.putIfAbsent(regObject, supplier) == null) {
 			"Duplicate registry entry: " + this.modID + ":" + name
+		}
+		if (frozen) {
+			if (PlatformServices.NETWORK.side == ApplicationSide.CLIENT) throw IllegalStateException(
+				"The client cannot dynamically add to the registry."
+			)
+			@Suppress("UNCHECKED_CAST")
+			PlatformServices.NETWORK.server.registryAccess().register(
+				registry.key() as ResourceKey<Registry<Any>>,
+				{ supplier.get() as Any },
+				ResourceLocation.fromNamespaceAndPath(modID, name)
+			)
+			regObject.bind()
 		}
 		return regObject
 	}
@@ -98,7 +119,7 @@ open class RegistryProvider<T> private constructor(val registry: Registry<T>, va
 		@get:ApiStatus.Internal
 		val applicableBlocks: List<BreadLibBlockWithEntity<*>> by lazy {
 			getBlocks(modID)
-				.also { if (it.frozen == null) it.freeze() }
+				.also { if (!it.frozen) it.freeze() }
 				.entries.keys
 				.mapNotNull { it.get() as? BreadLibBlockWithEntity<*> }
 		}

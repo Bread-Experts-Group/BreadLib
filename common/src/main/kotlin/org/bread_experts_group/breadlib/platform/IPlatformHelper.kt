@@ -39,4 +39,9 @@ interface IPlatformHelper {
 	fun isModLoaded(modId: String): Boolean
 
 	fun getModInfo(modId: String): ModInfo
+
+	/**
+	 * Refresh local level entries to allow ticking with dynamically added levels.
+	 */
+	fun refreshLevels()
 }

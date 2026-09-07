@@ -5,6 +5,8 @@ import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntityCapabilitiesSynchronizationPacket
 import org.bread_experts_group.breadlib.platform.PlatformServices
+import org.bread_experts_group.breadlib.registry.network.BiomeRegisterPacket
+import org.bread_experts_group.breadlib.registry.network.DimensionTypeRegisterPacket
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
 import org.bread_experts_group.breadlib.task.network.NetworkTask
 
@@ -36,6 +38,19 @@ object BreadLib {
 				BreadLibBlockEntityCapabilitiesSynchronizationPacket.TYPE,
 				BreadLibBlockEntityCapabilitiesSynchronizationPacket.STREAM_CODEC,
 				BreadLibBlockEntityCapabilitiesSynchronizationPacket::handleClientbound
+			)
+
+			task.addClientbound(
+				DimensionTypeRegisterPacket::class.java,
+				DimensionTypeRegisterPacket.TYPE,
+				DimensionTypeRegisterPacket.STREAM_CODEC,
+				DimensionTypeRegisterPacket::handleClientbound
+			)
+			task.addClientbound(
+				BiomeRegisterPacket::class.java,
+				BiomeRegisterPacket.TYPE,
+				BiomeRegisterPacket.STREAM_CODEC,
+				BiomeRegisterPacket::handleClientbound
 			)
 		}
 

@@ -18,7 +18,6 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator
 import net.minecraft.world.level.storage.DerivedLevelData
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.extensions.IRegistryExtension
-import org.bread_experts_group.breadlib.platform.PlatformServices
 import kotlin.random.Random
 
 // Referenced some code from Infiniverse
@@ -153,6 +152,6 @@ object DimensionUtil {
 
 		level.worldBorder.addListener(BorderChangeListener.DelegateBorderChangeListener(level.worldBorder))
 		server.levels[levelKey] = newLevel
-		PlatformServices.NETWORK.sendToAllPlayers(DimensionUpdatePacket(levelKey), level)
+//		PlatformServices.NETWORK.sendToAllPlayers(DimensionTypeRegisterPacket(levelKey))
 	}
 }

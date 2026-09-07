@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.ItemLike
 import org.bread_experts_group.breadlib.registry.ItemLikeExtended
 
 class RegistryItem<I : Item>(name: ResourceLocation) : RegistryObject<Item, I>(
@@ -16,7 +17,6 @@ class RegistryItem<I : Item>(name: ResourceLocation) : RegistryObject<Item, I>(
 
 	override fun asItem(): Item = get()
 
-	override fun toStack(): ItemStack = ItemStack(this, 1)
-
-	override fun asStack(count: Int): ItemStack = ItemStack(this, count)
+	override fun toStack(): ItemStack = ItemStack(this as ItemLike, 1)
+	override fun asStack(count: Int): ItemStack = ItemStack(this as ItemLike, count)
 }

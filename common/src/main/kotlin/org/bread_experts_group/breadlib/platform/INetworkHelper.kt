@@ -1,10 +1,31 @@
 package org.bread_experts_group.breadlib.platform
 
+import net.minecraft.client.Minecraft
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
 
 interface INetworkHelper {
+	/**
+	 * Gets the side of the current network environment.
+	 * @return The side of the current network environment.
+	 * @see ApplicationSide
+	 */
+    val side: ApplicationSide
+
+	/**
+	 * Gets the [MinecraftServer] instance if the caller is running on a server.
+	 * @return The server, if the caller is running on [ApplicationSide.SERVER] (logical or physical).
+	 */
+	val server: MinecraftServer
+
+	/**
+	 * Gets the [Minecraft] instance if the caller is running on a client.
+	 * @return [Minecraft], if the caller is running on [ApplicationSide.CLIENT] (logical).
+	 */
+	val client: Minecraft
+
 	/**
 	 * Sends a packet to the server.
 	 * @param payload The payload to be sent
@@ -14,9 +35,8 @@ interface INetworkHelper {
 	/**
 	 * Sends a packet to all players on the server.
 	 * @param payload The payload to be sent
-	 * @param level The level to get the minecraft server
 	 */
-	fun sendToAllPlayers(payload: CustomPacketPayload, level: ServerLevel)
+	fun sendToAllPlayers(payload: CustomPacketPayload)
 
 	/**
 	 * Sends a packet to all players tracking the specified ChunkPos.

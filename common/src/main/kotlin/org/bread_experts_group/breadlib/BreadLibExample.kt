@@ -7,7 +7,6 @@ import org.bread_experts_group.breadlib.data.ModelGenerator
 import org.bread_experts_group.breadlib.data.PlaceholderTextureGenerator
 import org.bread_experts_group.breadlib.data.model.ObjectResourceLocation
 import org.bread_experts_group.breadlib.data.model.block.BlockStateSingleVariant
-import org.bread_experts_group.breadlib.dimension.DimensionUpdatePacket
 import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlockEntityTypes
@@ -16,7 +15,9 @@ import org.bread_experts_group.breadlib.task.BreadLibTasks
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask
 import org.bread_experts_group.breadlib.task.network.NetworkTask
-import org.bread_experts_group.breadlib.test.*
+import org.bread_experts_group.breadlib.test.BlocksTest
+import org.bread_experts_group.breadlib.test.CreativeTabTest
+import org.bread_experts_group.breadlib.test.ItemsTest
 import org.bread_experts_group.breadlib.test.client.TasksClientTest
 import org.bread_experts_group.breadlib.test.network.ClientboundPacketTest
 import org.bread_experts_group.breadlib.test.network.ServerboundPacketTest
@@ -96,12 +97,6 @@ fun kExample() {
 			ServerboundPacketTest.TYPE,
 			ServerboundPacketTest.STREAM_CODEC,
 			ServerboundPacketTest::handleServerbound
-		)
-		task.addClientbound(
-			DimensionUpdatePacket::class.java,
-			DimensionUpdatePacket.TYPE,
-			DimensionUpdatePacket.STREAM_CODEC,
-			DimensionUpdatePacket::handleClientbound
 		)
 		task.addClientbound(
 			ClientboundPacketTest::class.java,

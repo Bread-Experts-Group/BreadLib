@@ -1,18 +1,20 @@
 package org.bread_experts_group.breadlib
 
+import net.minecraft.client.Minecraft
 import net.minecraft.core.Direction
+import net.minecraft.server.level.ServerLevel
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.common.Mod
 import net.neoforged.neoforge.capabilities.Capabilities
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent
+import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.data.event.GatherDataEvent
+import net.neoforged.neoforge.event.level.LevelEvent
 import net.neoforged.neoforge.registries.RegisterEvent
 import org.bread_experts_group.breadlib.BreadLib.init
 import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
 import org.bread_experts_group.breadlib.capability.EnergyPacket
-import org.bread_experts_group.breadlib.platform.NeoForgeGenerateDataTask
-import org.bread_experts_group.breadlib.platform.PlatformInitialization
-import org.bread_experts_group.breadlib.platform.PlatformServices
+import org.bread_experts_group.breadlib.platform.*
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.TaskManager
 
@@ -57,6 +59,17 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 				override fun push(side: Direction?, what: EnergyPacket, simulate: Boolean): EnergyPacket {
 					TODO("Not yet implemented")
 				}
+			}
+		}
+
+		NeoForge.EVENT_BUS.addListener { event: LevelEvent.Load ->
+			val network = PlatformServices.NETWORK as NeoForgeNetworkHelper
+			if (event.level.isClientSide) {
+				network.trueSide.set(ApplicationSide.CLIENT)
+				network.trueClient.set(Minecraft.getInstance())
+			} else {
+				network.trueSide.set(ApplicationSide.SERVER)
+				network.trueServer.set((event.level as ServerLevel).server)
 			}
 		}
 

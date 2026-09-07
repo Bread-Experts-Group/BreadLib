@@ -24,8 +24,7 @@ data class ServerboundPacketTest(val testInt: Int, val testString: String) : Cus
 		fun handleServerbound(data: ServerboundPacketTest, context: NetworkContext) {
 			BreadLib.LOGGER.info("Serverbound packet test: {}, {}", data.testInt, data.testString)
 			PlatformServices.NETWORK.sendToAllPlayers(
-				ClientboundPacketTest(20, "client_test"),
-				context.serverLevel()
+				ClientboundPacketTest(20, "client_test")
 			)
 		}
 	}
