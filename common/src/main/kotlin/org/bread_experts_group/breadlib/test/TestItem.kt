@@ -4,16 +4,11 @@ import com.mojang.blaze3d.platform.InputConstants
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerLevel
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResultHolder
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.level.Level
-import org.bread_experts_group.breadlib.dimension.DimensionUtil
 import org.bread_experts_group.breadlib.extensions.item.IKeyboardItem
 import org.bread_experts_group.breadlib.extensions.item.IMouseItem
 import org.bread_experts_group.breadlib.platform.PlatformServices
@@ -28,12 +23,6 @@ class TestItem : Item(Properties()), IMouseItem, IKeyboardItem {
 			return true
 		}
 		return false
-	}
-
-	override fun use(level: Level, player: Player, usedHand: InteractionHand): InteractionResultHolder<ItemStack> {
-		if (level.isClientSide) return super.use(level, player, usedHand)
-		DimensionUtil.createDimension(level as ServerLevel)
-		return super.use(level, player, usedHand)
 	}
 
 	override fun onKeyPress(
