@@ -9,7 +9,7 @@ class BreadLibDataGeneratorEntry : DataGeneratorEntrypoint {
 		val pack = fabricDataGenerator.createPack()
 		val task = FabricGenerateDataTask(pack)
 
-		pack.addProvider(::BreadLibWorldGenProvider)
+//		TODO: figure out what htis is pack.addProvider(::BreadLibWorldGenProvider)
 		TaskManager.runTasks(task)
 	}
 

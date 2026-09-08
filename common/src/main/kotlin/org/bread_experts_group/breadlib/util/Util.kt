@@ -2,7 +2,6 @@
 
 package org.bread_experts_group.breadlib.util
 
-import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.resources.ResourceLocation
@@ -12,11 +11,9 @@ import net.minecraft.world.level.block.state.BlockState
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.util.Supplier
 import org.bread_experts_group.breadlib.BreadLib
+import org.bread_experts_group.breadlib.platform.PlatformServices
 import java.nio.file.Path
 import java.util.*
-
-val minecraft: Minecraft?
-	get() = Minecraft.getInstance()
 
 fun getFrame(backwardsDepth: Long): StackWalker.StackFrame? = StackWalker.getInstance(
 	StackWalker.Option.RETAIN_CLASS_REFERENCE
@@ -60,7 +57,7 @@ val Item.location: ResourceLocation
 val Block.location: ResourceLocation
 	get() = BuiltInRegistries.BLOCK.getKey(this)
 val BlockState.particleSprite: TextureAtlasSprite
-	get() = minecraft!!.blockRenderer.blockModelShaper.getParticleIcon(this)
+	get() = PlatformServices.NETWORK.client.blockRenderer.blockModelShaper.getParticleIcon(this)
 
 val Item.texture: ResourceLocation
 	get() = this.location.withPrefix("textures/item/").withSuffix(".png")

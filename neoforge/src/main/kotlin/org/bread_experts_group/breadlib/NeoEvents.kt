@@ -10,6 +10,8 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.RegisterCommandsEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
+import org.bread_experts_group.breadlib.platform.ApplicationSide
+import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
 import org.bread_experts_group.breadlib.task.command.ClientCommandTask
@@ -22,7 +24,6 @@ import org.bread_experts_group.breadlib.task.render.RenderLevelStage
 import org.bread_experts_group.breadlib.task.render.ShaderTask
 import org.bread_experts_group.breadlib.task.tick.ClientTickTask
 import org.bread_experts_group.breadlib.task.tick.ServerTickTask
-import org.bread_experts_group.breadlib.util.minecraft
 import java.util.function.Consumer
 
 object NeoEvents {
@@ -120,7 +121,8 @@ object NeoEvents {
 	}
 
 	private fun addClientTickTasks() {
-		val level = (minecraft ?: return).level ?: return
+		if (PlatformServices.PLATFORM.side != ApplicationSide.CLIENT) return
+		val level = PlatformServices.NETWORK.client.level ?: return
 		this.addListener { _: ClientTickEvent.Pre ->
 			TaskManager.runTasks(ClientTickTask(level, FireSide.PRE))
 		}

@@ -11,9 +11,11 @@ import net.fabricmc.api.EnvType
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.multiplayer.ClientLevel
@@ -22,6 +24,7 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.server.level.ServerLevel
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
 import org.bread_experts_group.breadlib.task.command.ClientCommandTask
 import org.bread_experts_group.breadlib.task.command.ServerCommandTask
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask
@@ -53,7 +56,15 @@ object FabricEvents {
 		if (envType == EnvType.CLIENT) {
 			addWorldRenderTasks()
 			addClientTickTasks()
+
+			ClientPlayConnectionEvents.JOIN.register { _, _, minecraft ->
+				TaskManager.runTasks(ClientLogInEvent(minecraft.player!!))
+			}
 		}
+		ServerLifecycleEvents.SERVER_STARTED.register { server ->
+			TaskManager.runTasks(org.bread_experts_group.breadlib.task.server.ServerStartingEvent(server))
+		}
+
 		addServerTickTasks()
 		addCommandTasks(envType)
 	}

@@ -7,13 +7,13 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.ChunkPos
 
-class FabricNetworkHelper : INetworkHelper {
+class FabricNetworkHelper : NetworkHelper() {
 	override fun sendToServer(payload: CustomPacketPayload) {
 		ClientPlayNetworking.send(payload)
 	}
 
-	override fun sendToAllPlayers(payload: CustomPacketPayload, level: ServerLevel) {
-		for (player in PlayerLookup.all(level.server)) ServerPlayNetworking.send(player, payload)
+	override fun sendToAllPlayers(payload: CustomPacketPayload) {
+		for (player in PlayerLookup.all(PlatformServices.NETWORK.server)) ServerPlayNetworking.send(player, payload)
 	}
 
 	override fun sendToPlayersTrackingChunk(payload: CustomPacketPayload, level: ServerLevel, pos: ChunkPos) {

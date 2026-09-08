@@ -3,15 +3,12 @@ package org.bread_experts_group.breadlib.extensions.block
 import io.netty.buffer.ByteBuf
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
-import net.minecraft.core.SectionPos
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload
-import net.minecraft.util.ExtraCodecs
 import net.minecraft.world.level.chunk.LevelChunk
 import org.bread_experts_group.breadlib.BreadLib.modLoc
 import org.bread_experts_group.breadlib.network.NetworkContext
-import org.bread_experts_group.breadlib.util.minecraft
 
 class BreadLibBlockEntityCapabilitiesSynchronizationPacket(
     val pos: BlockPos,

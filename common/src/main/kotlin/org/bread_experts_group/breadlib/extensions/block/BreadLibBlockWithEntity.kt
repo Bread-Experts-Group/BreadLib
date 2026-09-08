@@ -17,6 +17,7 @@ import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlockEntityTypes
 import org.jetbrains.annotations.ApiStatus
 import java.lang.reflect.Constructor
+import java.util.concurrent.atomic.AtomicLong
 
 abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
 	@ApiStatus.Internal
@@ -29,9 +30,13 @@ abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
 	private val beConstructor = blockEntity.getConstructor(BlockPos::class.java, BlockState::class.java)
 	private val commonTick = Tickable.Common::class.java.isAssignableFrom(blockEntity)
 
+	companion object {
+		var counter = AtomicLong(0)
+	}
+
 	init {
 		val bet = getBlockEntityTypes(modID)
-		if (bet.getType(blockEntity) == null) bet.register<BlockEntityType<*>>("test_${System.currentTimeMillis()}", false) {
+		if (bet.getType(blockEntity) == null) bet.register<BlockEntityType<*>>("test_${counter.getAndIncrement()}", false) {
 			@Suppress("UNCHECKED_CAST")
 			create(blockEntity as Class<BlockEntity>, (beConstructor as Constructor<BlockEntity>)::newInstance).also { builder ->
 				if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {

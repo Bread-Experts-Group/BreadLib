@@ -12,11 +12,13 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.biome.BiomeGenerationSettings
 import net.minecraft.world.level.biome.MobSpawnSettings
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.HorizontalDirectionalBlock
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.dimension.DimensionType
 import net.minecraft.world.level.dimension.LevelStem
 import net.minecraft.world.level.levelgen.FlatLevelSource
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings
 import net.minecraft.world.level.portal.DimensionTransition
 import org.bread_experts_group.breadlib.BreadLib
@@ -103,7 +105,13 @@ class TestBlock : BreadLibBlockWithEntity<TestBlockEntity>(TestBlockEntity::clas
 						Optional.empty(),
 						biome.holder(),
 						emptyList()
-					)
+					).withBiomeAndLayers(
+						mutableListOf(
+							FlatLayerInfo(5, Blocks.ANCIENT_DEBRIS)
+						),
+						Optional.empty(),
+						biome.holder()
+					).also { it.updateLayers() }
 				)
 			)
 		}
@@ -115,8 +123,8 @@ class TestBlock : BreadLibBlockWithEntity<TestBlockEntity>(TestBlockEntity::clas
 			server.playerList.players.forEach {
 				it.changeDimension(
 					DimensionTransition.missingRespawnBlock(
-						newWorld, it
-                    ) { }
+						newWorld, it, DimensionTransition.PLAY_PORTAL_SOUND
+                    )
                 )
 			}
 		}

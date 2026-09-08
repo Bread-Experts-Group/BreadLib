@@ -8,8 +8,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.data.event.GatherDataEvent
-import net.neoforged.neoforge.event.level.LevelEvent
-import net.neoforged.neoforge.event.server.ServerAboutToStartEvent
+import net.neoforged.neoforge.event.server.ServerStartingEvent
 import net.neoforged.neoforge.registries.RegisterEvent
 import org.bread_experts_group.breadlib.BreadLib.init
 import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
@@ -20,8 +19,6 @@ import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.TaskManager
 import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
-import org.bread_experts_group.breadlib.task.level.LevelTask
-import org.bread_experts_group.breadlib.task.server.ServerStartEvent
 
 @Mod(BreadLib.MOD_ID)
 class BreadLibNeoForge(eventBus: IEventBus) {
@@ -71,13 +68,13 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 			TaskManager.runTasks(ClientLogInEvent(event.player))
 		}
 
-		NeoForge.EVENT_BUS.addListener { event: ServerAboutToStartEvent ->
-			TaskManager.runTasks(ServerStartEvent(event.server))
+		NeoForge.EVENT_BUS.addListener { event: ServerStartingEvent ->
+			TaskManager.runTasks(org.bread_experts_group.breadlib.task.server.ServerStartingEvent(event.server))
 		}
 
-		NeoForge.EVENT_BUS.addListener { event: LevelEvent.Load ->
-			TaskManager.runTasks(LevelTask.Load(event.level))
-		}
+//		NeoForge.EVENT_BUS.addListener { event: LevelEvent.Load ->
+//			TaskManager.runTasks(LevelTask.Load(event.level))
+//		}
 
 		eventBus.addListener { event: GatherDataEvent ->
 			TaskManager.runTasks(NeoForgeGenerateDataTask(event))

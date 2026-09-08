@@ -12,6 +12,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.biome.*
+import net.minecraft.world.level.border.BorderChangeListener
 import net.minecraft.world.level.dimension.DimensionType
 import net.minecraft.world.level.dimension.LevelStem
 import net.minecraft.world.level.storage.DerivedLevelData
@@ -78,9 +79,9 @@ object DimUtil {
 
 		registryAccess.registerDimension(newWorld, worldKey)
 
-//		server.getLevel(Level.OVERWORLD)!!.worldBorder.addListener(
-//			BorderChangeListener.DelegateBorderChangeListener(newWorld.worldBorder)
-//		)
+		server.getLevel(Level.OVERWORLD)!!.worldBorder.addListener(
+			BorderChangeListener.DelegateBorderChangeListener(newWorld.worldBorder)
+		)
 
 		server.levels[resourceKey] = newWorld
 		PlatformServices.PLATFORM.refreshLevels()

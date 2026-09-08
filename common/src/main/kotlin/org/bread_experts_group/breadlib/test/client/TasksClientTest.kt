@@ -11,7 +11,6 @@ import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask
 import org.bread_experts_group.breadlib.util.Color
-import org.bread_experts_group.breadlib.util.minecraft
 
 object TasksClientTest {
 	fun renderTest() {
@@ -28,13 +27,14 @@ object TasksClientTest {
 				guiGraphics.drawString(Minecraft.getInstance().font, debugInfo, 2, 2, Color.ORANGE, false)
 			}
 
-			task.add(BreadLib.modLoc("dim_overlay")) { guiGraphics, deltaTracker ->
-				val level = minecraft!!.level!!
-				val player = minecraft!!.player!!
+			task.add(modLoc("dim_overlay")) { guiGraphics, _ ->
+				val minecraft = PlatformServices.NETWORK.client
+				val level = minecraft.level!!
+				val player = minecraft.player!!
 				val biomeReg = level.registryAccess().registryOrThrow(Registries.BIOME)
 				val biome = biomeReg.getKey(level.getBiome(player.blockPosition()).value())
-				guiGraphics.drawString(minecraft!!.font, "current dim: ${level.dimension().location()}", 0, 15, Color.ORANGE)
-				guiGraphics.drawString(minecraft!!.font, "biome: $biome", 0, 25, Color.ORANGE)
+				guiGraphics.drawString(minecraft.font, "current dim: ${level.dimension().location()}", 0, 15, Color.ORANGE)
+				guiGraphics.drawString(minecraft.font, "biome: $biome", 0, 25, Color.ORANGE)
 			}
 		}
 	}

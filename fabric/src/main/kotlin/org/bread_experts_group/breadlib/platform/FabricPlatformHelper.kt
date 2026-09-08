@@ -32,4 +32,7 @@ class FabricPlatformHelper : IPlatformHelper {
 
 		return ModInfo(modId, metadata.description, version, dependencies, jarPath)
 	}
+
+	override fun refreshLevels() {
+	}
 }

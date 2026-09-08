@@ -12,7 +12,7 @@ abstract class NetworkHelper {
 	 * @return [Minecraft], if the caller is running on [ApplicationSide.CLIENT] (logical).
 	 */
 	val client: Minecraft
-		get() = trueClient.get() ?: throw IllegalStateException("Not running on ${ApplicationSide.CLIENT}.")
+		get() = trueClient.get() ?: Minecraft.getInstance() ?: throw IllegalStateException("Not running on ${ApplicationSide.CLIENT}.")
 
 	/**
 	 * Gets the [MinecraftServer] instance if the caller is running on a server.
@@ -22,8 +22,11 @@ abstract class NetworkHelper {
 		get() = trueServer.get() ?: throw IllegalStateException("Not running on ${ApplicationSide.SERVER}.")
 
 	internal val trueSide: ThreadLocal<ApplicationSide?> = ThreadLocal.withInitial { null }
-	internal val trueClient: ThreadLocal<Minecraft?> = ThreadLocal.withInitial { null }
+
 	internal val trueServer: ThreadLocal<MinecraftServer?> = ThreadLocal.withInitial { null }
+	internal val trueClient: ThreadLocal<Minecraft?> by lazy {
+		ThreadLocal.withInitial { null }
+	}
 
 	/**
 	 * Gets the side of the current network environment.

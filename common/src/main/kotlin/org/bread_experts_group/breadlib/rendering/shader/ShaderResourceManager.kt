@@ -10,7 +10,6 @@ import net.minecraft.server.packs.repository.PackSource
 import net.minecraft.server.packs.resources.Resource
 import net.minecraft.server.packs.resources.ResourceManager
 import org.bread_experts_group.breadlib.platform.PlatformServices
-import org.bread_experts_group.breadlib.util.minecraft
 import org.bread_experts_group.breadlib.util.optional
 import org.bread_experts_group.breadlib.util.resolve
 import java.nio.file.FileSystems
@@ -54,7 +53,7 @@ class ShaderResourceManager : ResourceManager {
 	override fun getResource(location: ResourceLocation): Optional<Resource> {
 //		BreadLib.LOGGER.info("{}, {}", PlatformServices.PLATFORM.getPlatformName(), location)
 		val isBuiltin = location.namespace == ResourceLocation.DEFAULT_NAMESPACE
-		if (isBuiltin) return minecraft!!.resourceManager.getResource(location)
+		if (isBuiltin) return PlatformServices.NETWORK.client.resourceManager.getResource(location)
 
 		if (PlatformServices.PLATFORM.isModLoaded(location.namespace)) {
 			val info = PlatformServices.PLATFORM.getModInfo(location.namespace)

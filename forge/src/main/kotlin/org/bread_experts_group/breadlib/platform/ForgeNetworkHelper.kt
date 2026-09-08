@@ -6,13 +6,13 @@ import net.minecraft.world.level.ChunkPos
 import net.minecraftforge.network.PacketDistributor
 import org.bread_experts_group.breadlib.ForgeNetworking
 
-class ForgeNetworkHelper : INetworkHelper {
+class ForgeNetworkHelper : NetworkHelper() {
 	override fun sendToServer(payload: CustomPacketPayload) {
 		ForgeNetworking.checkChannelNotNull()
 		ForgeNetworking.NETWORK_CHANNEL.send(payload, PacketDistributor.SERVER.noArg())
 	}
 
-	override fun sendToAllPlayers(payload: CustomPacketPayload, level: ServerLevel) {
+	override fun sendToAllPlayers(payload: CustomPacketPayload) {
 		ForgeNetworking.checkChannelNotNull()
 		ForgeNetworking.NETWORK_CHANNEL.send(payload, PacketDistributor.ALL.noArg())
 	}

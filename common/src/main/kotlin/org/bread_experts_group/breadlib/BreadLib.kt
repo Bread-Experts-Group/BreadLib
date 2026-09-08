@@ -22,7 +22,7 @@ import org.bread_experts_group.breadlib.registry.network.DimensionTypeRegisterPa
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
 import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
 import org.bread_experts_group.breadlib.task.network.NetworkTask
-import org.bread_experts_group.breadlib.task.server.ServerStartEvent
+import org.bread_experts_group.breadlib.task.server.ServerStartingEvent
 import org.bread_experts_group.breadlib.util.DimUtil.createAndRegisterWorldAndDimension
 import org.bread_experts_group.breadlib.util.DimUtil.dynamicLevelDataFile
 import java.io.IOException
@@ -86,17 +86,14 @@ object BreadLib {
 			network.trueClient.set(Minecraft.getInstance())
 		}
 
-		newTask { task: ServerStartEvent ->
+		newTask { task: ServerStartingEvent ->
 			val network = PlatformServices.NETWORK
 			network.trueSide.set(ApplicationSide.SERVER)
 			network.trueServer.set(task.server)
 
-			RegistryProvider.DYNAMICS.walk().filter {
-				it.extension.lowercase() == "nbtc"
-			}.forEach {
-				val nbt = NbtIo.readCompressed(it, NbtAccounter.unlimitedHeap())
+			fun register(nbt: CompoundTag, form: Int ) {
 				val dataTag = nbt.get("data")
-				val data = when (val form = nbt.getInt("codec_form")) {
+				val data = when (form) {
 					0 -> Biome.DIRECT_CODEC.decode(NbtOps.INSTANCE, dataTag)
 					1 -> DimensionType.DIRECT_CODEC.decode(NbtOps.INSTANCE, dataTag)
 					2 -> LevelStem.CODEC.decode(
@@ -120,6 +117,21 @@ object BreadLib {
 
 				registry.freeze()
 				registry.register<Any>(itemKey.path, false) { data }
+			}
+
+			RegistryProvider.DYNAMICS.walk().filter {
+				it.extension.lowercase() == "nbtc"
+			}.map {
+				val nbt = NbtIo.readCompressed(it, NbtAccounter.unlimitedHeap())
+				nbt to nbt.getInt("codec_form")
+			}.filter { (nbt, form) ->
+				if (form == 0 || form == 1) {
+					register(nbt, form)
+					return@filter false
+				}
+				return@filter true
+			}.forEach { (nbt, form) ->
+				register(nbt, form)
 			}
 
 			val dynLevels = try {

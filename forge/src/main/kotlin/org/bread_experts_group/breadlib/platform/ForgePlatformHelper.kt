@@ -28,4 +28,8 @@ class ForgePlatformHelper : IPlatformHelper {
 
 		return ModInfo(modId, info.description, version, dependencies, path)
 	}
+
+	override fun refreshLevels() {
+		PlatformServices.NETWORK.server.markWorldsDirty()
+	}
 }

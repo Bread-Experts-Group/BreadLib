@@ -1,6 +1,5 @@
 package org.bread_experts_group.breadlib.test
 
-import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.block.model.BakedQuad
 import net.minecraft.client.renderer.block.model.BlockElementFace
 import net.minecraft.client.renderer.block.model.BlockFaceUV
@@ -24,11 +23,11 @@ import org.bread_experts_group.breadlib.capability.EnergyPacket
 import org.bread_experts_group.breadlib.extensions.block.BlockProperties
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlock
 import org.bread_experts_group.breadlib.platform.ICapabilityHelper.Companion.capability
+import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.rendering.model.MeshProvider
 import org.bread_experts_group.breadlib.rendering.model.ModelUtil.makeVertices
 import org.bread_experts_group.breadlib.rendering.model.ModelUtil.model
 import org.bread_experts_group.breadlib.rendering.model.ModelUtil.setupShape
-import org.bread_experts_group.breadlib.util.minecraft
 import org.joml.Vector3f
 import java.util.*
 
@@ -103,7 +102,7 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 
 	override val meshProvider: MeshProvider by lazy {
 		MeshProvider { state, pos, level, poseStack, vertexConsumer, randomSource ->
-			val sprite = minecraft!!.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(
+			val sprite = PlatformServices.NETWORK.client.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(
 				ResourceLocation.withDefaultNamespace("block/iron_block")
 			)
 
@@ -241,7 +240,7 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 				}
 			}
 
-			minecraft!!.blockRenderer.modelRenderer.tesselateWithAO(
+			PlatformServices.NETWORK.client.blockRenderer.modelRenderer.tesselateWithAO(
 				level, quads.model(), state, pos, poseStack, vertexConsumer, true, randomSource, 0,
 				OverlayTexture.NO_OVERLAY
 			)
@@ -267,7 +266,7 @@ class MultipartCableBlock : BreadLibBlock(Properties.of()) {
 		// TODO: This allows the cable to update immediately to local changes,
 		// TODO: but is costly (especially when loading many many cables),
 		// TODO: it may be prudent to find a better solution.
-		if (level is ClientLevel) minecraft!!.levelRenderer.setBlocksDirty(
+		if (level is Level && level.isClientSide) PlatformServices.NETWORK.client.levelRenderer.setBlocksDirty(
 			pos.x, pos.y, pos.z,
 			pos.x, pos.y, pos.z
 		)
