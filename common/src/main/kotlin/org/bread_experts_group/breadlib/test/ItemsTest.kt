@@ -8,5 +8,5 @@ import org.bread_experts_group.breadlib.registry.objects.RegistryItem
 object ItemsTest {
 	val REGISTRY: RegistryProvider.Items = getItems(BreadLib.MOD_ID)
 
-	val TEST_ITEM: RegistryItem<TestItem> = REGISTRY.register("test_item", ::TestItem)
+	val TEST_ITEM: RegistryItem<TestItem> = REGISTRY.register("test_item", false, ::TestItem)
 }

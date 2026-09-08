@@ -31,7 +31,7 @@ abstract class BreadLibBlockWithEntity<BE : BlockEntity>(
 
 	init {
 		val bet = getBlockEntityTypes(modID)
-		if (bet.getType(blockEntity) == null) bet.register<BlockEntityType<*>>("test_${System.currentTimeMillis()}") {
+		if (bet.getType(blockEntity) == null) bet.register<BlockEntityType<*>>("test_${System.currentTimeMillis()}", false) {
 			@Suppress("UNCHECKED_CAST")
 			create(blockEntity as Class<BlockEntity>, (beConstructor as Constructor<BlockEntity>)::newInstance).also { builder ->
 				if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {

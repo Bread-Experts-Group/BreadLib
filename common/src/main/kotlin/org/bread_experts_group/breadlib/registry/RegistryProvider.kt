@@ -5,15 +5,23 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderers
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.NbtIo
+import net.minecraft.nbt.NbtOps
+import net.minecraft.resources.RegistryOps
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.Item
+import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.entity.BlockEntity
 import net.minecraft.world.level.block.entity.BlockEntityType
 import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.dimension.DimensionType
+import net.minecraft.world.level.dimension.LevelStem
+import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockWithEntity
 import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
@@ -22,7 +30,9 @@ import org.bread_experts_group.breadlib.registry.objects.RegistryItem
 import org.bread_experts_group.breadlib.registry.objects.RegistryObject
 import org.bread_experts_group.breadlib.util.DimUtil.register
 import org.jetbrains.annotations.ApiStatus
+import java.nio.file.Path
 import java.util.function.Supplier
+import kotlin.io.path.createDirectories
 
 open class RegistryProvider<T> private constructor(
 	val registry: Registry<T>,
@@ -54,6 +64,8 @@ open class RegistryProvider<T> private constructor(
 				else -> RegistryProvider(this, modID)
 			}
 		} as RegistryProvider<T>
+
+		val DYNAMICS = BreadLib.CONFIG.resolve("registry dynamics")
 	}
 
 	val entries: MutableMap<RegistryObject<T, out T>, Supplier<T>> = mutableMapOf()
@@ -71,22 +83,84 @@ open class RegistryProvider<T> private constructor(
 		this.registry
 	)
 
-	open fun <I : T> register(name: String, supplier: Supplier<T>): RegistryObject<T, I> {
+	fun <I : T> getOrRegister(
+		name: String, persistDynamic: Boolean = true,
+		supplier: Supplier<T>
+	): RegistryObject<T, I> {
+		val location = ResourceLocation.fromNamespaceAndPath(modID, name)
+		if (registry.containsKey(location)) {
+			val regObject = this.createRegistryObject<I>(name)
+			regObject.bind()
+			return regObject
+		}
+		return register(name, persistDynamic, supplier)
+	}
+
+	val dynamicsFolder: Path = DYNAMICS.resolve(modID)
+	open fun <I : T> register(
+		name: String, persistDynamic: Boolean = true,
+		supplier: Supplier<T>
+	): RegistryObject<T, I> {
+		val location = ResourceLocation.fromNamespaceAndPath(modID, name)
+		check(!registry.containsKey(location)) {
+			"Duplicate underlying entry: $location"
+		}
 		val regObject = this.createRegistryObject<I>(name)
 		check(this.entries.putIfAbsent(regObject, supplier) == null) {
-			"Duplicate registry entry: " + this.modID + ":" + name
+			"Duplicate registry entry: $location"
 		}
 		if (frozen) {
 			if (PlatformServices.NETWORK.side == ApplicationSide.CLIENT) throw IllegalStateException(
 				"The client cannot dynamically add to the registry."
 			)
+			val registries = PlatformServices.NETWORK.server.registryAccess()
 			@Suppress("UNCHECKED_CAST")
-			PlatformServices.NETWORK.server.registryAccess().register(
+			registries.register(
 				registry.key() as ResourceKey<Registry<Any>>,
-				{ supplier.get() as Any },
-				ResourceLocation.fromNamespaceAndPath(modID, name)
+				{ supplier.get() as Any }, location
 			)
 			regObject.bind()
+
+			if (persistDynamic) {
+				val (saved, form) = when (val encodingValue = regObject.get()) {
+					is Biome -> Biome.DIRECT_CODEC.encode(encodingValue, NbtOps.INSTANCE, null) to 0
+					is DimensionType -> DimensionType.DIRECT_CODEC.encode(encodingValue, NbtOps.INSTANCE, null) to 1
+					is LevelStem -> LevelStem.CODEC.encode(
+						encodingValue,
+						RegistryOps.create(NbtOps.INSTANCE, registries), CompoundTag()
+					) to 2
+					else -> throw IllegalStateException("Persistent dynamic registration not available for $encodingValue")
+				}
+
+				val data = CompoundTag().apply {
+					put("data", saved.orThrow)
+
+					val registryKey = registry.key()
+					putString(
+						"registry_registry",
+						registryKey.registry().toString()
+					)
+					putString(
+						"registry",
+						registryKey.location().toString()
+					)
+					putString(
+						"item",
+						"$modID:$name"
+					)
+					putInt(
+						"codec_form",
+						form
+					)
+				}
+
+				NbtIo.writeCompressed(
+					data,
+					dynamicsFolder
+						.createDirectories()
+						.resolve("${System.currentTimeMillis()}_${System.nanoTime()}.nbtc")
+				)
+			}
 		}
 		return regObject
 	}
@@ -96,8 +170,8 @@ open class RegistryProvider<T> private constructor(
 			RegistryBlock.create(this.modID, name)
 
 		@Suppress("UNCHECKED_CAST")
-		override fun <B : Block> register(name: String, supplier: Supplier<Block>): RegistryBlock<B> =
-			super.register<Block>(name, supplier) as RegistryBlock<B>
+		override fun <B : Block> register(name: String, persistDynamic: Boolean, supplier: Supplier<Block>): RegistryBlock<B> =
+			super.register<Block>(name, persistDynamic, supplier) as RegistryBlock<B>
 
 		fun <B : Block> registerSimpleBlock(name: String, properties: BlockBehaviour.Properties): RegistryBlock<B> =
 			this.register(name) { Block(properties) }
@@ -141,10 +215,10 @@ open class RegistryProvider<T> private constructor(
 		}
 
 		fun <I : BlockEntityType<*>> register(
-			name: String,
+			name: String, persistDynamic: Boolean,
 			supplier: BlockEntityTypes.() -> BlockEntityType<*>
 		): RegistryObject<BlockEntityType<*>, I> {
-			return super.register(name) { this.supplier() }
+			return super.register(name, persistDynamic) { this.supplier() }
 		}
 
 		@ApiStatus.Internal
@@ -156,8 +230,8 @@ open class RegistryProvider<T> private constructor(
 			RegistryItem.create(this.modID, name)
 
 		@Suppress("UNCHECKED_CAST")
-		override fun <I : Item> register(name: String, supplier: Supplier<Item>): RegistryItem<I> =
-			super.register<Item>(name, supplier) as RegistryItem<I>
+		override fun <I : Item> register(name: String, persistDynamic: Boolean, supplier: Supplier<Item>): RegistryItem<I> =
+			super.register<Item>(name, persistDynamic, supplier) as RegistryItem<I>
 
 		fun <I : Item> simpleItem(name: String, properties: Item.Properties): RegistryItem<I> =
 			this.register(name) { Item(properties) }

@@ -5,7 +5,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.registries.Registries
-import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.tags.BlockTags
 import net.minecraft.util.valueproviders.ConstantInt
@@ -70,7 +69,7 @@ class TestBlock : BreadLibBlockWithEntity<TestBlockEntity>(TestBlockEntity::clas
 		val biomes = server.registryAccess().registry(Registries.BIOME).get()
 			.getProvider(MOD_ID)
 		biomes.freeze()
-		val biome = biomes.register<Biome>(
+		val biome = biomes.getOrRegister<Biome>(
 			"test_biome"
 		) {
 			createBiome(
@@ -87,25 +86,29 @@ class TestBlock : BreadLibBlockWithEntity<TestBlockEntity>(TestBlockEntity::clas
 		val dimensionTypes = server.registryAccess().registry(Registries.DIMENSION_TYPE).get()
 			.getProvider(MOD_ID)
 		dimensionTypes.freeze()
-		val dimensionType = dimensionTypes.register<DimensionType>(
+		val dimensionType = dimensionTypes.getOrRegister<DimensionType>(
 			"test_dim"
 		) { TODO_TYPE }
 
-		val newWorld = createAndRegisterWorldAndDimension(
-			ResourceKey.create(
-				Registries.DIMENSION,
-				modLoc("test_dim")
-			)
-		) { LevelStem(
-			dimensionType.holder(),
-			FlatLevelSource(
-				FlatLevelGeneratorSettings(
-					Optional.empty(),
-					biome.holder(),
-					emptyList()
+		val levelStems = server.registryAccess().registry(Registries.LEVEL_STEM).get()
+			.getProvider(MOD_ID)
+		levelStems.freeze()
+		val stem = levelStems.getOrRegister<LevelStem>(
+			"test_dim"
+		) {
+			LevelStem(
+				dimensionType.holder(),
+				FlatLevelSource(
+					FlatLevelGeneratorSettings(
+						Optional.empty(),
+						biome.holder(),
+						emptyList()
+					)
 				)
 			)
-		) }
+		}
+
+		val newWorld = createAndRegisterWorldAndDimension(modLoc("test_dim"), stem.get())
 
 		server.execute {
 			Thread.sleep(1000)

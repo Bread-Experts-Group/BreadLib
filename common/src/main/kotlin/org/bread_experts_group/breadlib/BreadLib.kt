@@ -1,14 +1,35 @@
 package org.bread_experts_group.breadlib
 
+import net.minecraft.client.Minecraft
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.Registries
+import net.minecraft.nbt.*
+import net.minecraft.resources.RegistryOps
+import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.world.level.biome.Biome
+import net.minecraft.world.level.dimension.DimensionType
+import net.minecraft.world.level.dimension.LevelStem
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntityCapabilitiesSynchronizationPacket
+import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
+import org.bread_experts_group.breadlib.registry.RegistryProvider
+import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getProvider
 import org.bread_experts_group.breadlib.registry.network.BiomeRegisterPacket
 import org.bread_experts_group.breadlib.registry.network.DimensionTypeRegisterPacket
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
+import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
 import org.bread_experts_group.breadlib.task.network.NetworkTask
+import org.bread_experts_group.breadlib.task.server.ServerStartEvent
+import org.bread_experts_group.breadlib.util.DimUtil.createAndRegisterWorldAndDimension
+import org.bread_experts_group.breadlib.util.DimUtil.dynamicLevelDataFile
+import java.io.IOException
+import java.nio.file.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.extension
+import kotlin.io.path.walk
 
 object BreadLib {
 	const val MOD_ID: String = "breadlib"
@@ -16,6 +37,12 @@ object BreadLib {
 
 	@JvmField
 	val LOGGER: Logger = LogManager.getLogger("BreadLib")
+
+	val CONFIG: Path by lazy {
+		PlatformServices.PLATFORM.configDir.resolve(
+			MOD_ID
+		)
+	}
 
 	@JvmStatic
 	fun modLoc(vararg path: String): ResourceLocation {
@@ -30,7 +57,6 @@ object BreadLib {
 			PlatformServices.PLATFORM.environmentKind,
 			PlatformServices.PLATFORM.side
 		)
-		kExample()
 
 		newTask { task: NetworkTask ->
 			task.addClientbound(
@@ -53,6 +79,80 @@ object BreadLib {
 				BiomeRegisterPacket::handleClientbound
 			)
 		}
+
+		newTask { _: ClientLogInEvent ->
+			val network = PlatformServices.NETWORK
+			network.trueSide.set(ApplicationSide.CLIENT)
+			network.trueClient.set(Minecraft.getInstance())
+		}
+
+		newTask { task: ServerStartEvent ->
+			val network = PlatformServices.NETWORK
+			network.trueSide.set(ApplicationSide.SERVER)
+			network.trueServer.set(task.server)
+
+			RegistryProvider.DYNAMICS.walk().filter {
+				it.extension.lowercase() == "nbtc"
+			}.forEach {
+				val nbt = NbtIo.readCompressed(it, NbtAccounter.unlimitedHeap())
+				val dataTag = nbt.get("data")
+				val data = when (val form = nbt.getInt("codec_form")) {
+					0 -> Biome.DIRECT_CODEC.decode(NbtOps.INSTANCE, dataTag)
+					1 -> DimensionType.DIRECT_CODEC.decode(NbtOps.INSTANCE, dataTag)
+					2 -> LevelStem.CODEC.decode(
+						RegistryOps.create(NbtOps.INSTANCE, task.server.registryAccess()),
+						dataTag
+					)
+
+					else -> throw NotImplementedError("Codec form $form")
+				}.orThrow.first
+
+				val parentKey = ResourceLocation.parse(nbt.getString("registry_registry"))
+				val registryKey = ResourceLocation.parse(nbt.getString("registry"))
+				val itemKey = ResourceLocation.parse(nbt.getString("item"))
+
+				val registry = task.server.registryAccess().registry(
+					ResourceKey.create(
+						ResourceKey.createRegistryKey<Registry<*>>(parentKey),
+						registryKey
+					)
+				).get().getProvider(itemKey.namespace)
+
+				registry.freeze()
+				registry.register<Any>(itemKey.path, false) { data }
+			}
+
+			val dynLevels = try {
+				NbtIo.readCompressed(
+					task.server.dynamicLevelDataFile().also { it.parent.createDirectories() },
+					NbtAccounter.unlimitedHeap()
+				)
+			} catch (_: IOException) {
+				CompoundTag()
+			}
+			dynLevels.getList("levels_simple", Tag.TAG_STRING.toInt()).forEach {
+				val registry = task.server.registryAccess()
+				val location = ResourceLocation.parse(it.asString)
+
+				val dimensionKey: ResourceLocation = location
+				val levelStem: LevelStem = registry.registry(Registries.LEVEL_STEM).get()[location]!!
+
+				createAndRegisterWorldAndDimension(dimensionKey, levelStem, false)
+			}
+			dynLevels.getList("levels", Tag.TAG_LIST.toInt()).forEach {
+				it as ListTag
+
+				val dimensionKey: ResourceLocation = ResourceLocation.parse((it[0] as StringTag).asString)
+
+				val registry = task.server.registryAccess()
+				val stemKeyLocation = ResourceLocation.parse((it[1] as StringTag).asString)
+				val levelStem: LevelStem = registry.registry(Registries.LEVEL_STEM).get()[stemKeyLocation]!!
+
+				createAndRegisterWorldAndDimension(dimensionKey, levelStem, false)
+			}
+		}
+
+		kExample()
 
 		LOGGER.info(PlatformServices.PLATFORM.getModInfo("breadlib").hash)
 	}

@@ -5,43 +5,47 @@ import net.minecraft.core.MappedRegistry
 import net.minecraft.core.Registry
 import net.minecraft.core.RegistryAccess
 import net.minecraft.core.registries.Registries
+import net.minecraft.nbt.*
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.biome.*
-import net.minecraft.world.level.border.BorderChangeListener
 import net.minecraft.world.level.dimension.DimensionType
 import net.minecraft.world.level.dimension.LevelStem
 import net.minecraft.world.level.storage.DerivedLevelData
+import net.minecraft.world.level.storage.LevelResource
+import org.bread_experts_group.breadlib.BreadLib.MOD_ID
 import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.network.BiomeRegisterPacket
 import org.bread_experts_group.breadlib.registry.network.DimensionTypeRegisterPacket
-import org.bread_experts_group.breadlib.test.TestBlock.Companion.TODO_TYPE
 import java.awt.Color
+import java.io.IOException
+import kotlin.io.path.createDirectories
 
 // This code was derived from the ideas in:
 // https://github.com/McJtyMods/RFToolsDimensions/blob/1.21_neo/src/main/java/mcjty/rftoolsdim/dimension/tools/DynamicDimensionManager.java
 
 object DimUtil {
+	fun MinecraftServer.dynamicLevelDataFile() = this.getWorldPath(LevelResource.ROOT)
+		.resolve("data", MOD_ID, "dynamic level data.nbtc")
+
 	fun createAndRegisterWorldAndDimension(
-		worldKey: ResourceKey<Level>,
-		dimension: () -> LevelStem
+		worldKey: ResourceLocation,
+		dimension: LevelStem,
+		persist: Boolean = true
 	): ServerLevel = PlatformServices.NETWORK.server.let { server ->
-		val dimensionKey = ResourceKey.create(Registries.LEVEL_STEM, worldKey.location())
-
-		val serverRegistry = server.registries().compositeAccess()
-		val dimension = dimension()
-
 		val worldData = server.worldData
+		val resourceKey = ResourceKey.create(Registries.DIMENSION, worldKey)
 
 		val newWorld = ServerLevel(
 			server,
 			server.executor,
 			server.storageSource,
 			DerivedLevelData(worldData, worldData.overworldData()),
-			worldKey,
+			resourceKey,
 			dimension,
 			server.progressListenerFactory.create(11),
 			false,
@@ -51,16 +55,34 @@ object DimUtil {
 			null
 		)
 
-		serverRegistry.apply {
-			registerDimensionType(TODO_TYPE, worldKey.location())
-			registerLevelStem(dimension, dimensionKey.location())
+		val registryAccess = server.registryAccess()
+		if (persist) {
+			val file = server.dynamicLevelDataFile().also { it.parent.createDirectories() }
+			val mutable = try {
+				NbtIo.readCompressed(file, NbtAccounter.unlimitedHeap())
+			} catch (_: IOException) {
+				CompoundTag()
+			}
+
+			val stemKey = registryAccess.registry(Registries.LEVEL_STEM).get().getResourceKey(dimension).get()
+
+			if (stemKey.location() == worldKey) mutable.put(
+				"levels_simple",
+				mutable.getList("levels_simple", Tag.TAG_STRING.toInt()).apply {
+					add(StringTag.valueOf(stemKey.location().toString()))
+				}
+			) else TODO("Complex")
+
+			NbtIo.writeCompressed(mutable, file)
 		}
 
-		server.getLevel(Level.OVERWORLD)!!.worldBorder.addListener(
-			BorderChangeListener.DelegateBorderChangeListener(newWorld.worldBorder)
-		)
+		registryAccess.registerDimension(newWorld, worldKey)
 
-		server.levels[worldKey] = newWorld
+//		server.getLevel(Level.OVERWORLD)!!.worldBorder.addListener(
+//			BorderChangeListener.DelegateBorderChangeListener(newWorld.worldBorder)
+//		)
+
+		server.levels[resourceKey] = newWorld
 		PlatformServices.PLATFORM.refreshLevels()
 
 		return newWorld
@@ -92,15 +114,19 @@ object DimUtil {
 		registry: ResourceKey<Registry<T>>,
 		entry: () -> T, location: ResourceLocation
 	): Holder<T> {
-		val entryRegistry = this.registry(registry)
-		(entryRegistry.get() as MappedRegistry<*>).frozen = false
+		val entryRegistry = this.registry(registry).get() as MappedRegistry<T>
+
+		val holderCheck = entryRegistry.getHolder(location)
+		if (holderCheck.isPresent) return holderCheck.get()
+
+		entryRegistry.frozen = false
 		val entry = entry()
 		val holder = Registry.registerForHolder(
-			entryRegistry.get(),
+			entryRegistry,
 			ResourceKey.create(registry, location),
 			entry
 		)
-		(entryRegistry.get() as MappedRegistry<*>).frozen = true
+		entryRegistry.frozen = true
 
 		if (PlatformServices.NETWORK.side == ApplicationSide.CLIENT) return holder
 		else if (registry != Registries.LEVEL_STEM) PlatformServices.NETWORK.sendToAllPlayers(
@@ -124,5 +150,9 @@ object DimUtil {
 
 	fun RegistryAccess.registerLevelStem(stem: LevelStem, location: ResourceLocation) = this.register(
 		Registries.LEVEL_STEM, { stem }, location
+	)
+
+	fun RegistryAccess.registerDimension(level: Level, location: ResourceLocation) = this.register(
+		Registries.DIMENSION, { level }, location
 	)
 }
