@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation
 import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.dimension.DimensionType
 import net.minecraft.world.level.dimension.LevelStem
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockEntityCapabilitiesSynchronizationPacket
@@ -97,6 +98,10 @@ object BreadLib {
 					0 -> Biome.DIRECT_CODEC.decode(NbtOps.INSTANCE, dataTag)
 					1 -> DimensionType.DIRECT_CODEC.decode(NbtOps.INSTANCE, dataTag)
 					2 -> LevelStem.CODEC.decode(
+						RegistryOps.create(NbtOps.INSTANCE, task.server.registryAccess()),
+						dataTag
+					)
+					3 -> NoiseGeneratorSettings.DIRECT_CODEC.decode(
 						RegistryOps.create(NbtOps.INSTANCE, task.server.registryAccess()),
 						dataTag
 					)

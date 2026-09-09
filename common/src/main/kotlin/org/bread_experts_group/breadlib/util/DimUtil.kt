@@ -133,7 +133,9 @@ object DimUtil {
 		entryRegistry.frozen = true
 
 		if (PlatformServices.NETWORK.side == ApplicationSide.CLIENT) return holder
-		else if (registry != Registries.LEVEL_STEM) PlatformServices.NETWORK.sendToAllPlayers(
+		else if (
+			registry != Registries.LEVEL_STEM && registry != Registries.NOISE_SETTINGS
+		) PlatformServices.NETWORK.sendToAllPlayers(
 			when (registry) {
 				Registries.DIMENSION_TYPE -> DimensionTypeRegisterPacket(location, entry as DimensionType)
 				Registries.BIOME -> BiomeRegisterPacket(location, entry as Biome)

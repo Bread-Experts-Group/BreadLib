@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.dimension.DimensionType
 import net.minecraft.world.level.dimension.LevelStem
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.extensions.block.BreadLibBlockWithEntity
 import org.bread_experts_group.breadlib.platform.ApplicationSide
@@ -129,6 +130,10 @@ open class RegistryProvider<T> private constructor(
 						encodingValue,
 						RegistryOps.create(NbtOps.INSTANCE, registries), CompoundTag()
 					) to 2
+					is NoiseGeneratorSettings -> NoiseGeneratorSettings.DIRECT_CODEC.encode(
+						encodingValue,
+						RegistryOps.create(NbtOps.INSTANCE, registries), CompoundTag()
+					) to 3
 					else -> throw IllegalStateException("Persistent dynamic registration not available for $encodingValue")
 				}
 
