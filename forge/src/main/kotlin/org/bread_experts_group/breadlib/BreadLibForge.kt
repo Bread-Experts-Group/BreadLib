@@ -1,6 +1,8 @@
 package org.bread_experts_group.breadlib
 
+import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.data.event.GatherDataEvent
+import net.minecraftforge.event.server.ServerStartingEvent
 import net.minecraftforge.eventbus.api.IEventBus
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
@@ -50,6 +52,10 @@ class BreadLibForge(context: FMLJavaModLoadingContext) {
 //				)
 //				generator.addProvider(true, provider)
 //			}
+		}
+
+		MinecraftForge.EVENT_BUS.addListener { event: ServerStartingEvent ->
+			TaskManager.runTasks(org.bread_experts_group.breadlib.task.server.ServerStartingEvent(event.server))
 		}
 
 		BreadLib.LOGGER.info("Hello Forge world!")

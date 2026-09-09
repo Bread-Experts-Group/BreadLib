@@ -1,12 +1,15 @@
 package org.bread_experts_group.breadlib;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.SimpleChannel;
 import org.bread_experts_group.breadlib.network.payload.PayloadInfo;
+import org.bread_experts_group.breadlib.platform.ApplicationSide;
+import org.bread_experts_group.breadlib.platform.PlatformServices;
 import org.bread_experts_group.breadlib.task.TaskManager;
 import org.bread_experts_group.breadlib.task.network.NetworkTask;
+
+import static org.bread_experts_group.breadlib.ForgeNetworkingClient.setupClient;
 
 public class ForgeNetworking {
 	public static SimpleChannel NETWORK_CHANNEL;
@@ -31,10 +34,13 @@ public class ForgeNetworking {
 								info.handler.handle((CustomPacketPayload) payload, context.getSender())
 						);
 					}
-					for (PayloadInfo info : task.clientboundPayloads()) {
-						ctx.clientbound().add(info.packetClass, info.streamCodec, (payload, context) ->
-								info.handler.handle((CustomPacketPayload) payload, Minecraft.getInstance().player)
-						);
+					if (PlatformServices.PLATFORM.getSide() == ApplicationSide.CLIENT) setupClient(task, ctx);
+					else {
+						for (PayloadInfo info : task.clientboundPayloads()) {
+							ctx.clientbound().add(info.packetClass, info.streamCodec, (payload, context) ->
+									info.handler.handle((CustomPacketPayload) payload, context.getSender())
+							);
+						}
 					}
 				}).play().bidirectional().build();
 	}

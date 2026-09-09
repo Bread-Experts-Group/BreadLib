@@ -38,9 +38,12 @@ object DimUtil {
 		dimension: LevelStem,
 		persist: Boolean = true
 	): ServerLevel = PlatformServices.NETWORK.server.let { server ->
-		val worldData = server.worldData
 		val resourceKey = ResourceKey.create(Registries.DIMENSION, worldKey)
 
+		val existingWorld = server.levels[resourceKey]
+		if (existingWorld != null) return@let existingWorld
+
+		val worldData = server.worldData
 		val newWorld = ServerLevel(
 			server,
 			server.executor,
@@ -92,7 +95,7 @@ object DimUtil {
 	fun createBiomeSpecialFX(
 		skyColor: Color, skyFogColor: Color,
 		waterColor: Color, waterFogColor: Color
-	) = BiomeSpecialEffects.Builder()
+	): BiomeSpecialEffects = BiomeSpecialEffects.Builder()
 		.skyColor(skyColor.rgb).fogColor(skyFogColor.rgb)
 		.waterColor(waterColor.rgb).waterFogColor(waterFogColor.rgb)
 		.build()
@@ -103,7 +106,7 @@ object DimUtil {
 		mobSpawnSettings: MobSpawnSettings,
 		generationSettings: BiomeGenerationSettings,
 		specialEffects: BiomeSpecialEffects
-	) = Biome.BiomeBuilder()
+	): Biome = Biome.BiomeBuilder()
 		.hasPrecipitation(precipitation)
 		.temperature(temperature).downfall(downfall)
 		.mobSpawnSettings(mobSpawnSettings)

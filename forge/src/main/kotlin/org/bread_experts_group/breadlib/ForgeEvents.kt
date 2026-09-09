@@ -2,18 +2,17 @@ package org.bread_experts_group.breadlib
 
 import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.Minecraft
-import net.minecraftforge.client.event.AddGuiOverlayLayersEvent
-import net.minecraftforge.client.event.InputEvent
-import net.minecraftforge.client.event.RegisterClientCommandsEvent
-import net.minecraftforge.client.event.RegisterShadersEvent
-import net.minecraftforge.client.event.RenderLevelStageEvent
+import net.minecraftforge.client.event.*
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.TickEvent
 import net.minecraftforge.eventbus.api.Event
 import net.minecraftforge.eventbus.api.IEventBus
+import org.bread_experts_group.breadlib.platform.ApplicationSide
+import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
 import org.bread_experts_group.breadlib.task.command.ClientCommandTask
 import org.bread_experts_group.breadlib.task.command.ServerCommandTask
 import org.bread_experts_group.breadlib.task.input.KeyboardTask
@@ -47,13 +46,18 @@ object ForgeEvents {
 
 	@JvmStatic
 	fun registerEvents(eventBus: IEventBus) {
-		this.addRLSETask()
+		if (PlatformServices.PLATFORM.side != ApplicationSide.SERVER) {
+			this.addRLSETask()
+			this.addClientTickTasks()
+			this.addLayeredDrawTask(eventBus)
+			MinecraftForge.EVENT_BUS.addListener { event: ClientPlayerNetworkEvent.LoggingIn ->
+				TaskManager.runTasks(ClientLogInEvent(event.player))
+			}
+		}
 		this.addKeyboardTasks()
 		this.addMouseScrollTask()
 		this.addMouseButtonTasks()
-		this.addClientTickTasks()
 		this.addServerTickTasks()
-		this.addLayeredDrawTask(eventBus)
 		this.addCommandTasks()
 		this.addShaderTask(eventBus)
 	}
