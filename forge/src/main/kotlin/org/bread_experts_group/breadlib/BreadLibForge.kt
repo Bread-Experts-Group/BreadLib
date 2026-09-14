@@ -3,38 +3,17 @@ package org.bread_experts_group.breadlib
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.data.event.GatherDataEvent
 import net.minecraftforge.event.server.ServerStartingEvent
-import net.minecraftforge.eventbus.api.IEventBus
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
-import net.minecraftforge.registries.RegisterEvent
 import org.bread_experts_group.breadlib.BreadLib.init
 import org.bread_experts_group.breadlib.ForgeEvents.registerEvents
+import org.bread_experts_group.breadlib.ForgeRegistrationHelper.registerContent
 import org.bread_experts_group.breadlib.platform.ForgeGenerateDataTask
-import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.server.ServerStartingTask
 
 @Mod(BreadLib.MOD_ID)
 class BreadLibForge(context: FMLJavaModLoadingContext) {
-	companion object {
-		fun <T> registerContent(provider: RegistryProvider<T>, event: RegisterEvent) {
-			event.register(provider.key) { helper ->
-				provider.entries.forEach { (key, value) ->
-					helper.register(key.name, value.get())
-					key.bind()
-				}
-				provider.freeze()
-			}
-		}
-
-		fun registerContent(eventBus: IEventBus) {
-			eventBus.addListener { event: RegisterEvent ->
-				for ((_, registries) in RegistryProvider.providers) {
-					for ((_, registry) in registries) registerContent(registry, event)
-				}
-			}
-		}
-	}
-
 	init {
 		val eventBus = context.modEventBus
 		eventBus.addListener { event: GatherDataEvent ->
@@ -55,12 +34,12 @@ class BreadLibForge(context: FMLJavaModLoadingContext) {
 		}
 
 		MinecraftForge.EVENT_BUS.addListener { event: ServerStartingEvent ->
-			TaskManager.runTasks(org.bread_experts_group.breadlib.task.server.ServerStartingEvent(event.server))
+			TaskManager.runTasks(ServerStartingTask(event.server))
 		}
 
 		BreadLib.LOGGER.info("Hello Forge world!")
 		init()
-		registerContent(eventBus)
+		registerContent(eventBus, BreadLib.MOD_ID)
 		registerEvents(eventBus)
 		ForgeNetworking.setup()
 	}

@@ -9,6 +9,7 @@ import net.minecraft.world.level.BlockGetter
 import net.minecraft.world.level.EntityGetter
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
@@ -40,8 +41,7 @@ object RaycastUtil {
 		return result
 	}
 
-	fun <T> entityRaycast(
-		entity: Entity,
+	fun <T> Entity.raycast(
 		length: Double,
 		stepSize: Double,
 		deviation: Float = 0f,
@@ -49,33 +49,34 @@ object RaycastUtil {
 		offsetY: Float = 0f,
 		selector: (BlockGetter, Vec3, Vec3) -> T
 	): RaycastResult<T>? {
-		return this.raycast(
-			entity.level(),
-			entity.eyePosition,
-			entity.calculateViewVector(entity.xRot + offsetX, entity.yRot + offsetY)
-				.offsetRandom(entity.getRandom(), deviation),
+		return raycast(
+			this.level(),
+			this.eyePosition,
+			this.calculateViewVector(this.xRot + offsetX, this.yRot + offsetY)
+				.offsetRandom(this.getRandom(), deviation),
 			length,
 			stepSize
-		) { from, to -> selector(entity.level(), from, to) }
+		) { from, to -> selector(this.level(), from, to) }
 	}
 
-	fun <T> cameraRaycast(
-		camera: Camera,
+	fun <T> Camera.raycast(
 		length: Double,
 		stepSize: Double,
 		selector: (BlockGetter, Vec3, Vec3) -> T
 	): RaycastResult<T>? {
 		val player = Minecraft.getInstance().player ?: return null
-		return this.raycast(
+		return raycast(
 			player.level(),
-			camera.position,
+			this.position,
 			player.calculateViewVector(player.xRot, player.yRot),
 			length,
 			stepSize,
 		) { from, to -> selector(player.level(), from, to) }
 	}
 
-	fun blocks(vararg filter: Block): (BlockGetter, Vec3, Vec3) -> BlockState? = { level, from, to ->
+	fun blocks(
+		vararg filter: Block = arrayOf(Blocks.AIR, Blocks.VOID_AIR, Blocks.CAVE_AIR)
+	): (BlockGetter, Vec3, Vec3) -> BlockState? = { level, from, to ->
 		val blockPos = BlockPos(to.toVec3i())
 		val state = level.getBlockState(blockPos)
 		val shape = state.getShape(level, blockPos)

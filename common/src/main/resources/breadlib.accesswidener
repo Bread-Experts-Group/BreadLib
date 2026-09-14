@@ -10,3 +10,5 @@ accessible field net/minecraft/server/MinecraftServer progressListenerFactory Ln
 accessible field net/minecraft/server/MinecraftServer levels Ljava/util/Map;
 
 accessible field net/minecraft/core/MappedRegistry frozen Z
+
+accessible method net/minecraft/world/level/levelgen/NoiseRouterData overworld (Lnet/minecraft/core/HolderGetter;Lnet/minecraft/core/HolderGetter;ZZ)Lnet/minecraft/world/level/levelgen/NoiseRouter;

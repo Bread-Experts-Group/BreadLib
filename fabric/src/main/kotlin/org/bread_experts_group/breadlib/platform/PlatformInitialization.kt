@@ -10,6 +10,7 @@ import team.reborn.energy.api.EnergyStorage
 object PlatformInitialization {
 	fun registerCapabilities(modID: String) {
 		val bet = getBlockEntityTypes(modID)
+		// todo i don't think this fix actually works
 		// todo band-aid so the example mod doesn't fail to load
 		val techRebornLoaded = PlatformServices.PLATFORM.isModLoaded("tech_reborn")
 		bet.applicableBlocks.forEach { blBlock ->

@@ -9,40 +9,19 @@ import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.data.event.GatherDataEvent
 import net.neoforged.neoforge.event.server.ServerStartingEvent
-import net.neoforged.neoforge.registries.RegisterEvent
 import org.bread_experts_group.breadlib.BreadLib.init
+import org.bread_experts_group.breadlib.NeoForgeRegistrationHelper.registerContent
 import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
 import org.bread_experts_group.breadlib.capability.EnergyPacket
 import org.bread_experts_group.breadlib.platform.NeoForgeGenerateDataTask
 import org.bread_experts_group.breadlib.platform.PlatformInitialization
 import org.bread_experts_group.breadlib.platform.PlatformServices
-import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.TaskManager
 import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
+import org.bread_experts_group.breadlib.task.server.ServerStartingTask
 
 @Mod(BreadLib.MOD_ID)
 class BreadLibNeoForge(eventBus: IEventBus) {
-	companion object {
-		@Suppress("TYPE_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-		fun <T> registerContent(provider: RegistryProvider<T>, event: RegisterEvent) {
-			event.register(provider.key) { helper ->
-				provider.entries.forEach { (key, value) ->
-					helper.register(key.name, value.get())
-					key.bind()
-				}
-				provider.freeze()
-			}
-		}
-
-		fun registerContent(eventBus: IEventBus) {
-			eventBus.addListener { event: RegisterEvent ->
-				for ((_, registries) in RegistryProvider.providers) {
-					for ((_, registry) in registries) this.registerContent(registry, event)
-				}
-			}
-		}
-	}
-
 	init {
 		PlatformServices.CAPABILITY.installCapabilityConverter(
 			BlockEnergyCapability::class.java,
@@ -69,7 +48,7 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 		}
 
 		NeoForge.EVENT_BUS.addListener { event: ServerStartingEvent ->
-			TaskManager.runTasks(org.bread_experts_group.breadlib.task.server.ServerStartingEvent(event.server))
+			TaskManager.runTasks(ServerStartingTask(event.server))
 		}
 
 //		NeoForge.EVENT_BUS.addListener { event: LevelEvent.Load ->
@@ -96,7 +75,7 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 
 		BreadLib.LOGGER.info("Hello NeoForge world!")
 		init()
-		registerContent(eventBus)
+		registerContent(eventBus, BreadLib.MOD_ID)
 		NeoEvents.registerEvents(eventBus)
 		NeoForgeNetworking.registerPackets(eventBus)
 	}

@@ -40,13 +40,16 @@ open class RegistryProvider<T> private constructor(
 	val modID: String
 ) {
 	companion object {
-		val providers: MutableMap<String, MutableMap<Registry<*>, RegistryProvider<*>>> = mutableMapOf()
+		private val providers: MutableMap<String, MutableMap<Registry<*>, RegistryProvider<*>>> = mutableMapOf()
+
+		fun getProvidersForID(modID: String): Collection<Pair<Registry<*>, RegistryProvider<*>>> =
+			this.providers[modID]!!.toList()
 
 		/**
 		 * Method for statically initializing the classes holding providers and their contents.
 		 */
 		@Suppress("unused")
-		fun initialize(vararg providers: RegistryProvider<*>): Unit = Unit
+		fun initializeProviders(vararg providers: RegistryProvider<*>): Unit = Unit
 
 		fun getBlocks(modID: String): Blocks = BuiltInRegistries.BLOCK.getProvider(modID) as Blocks
 		fun getBlockEntityTypes(modID: String): BlockEntityTypes =
@@ -55,7 +58,7 @@ open class RegistryProvider<T> private constructor(
 		fun getItems(modID: String): Items = BuiltInRegistries.ITEM.getProvider(modID) as Items
 
 		@Suppress("UNCHECKED_CAST")
-		fun <T> Registry<T>.getProvider(modID: String): RegistryProvider<T> = providers.getOrPut(
+		fun <T> Registry<T>.getProvider(modID: String): RegistryProvider<T> = this@Companion.providers.getOrPut(
 			modID
 		) { mutableMapOf() }.getOrPut(this) {
 			when (this) {
@@ -66,7 +69,7 @@ open class RegistryProvider<T> private constructor(
 			}
 		} as RegistryProvider<T>
 
-		val DYNAMICS = BreadLib.CONFIG.resolve("registry dynamics")
+		val DYNAMICS: Path = BreadLib.CONFIG.resolve("registry dynamics")
 	}
 
 	val entries: MutableMap<RegistryObject<T, out T>, Supplier<T>> = mutableMapOf()
@@ -88,36 +91,34 @@ open class RegistryProvider<T> private constructor(
 		name: String, persistDynamic: Boolean = true,
 		supplier: Supplier<T>
 	): RegistryObject<T, I> {
-		val location = ResourceLocation.fromNamespaceAndPath(modID, name)
-		if (registry.containsKey(location)) {
+		val location = ResourceLocation.fromNamespaceAndPath(this.modID, name)
+		if (this.registry.containsKey(location)) {
 			val regObject = this.createRegistryObject<I>(name)
 			regObject.bind()
 			return regObject
 		}
-		return register(name, persistDynamic, supplier)
+		return this.register(name, persistDynamic, supplier)
 	}
 
-	val dynamicsFolder: Path = DYNAMICS.resolve(modID)
+	val dynamicsFolder: Path = Companion.DYNAMICS.resolve(this.modID)
 	open fun <I : T> register(
 		name: String, persistDynamic: Boolean = true,
 		supplier: Supplier<T>
 	): RegistryObject<T, I> {
-		val location = ResourceLocation.fromNamespaceAndPath(modID, name)
-		check(!registry.containsKey(location)) {
+		val location = ResourceLocation.fromNamespaceAndPath(this.modID, name)
+		check(!this.registry.containsKey(location)) {
 			"Duplicate underlying entry: $location"
 		}
 		val regObject = this.createRegistryObject<I>(name)
 		check(this.entries.putIfAbsent(regObject, supplier) == null) {
 			"Duplicate registry entry: $location"
 		}
-		if (frozen) {
-			if (PlatformServices.NETWORK.side == ApplicationSide.CLIENT) throw IllegalStateException(
-				"The client cannot dynamically add to the registry."
-			)
+		if (this.frozen) {
+			check(PlatformServices.NETWORK.side != ApplicationSide.CLIENT) { "The client cannot dynamically add to the registry." }
 			val registries = PlatformServices.NETWORK.server.registryAccess()
 			@Suppress("UNCHECKED_CAST")
 			registries.register(
-				registry.key() as ResourceKey<Registry<Any>>,
+				this.registry.key() as ResourceKey<Registry<Any>>,
 				{ supplier.get() as Any }, location
 			)
 			regObject.bind()
@@ -130,30 +131,32 @@ open class RegistryProvider<T> private constructor(
 						encodingValue,
 						RegistryOps.create(NbtOps.INSTANCE, registries), CompoundTag()
 					) to 2
+
 					is NoiseGeneratorSettings -> NoiseGeneratorSettings.DIRECT_CODEC.encode(
 						encodingValue,
 						RegistryOps.create(NbtOps.INSTANCE, registries), CompoundTag()
 					) to 3
+
 					else -> throw IllegalStateException("Persistent dynamic registration not available for $encodingValue")
 				}
 
 				val data = CompoundTag().apply {
-					put("data", saved.orThrow)
+					this.put("data", saved.orThrow)
 
-					val registryKey = registry.key()
-					putString(
+					val registryKey = this@RegistryProvider.registry.key()
+					this.putString(
 						"registry_registry",
 						registryKey.registry().toString()
 					)
-					putString(
+					this.putString(
 						"registry",
 						registryKey.location().toString()
 					)
-					putString(
+					this.putString(
 						"item",
-						"$modID:$name"
+						"${this@RegistryProvider.modID}:$name"
 					)
-					putInt(
+					this.putInt(
 						"codec_form",
 						form
 					)
@@ -161,7 +164,7 @@ open class RegistryProvider<T> private constructor(
 
 				NbtIo.writeCompressed(
 					data,
-					dynamicsFolder
+					this.dynamicsFolder
 						.createDirectories()
 						.resolve("${System.currentTimeMillis()}_${System.nanoTime()}.nbtc")
 				)
@@ -175,7 +178,11 @@ open class RegistryProvider<T> private constructor(
 			RegistryBlock.create(this.modID, name)
 
 		@Suppress("UNCHECKED_CAST")
-		override fun <B : Block> register(name: String, persistDynamic: Boolean, supplier: Supplier<Block>): RegistryBlock<B> =
+		override fun <B : Block> register(
+			name: String,
+			persistDynamic: Boolean,
+			supplier: Supplier<Block>
+		): RegistryBlock<B> =
 			super.register<Block>(name, persistDynamic, supplier) as RegistryBlock<B>
 
 		fun <B : Block> registerSimpleBlock(name: String, properties: BlockBehaviour.Properties): RegistryBlock<B> =
@@ -197,7 +204,7 @@ open class RegistryProvider<T> private constructor(
 
 		@get:ApiStatus.Internal
 		val applicableBlocks: List<BreadLibBlockWithEntity<*>> by lazy {
-			getBlocks(modID)
+			Companion.getBlocks(modID)
 				.also { if (!it.frozen) it.freeze() }
 				.entries.keys
 				.mapNotNull { it.get() as? BreadLibBlockWithEntity<*> }
@@ -235,7 +242,11 @@ open class RegistryProvider<T> private constructor(
 			RegistryItem.create(this.modID, name)
 
 		@Suppress("UNCHECKED_CAST")
-		override fun <I : Item> register(name: String, persistDynamic: Boolean, supplier: Supplier<Item>): RegistryItem<I> =
+		override fun <I : Item> register(
+			name: String,
+			persistDynamic: Boolean,
+			supplier: Supplier<Item>
+		): RegistryItem<I> =
 			super.register<Item>(name, persistDynamic, supplier) as RegistryItem<I>
 
 		fun <I : Item> simpleItem(name: String, properties: Item.Properties): RegistryItem<I> =

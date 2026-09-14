@@ -23,7 +23,7 @@ import org.bread_experts_group.breadlib.registry.network.DimensionTypeRegisterPa
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
 import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
 import org.bread_experts_group.breadlib.task.network.NetworkTask
-import org.bread_experts_group.breadlib.task.server.ServerStartingEvent
+import org.bread_experts_group.breadlib.task.server.ServerStartingTask
 import org.bread_experts_group.breadlib.util.DimUtil.createAndRegisterWorldAndDimension
 import org.bread_experts_group.breadlib.util.DimUtil.dynamicLevelDataFile
 import java.io.IOException
@@ -34,7 +34,7 @@ import kotlin.io.path.walk
 
 object BreadLib {
 	const val MOD_ID: String = "breadlib"
-	const val MOD_VERSION: String = "1.2.0"
+	const val MOD_VERSION: String = "1.3.0"
 
 	@JvmField
 	val LOGGER: Logger = LogManager.getLogger("BreadLib")
@@ -87,7 +87,7 @@ object BreadLib {
 			network.trueClient.set(Minecraft.getInstance())
 		}
 
-		newTask { task: ServerStartingEvent ->
+		newTask { task: ServerStartingTask ->
 			val network = PlatformServices.NETWORK
 			network.trueSide.set(ApplicationSide.SERVER)
 			network.trueServer.set(task.server)

@@ -10,7 +10,7 @@ import org.bread_experts_group.breadlib.data.model.block.BlockStateSingleVariant
 import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.getBlockEntityTypes
-import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.initialize
+import org.bread_experts_group.breadlib.registry.RegistryProvider.Companion.initializeProviders
 import org.bread_experts_group.breadlib.task.BreadLibTasks
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask
@@ -81,7 +81,7 @@ private fun kGetPlaceholderTextureGenerator() = PlaceholderTextureGenerator(Brea
 }
 
 fun kExample() {
-	initialize(
+	initializeProviders(
 		BlocksTest.REGISTRY, ItemsTest.REGISTRY, CreativeTabTest.REGISTRY,
 		getBlockEntityTypes(BreadLib.MOD_ID)
 	)

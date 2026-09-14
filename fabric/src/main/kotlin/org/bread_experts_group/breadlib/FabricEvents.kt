@@ -29,6 +29,7 @@ import org.bread_experts_group.breadlib.task.command.ClientCommandTask
 import org.bread_experts_group.breadlib.task.command.ServerCommandTask
 import org.bread_experts_group.breadlib.task.render.LevelRenderTask
 import org.bread_experts_group.breadlib.task.render.RenderLevelStage
+import org.bread_experts_group.breadlib.task.server.ServerStartingTask
 import org.bread_experts_group.breadlib.task.tick.ClientTickTask
 import org.bread_experts_group.breadlib.task.tick.ServerTickTask
 import org.joml.Matrix4f
@@ -62,7 +63,7 @@ object FabricEvents {
 			}
 		}
 		ServerLifecycleEvents.SERVER_STARTED.register { server ->
-			TaskManager.runTasks(org.bread_experts_group.breadlib.task.server.ServerStartingEvent(server))
+			TaskManager.runTasks(ServerStartingTask(server))
 		}
 
 		addServerTickTasks()
