@@ -22,12 +22,12 @@ object TasksClientTest {
 			val platform = PlatformServices.PLATFORM.platformName
 			val debugInfo = Component.literal("${BreadLib.MOD_ID} v${BreadLib.MOD_VERSION} | $platform")
 			val width = Minecraft.getInstance().font.width(debugInfo)
-			task.add(modLoc("layered_draw", "test_layer")) { guiGraphics: GuiGraphics, _: DeltaTracker ->
+			task.addAboveAll(modLoc("layered_draw", "test_layer")) { guiGraphics: GuiGraphics, _: DeltaTracker ->
 				guiGraphics.fill(0, 0, width, 12, Color.BLACK)
 				guiGraphics.drawString(Minecraft.getInstance().font, debugInfo, 2, 2, Color.ORANGE, false)
 			}
 
-			task.add(modLoc("dim_overlay")) { guiGraphics, _ ->
+			task.addAboveAll(modLoc("dim_overlay")) { guiGraphics, _ ->
 				val minecraft = PlatformServices.NETWORK.client
 				val level = minecraft.level!!
 				val player = minecraft.player!!
