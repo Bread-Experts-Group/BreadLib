@@ -4,12 +4,34 @@ import net.minecraft.client.gui.LayeredDraw
 import net.minecraft.resources.ResourceLocation
 import org.bread_experts_group.breadlib.task.Task
 
-// todo order based layer adding for all three platforms (render our layers behind or in front of other layers)
+// todo layer based logic currently does not exist on fabric, refer to MixinGui
 class LayeredDrawTask : Task() {
 	@JvmField
-	val layers: MutableMap<ResourceLocation, LayeredDraw.Layer> = hashMapOf()
+	val layers: MutableList<LayerInfo> = mutableListOf()
 
-	fun add(location: ResourceLocation, layer: LayeredDraw.Layer) {
-		this.layers[location] = layer
+	enum class Ordering { BEFORE, AFTER }
+	data class LayerInfo(
+		val id: ResourceLocation,
+		val other: ResourceLocation?,
+		val order: Ordering,
+		val layer: LayeredDraw.Layer
+	)
+
+	fun getLayers(): Collection<LayerInfo> = this.layers
+
+	fun addAbove(id: ResourceLocation, other: ResourceLocation, layer: LayeredDraw.Layer) {
+		this.layers.add(LayerInfo(id, other, Ordering.AFTER, layer))
+	}
+
+	fun addBelow(id: ResourceLocation, other: ResourceLocation, layer: LayeredDraw.Layer) {
+		this.layers.add(LayerInfo(id, other, Ordering.BEFORE, layer))
+	}
+
+	fun addAboveAll(id: ResourceLocation, layer: LayeredDraw.Layer) {
+		this.layers.add(LayerInfo(id, null, Ordering.AFTER, layer))
+	}
+
+	fun addBelowAll(id: ResourceLocation, layer: LayeredDraw.Layer) {
+		this.layers.add(LayerInfo(id, null, Ordering.BEFORE, layer))
 	}
 }

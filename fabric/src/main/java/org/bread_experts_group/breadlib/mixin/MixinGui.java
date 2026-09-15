@@ -23,8 +23,7 @@ abstract class MixinGui {
 
 	@Inject(method = "<init>", at = @At("TAIL"))
 	private void breadlib$addGuiLayers(Minecraft minecraft, CallbackInfo ci) {
-		TaskManager.runTasks(new LayeredDrawTask()).layers.forEach(((resourceLocation, layer) ->
-				this.layers.add(layer)
-		));
+		// todo layer sorting like in (neo)forge
+		TaskManager.runTasks(new LayeredDrawTask()).getLayers().forEach(info -> this.layers.add(info.getLayer()));
 	}
 }

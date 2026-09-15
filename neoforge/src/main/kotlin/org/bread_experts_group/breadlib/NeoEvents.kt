@@ -1,12 +1,9 @@
 package org.bread_experts_group.breadlib
 
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.LayeredDraw
-import net.minecraft.resources.ResourceLocation
 import net.neoforged.bus.api.Event
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.neoforge.client.event.*
-import net.neoforged.neoforge.client.gui.VanillaGuiLayers
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.RegisterCommandsEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
@@ -143,8 +140,15 @@ object NeoEvents {
 	private fun addLayeredDrawTask(eventBus: IEventBus) {
 		eventBus.addListener { event: RegisterGuiLayersEvent ->
 			val task = TaskManager.runTasks(LayeredDrawTask())
-			task.layers.forEach { (location: ResourceLocation, layer: LayeredDraw.Layer) ->
-				event.registerAbove(VanillaGuiLayers.DEBUG_OVERLAY, location, layer)
+			for ((id, other, order, layer) in task.getLayers()) {
+				if (other == null && order == LayeredDrawTask.Ordering.AFTER)
+					event.registerAboveAll(id, layer)
+				else if (other == null && order == LayeredDrawTask.Ordering.BEFORE)
+					event.registerBelowAll(id, layer)
+				else if (other != null && order == LayeredDrawTask.Ordering.AFTER)
+					event.registerAbove(other, id, layer)
+				else if (other != null && order == LayeredDrawTask.Ordering.BEFORE)
+					event.registerBelow(other, id, layer)
 			}
 		}
 	}

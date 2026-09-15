@@ -148,7 +148,14 @@ object ForgeEvents {
 	private fun addLayeredDrawTask(eventBus: IEventBus) {
 		eventBus.addListener { event: AddGuiOverlayLayersEvent ->
 			val task = TaskManager.runTasks(LayeredDrawTask())
-			task.layers.forEach(event.layeredDraw::add)
+			val layeredDraw = event.layeredDraw
+			for ((id, other, order, layer) in task.getLayers()) {
+				if (other != null) {
+					if (order == LayeredDrawTask.Ordering.BEFORE)
+						layeredDraw.addBelow(id, other, layer)
+					else layeredDraw.addAbove(id, other, layer)
+				} else layeredDraw.add(id, layer)
+			}
 		}
 	}
 
