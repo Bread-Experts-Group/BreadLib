@@ -3,10 +3,12 @@
   "minVersion": "0.8.7",
   "package": "org.bread_experts_group.breadlib.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [],
+  "mixins": [
+  ],
   "client": [
     "MixinSectionCompiler",
-    "MixinTitleScreen"
+    "MixinTitleScreen",
+    "MixinIClientItemExtensions"
   ],
   "server": [],
   "injectors": {

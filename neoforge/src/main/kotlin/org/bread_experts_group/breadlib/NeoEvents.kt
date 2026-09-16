@@ -1,9 +1,16 @@
 package org.bread_experts_group.breadlib
 
 import net.minecraft.client.Minecraft
+import net.minecraft.client.model.HumanoidModel
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.item.ItemStack
 import net.neoforged.bus.api.Event
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.neoforge.client.event.*
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent
 import net.neoforged.neoforge.common.NeoForge
 import net.neoforged.neoforge.event.RegisterCommandsEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
@@ -11,6 +18,7 @@ import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.client.ClientExtensionsTask
 import org.bread_experts_group.breadlib.task.command.ClientCommandTask
 import org.bread_experts_group.breadlib.task.command.ServerCommandTask
 import org.bread_experts_group.breadlib.task.input.KeyboardTask
@@ -52,6 +60,7 @@ object NeoEvents {
 		this.addLayeredDrawTask(eventBus)
 		this.addCommandTasks()
 		this.addShaderTask(eventBus)
+		this.addExtensionTasks(eventBus)
 	}
 
 	private fun addRLSETask() {
@@ -134,6 +143,21 @@ object NeoEvents {
 		}
 		this.addListener { event: ServerTickEvent.Post ->
 			TaskManager.runTasks(ServerTickTask(event.server.overworld(), FireSide.POST))
+		}
+	}
+
+	private fun addExtensionTasks(eventBus: IEventBus) {
+		val itemExtensions = TaskManager.runTasks(ClientExtensionsTask())
+		eventBus.addListener { event: RegisterClientExtensionsEvent ->
+			for ((extension, item) in itemExtensions.getExtensions())
+			event.registerItem(object : IClientItemExtensions {
+				override fun getCustomRenderer(): BlockEntityWithoutLevelRenderer = extension.getCustomRenderer()
+				override fun getArmPose(
+					entityLiving: LivingEntity,
+					hand: InteractionHand,
+					itemStack: ItemStack
+				): HumanoidModel.ArmPose = extension.getArmPose(entityLiving, hand, itemStack)
+			}, item)
 		}
 	}
 

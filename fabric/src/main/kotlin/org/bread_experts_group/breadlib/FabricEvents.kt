@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
@@ -24,6 +25,7 @@ import net.minecraft.commands.CommandSourceStack
 import net.minecraft.server.level.ServerLevel
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.client.ClientExtensionsTask
 import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
 import org.bread_experts_group.breadlib.task.command.ClientCommandTask
 import org.bread_experts_group.breadlib.task.command.ServerCommandTask
@@ -57,6 +59,7 @@ object FabricEvents {
 		if (envType == EnvType.CLIENT) {
 			addWorldRenderTasks()
 			addClientTickTasks()
+			addExtensionsTasks()
 
 			ClientPlayConnectionEvents.JOIN.register { _, _, minecraft ->
 				TaskManager.runTasks(ClientLogInEvent(minecraft.player!!))
@@ -181,5 +184,13 @@ object FabricEvents {
 	): RootCommandNode<FabricClientCommandSource> {
 		this.parseNodes(node, builder)
 		return node as RootCommandNode<FabricClientCommandSource>
+	}
+
+	// todo arm pose
+	private fun addExtensionsTasks() {
+		val itemExtensions = TaskManager.runTasks(ClientExtensionsTask())
+		for ((extension, item) in itemExtensions.getExtensions()) {
+			BuiltinItemRendererRegistry.INSTANCE.register(item, extension.getCustomRenderer()::renderByItem)
+		}
 	}
 }

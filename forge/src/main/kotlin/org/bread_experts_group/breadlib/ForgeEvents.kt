@@ -12,6 +12,7 @@ import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.client.ClientExtensionsTask
 import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
 import org.bread_experts_group.breadlib.task.command.ClientCommandTask
 import org.bread_experts_group.breadlib.task.command.ServerCommandTask
@@ -52,6 +53,11 @@ object ForgeEvents {
 			this.addLayeredDrawTask(eventBus)
 			MinecraftForge.EVENT_BUS.addListener { event: ClientPlayerNetworkEvent.LoggingIn ->
 				TaskManager.runTasks(ClientLogInEvent(event.player))
+			}
+
+			val itemExtensions = TaskManager.runTasks(ClientExtensionsTask())
+			for ((extension, item) in itemExtensions.getExtensions()) {
+				MixinUtil.itemExtensions[item] = extension
 			}
 		}
 		this.addKeyboardTasks()

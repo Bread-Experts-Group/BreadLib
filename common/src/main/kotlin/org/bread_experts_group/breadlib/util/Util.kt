@@ -65,3 +65,8 @@ val Block.texture: ResourceLocation
 	get() = this.location.withPrefix("textures/block/").withSuffix(".png")
 
 fun <T: Any> T.optional(): Optional<T> = Optional.of(this)
+
+fun <T, R> Pair<T, R>.toMojangPair(): com.mojang.datafixers.util.Pair<T, R> =
+	com.mojang.datafixers.util.Pair.of(this.first, this.second)
+
+fun <T, R> com.mojang.datafixers.util.Pair<T, R>.toKotlinPair(): Pair<T, R> = this.first to this.second

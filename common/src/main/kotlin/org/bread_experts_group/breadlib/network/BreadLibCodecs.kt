@@ -1,6 +1,7 @@
 package org.bread_experts_group.breadlib.network
 
 import com.mojang.serialization.Codec
+import com.mojang.serialization.codecs.RecordCodecBuilder
 import io.netty.buffer.ByteBuf
 import net.minecraft.core.BlockPos
 import net.minecraft.network.codec.ByteBufCodecs
@@ -9,19 +10,20 @@ import net.minecraft.util.ExtraCodecs
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.levelgen.structure.BoundingBox
+import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import org.joml.Quaternionf
 
 object BreadLibCodecs {
-	var LONG: CodecHolder<ByteBuf, Long> = CodecHolder(Codec.LONG, ByteBufCodecs.VAR_LONG)
-	var FLOAT: CodecHolder<ByteBuf, Float> = CodecHolder(Codec.FLOAT, ByteBufCodecs.FLOAT)
-	var INT: CodecHolder<ByteBuf, Int> = CodecHolder(Codec.INT, ByteBufCodecs.INT)
-	var DOUBLE: CodecHolder<ByteBuf, Double> = CodecHolder(Codec.DOUBLE, ByteBufCodecs.DOUBLE)
-	var STRING: CodecHolder<ByteBuf, String> = CodecHolder(Codec.STRING, ByteBufCodecs.STRING_UTF8)
-	var BOOLEAN: CodecHolder<ByteBuf, Boolean> = CodecHolder(Codec.BOOL, ByteBufCodecs.BOOL)
-	var BLOCK_POS: CodecHolder<ByteBuf, BlockPos> = CodecHolder(BlockPos.CODEC, BlockPos.STREAM_CODEC)
+	val LONG: CodecHolder<ByteBuf, Long> = CodecHolder(Codec.LONG, ByteBufCodecs.VAR_LONG)
+	val FLOAT: CodecHolder<ByteBuf, Float> = CodecHolder(Codec.FLOAT, ByteBufCodecs.FLOAT)
+	val INT: CodecHolder<ByteBuf, Int> = CodecHolder(Codec.INT, ByteBufCodecs.INT)
+	val DOUBLE: CodecHolder<ByteBuf, Double> = CodecHolder(Codec.DOUBLE, ByteBufCodecs.DOUBLE)
+	val STRING: CodecHolder<ByteBuf, String> = CodecHolder(Codec.STRING, ByteBufCodecs.STRING_UTF8)
+	val BOOLEAN: CodecHolder<ByteBuf, Boolean> = CodecHolder(Codec.BOOL, ByteBufCodecs.BOOL)
+	val BLOCK_POS: CodecHolder<ByteBuf, BlockPos> = CodecHolder(BlockPos.CODEC, BlockPos.STREAM_CODEC)
 
-	var VEC3: CodecHolder<ByteBuf, Vec3> = CodecHolder(
+	val VEC3: CodecHolder<ByteBuf, Vec3> = CodecHolder(
 		Vec3.CODEC,
 		StreamCodec.composite(
 			ByteBufCodecs.DOUBLE, { it.x() },
@@ -31,17 +33,17 @@ object BreadLibCodecs {
 		)
 	)
 
-	var QUATERNIONF: CodecHolder<ByteBuf, Quaternionf> = CodecHolder(
+	val QUATERNIONF: CodecHolder<ByteBuf, Quaternionf> = CodecHolder(
 		ExtraCodecs.QUATERNIONF,
 		ByteBufCodecs.QUATERNIONF
 	)
 
-	var BLOCK_STATE: CodecHolder<ByteBuf, BlockState> = CodecHolder(
+	val BLOCK_STATE: CodecHolder<ByteBuf, BlockState> = CodecHolder(
 		BlockState.CODEC,
 		ByteBufCodecs.idMapper(Block.BLOCK_STATE_REGISTRY)
 	)
 
-	var BOUNDING_BOX: CodecHolder<ByteBuf, BoundingBox> = CodecHolder(
+	val BOUNDING_BOX: CodecHolder<ByteBuf, BoundingBox> = CodecHolder(
 		BoundingBox.CODEC,
 		StreamCodec.composite(
 			ByteBufCodecs.INT, BoundingBox::minX,
@@ -51,6 +53,28 @@ object BreadLibCodecs {
 			ByteBufCodecs.INT, BoundingBox::maxY,
 			ByteBufCodecs.INT, BoundingBox::maxZ,
 			::BoundingBox
+		)
+	)
+
+	val AXIS_ALIGNED_BOUNDING_BOX: CodecHolder<ByteBuf, AABB> = CodecHolder(
+		RecordCodecBuilder.create { inst ->
+			inst.group(
+				Codec.DOUBLE.fieldOf("minX").forGetter(AABB::minX),
+				Codec.DOUBLE.fieldOf("minY").forGetter(AABB::minY),
+				Codec.DOUBLE.fieldOf("minZ").forGetter(AABB::minZ),
+				Codec.DOUBLE.fieldOf("maxX").forGetter(AABB::maxX),
+				Codec.DOUBLE.fieldOf("maxY").forGetter(AABB::maxY),
+				Codec.DOUBLE.fieldOf("maxZ").forGetter(AABB::maxZ)
+			).apply(inst, ::AABB)
+		},
+		StreamCodec.composite(
+			ByteBufCodecs.DOUBLE, AABB::minX,
+			ByteBufCodecs.DOUBLE, AABB::minY,
+			ByteBufCodecs.DOUBLE, AABB::minZ,
+			ByteBufCodecs.DOUBLE, AABB::maxX,
+			ByteBufCodecs.DOUBLE, AABB::maxY,
+			ByteBufCodecs.DOUBLE, AABB::maxZ,
+			::AABB
 		)
 	)
 }
