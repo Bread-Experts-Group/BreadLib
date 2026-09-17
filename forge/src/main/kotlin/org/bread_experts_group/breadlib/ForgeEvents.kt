@@ -45,12 +45,17 @@ object ForgeEvents {
 			else -> throw IllegalStateException("Failed to map Forge specific RenderLevelStageEvent.Stage: $stage")
 		}
 
-	@JvmStatic
+
 	fun registerEvents(eventBus: IEventBus) {
 		if (PlatformServices.PLATFORM.side != ApplicationSide.SERVER) {
 			this.addRLSETask()
 			this.addClientTickTasks()
 			this.addLayeredDrawTask(eventBus)
+			this.addKeyboardTasks()
+			this.addMouseScrollTask()
+			this.addMouseButtonTasks()
+			this.addShaderTask(eventBus)
+
 			MinecraftForge.EVENT_BUS.addListener { event: ClientPlayerNetworkEvent.LoggingIn ->
 				TaskManager.runTasks(ClientLogInEvent(event.player))
 			}
@@ -60,12 +65,8 @@ object ForgeEvents {
 				MixinUtil.itemExtensions[item] = extension
 			}
 		}
-		this.addKeyboardTasks()
-		this.addMouseScrollTask()
-		this.addMouseButtonTasks()
 		this.addServerTickTasks()
 		this.addCommandTasks()
-		this.addShaderTask(eventBus)
 	}
 
 	@Suppress("DEPRECATION", "removal")
@@ -133,7 +134,8 @@ object ForgeEvents {
 	}
 
 	private fun addClientTickTasks() {
-		val level = (Minecraft.getInstance() ?: return).level ?: return
+		if (PlatformServices.PLATFORM.isDataGenRunning) return
+		val level = PlatformServices.NETWORK.client.level ?: return
 		this.addListener { _: TickEvent.ClientTickEvent.Pre ->
 			TaskManager.runTasks(ClientTickTask(level, FireSide.PRE))
 		}

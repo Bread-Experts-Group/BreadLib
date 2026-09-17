@@ -51,16 +51,19 @@ object NeoEvents {
 		}
 
 	fun registerEvents(eventBus: IEventBus) {
-		this.addRLSETask()
-		this.addMouseScrollTask()
-		this.addMouseButtonTasks()
-		this.addKeyboardTasks()
-		this.addClientTickTasks()
 		this.addServerTickTasks()
-		this.addLayeredDrawTask(eventBus)
 		this.addCommandTasks()
-		this.addShaderTask(eventBus)
-		this.addExtensionTasks(eventBus)
+
+		if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {
+			this.addRLSETask()
+			this.addClientTickTasks()
+			this.addShaderTask(eventBus)
+			this.addLayeredDrawTask(eventBus)
+			this.addMouseScrollTask()
+			this.addMouseButtonTasks()
+			this.addKeyboardTasks()
+			this.addExtensionTasks(eventBus)
+		}
 	}
 
 	private fun addRLSETask() {
@@ -127,7 +130,7 @@ object NeoEvents {
 	}
 
 	private fun addClientTickTasks() {
-		if (PlatformServices.PLATFORM.side != ApplicationSide.CLIENT) return
+		if (PlatformServices.PLATFORM.isDataGenRunning) return
 		val level = PlatformServices.NETWORK.client.level ?: return
 		this.addListener { _: ClientTickEvent.Pre ->
 			TaskManager.runTasks(ClientTickTask(level, FireSide.PRE))

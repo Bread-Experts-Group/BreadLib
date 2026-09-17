@@ -31,6 +31,8 @@ interface IPlatformHelper {
 	 */
 	val environmentKind: EnvironmentKind
 
+	val isDataGenRunning: Boolean
+
 	/**
 	 * Checks if a mod with the given id is loaded.
 	 * @param modId The mod to check if it is loaded.

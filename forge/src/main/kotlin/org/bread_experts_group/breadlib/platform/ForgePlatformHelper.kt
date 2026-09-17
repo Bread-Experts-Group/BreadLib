@@ -1,6 +1,7 @@
 package org.bread_experts_group.breadlib.platform
 
 import net.minecraftforge.api.distmarker.Dist
+import net.minecraftforge.data.loading.DatagenModLoader
 import net.minecraftforge.fml.ModList
 import net.minecraftforge.fml.loading.FMLLoader
 import net.minecraftforge.fml.loading.FMLPaths
@@ -16,6 +17,8 @@ class ForgePlatformHelper : IPlatformHelper {
 		get() = if (FMLLoader.isProduction()) EnvironmentKind.RELEASE else EnvironmentKind.DEVELOPMENT
 	override val side: ApplicationSide
 		get() = if (FMLLoader.getDist() == Dist.CLIENT) ApplicationSide.CLIENT else ApplicationSide.SERVER
+	override val isDataGenRunning: Boolean
+		get() = DatagenModLoader.isRunningDataGen()
 
 	override fun isModLoaded(modId: String): Boolean = ModList.get().isLoaded(modId)
 

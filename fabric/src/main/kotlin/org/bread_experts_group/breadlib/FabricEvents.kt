@@ -23,6 +23,7 @@ import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.culling.Frustum
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.server.level.ServerLevel
+import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
 import org.bread_experts_group.breadlib.task.client.ClientExtensionsTask
@@ -127,6 +128,7 @@ object FabricEvents {
 	}
 
 	private fun addClientTickTasks() {
+		if (PlatformServices.PLATFORM.isDataGenRunning) return
 		ClientTickEvents.START_WORLD_TICK.register(ClientTickEvents.StartWorldTick { level: ClientLevel ->
 			TaskManager.runTasks(ClientTickTask(level, FireSide.PRE))
 		})

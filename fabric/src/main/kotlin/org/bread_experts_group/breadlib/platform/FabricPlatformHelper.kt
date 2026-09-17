@@ -19,6 +19,8 @@ class FabricPlatformHelper : IPlatformHelper {
 	override val side: ApplicationSide
 		get() = if (fabricLoader.environmentType == EnvType.CLIENT) ApplicationSide.CLIENT
 		else ApplicationSide.SERVER
+	override val isDataGenRunning: Boolean
+		get() = System.getProperty("fabric-api.datagen") != null
 
 	override fun isModLoaded(modId: String): Boolean = fabricLoader.isModLoaded(modId)
 

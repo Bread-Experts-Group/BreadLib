@@ -4,6 +4,7 @@ import net.neoforged.api.distmarker.Dist
 import net.neoforged.fml.ModList
 import net.neoforged.fml.loading.FMLLoader
 import net.neoforged.fml.loading.FMLPaths
+import net.neoforged.neoforge.data.loading.DatagenModLoader
 import java.nio.file.Path
 
 class NeoForgePlatformHelper : IPlatformHelper {
@@ -16,6 +17,8 @@ class NeoForgePlatformHelper : IPlatformHelper {
 		get() = if (FMLLoader.isProduction()) EnvironmentKind.RELEASE else EnvironmentKind.DEVELOPMENT
 	override val side: ApplicationSide
 		get() = if (FMLLoader.getDist() == Dist.CLIENT) ApplicationSide.CLIENT else ApplicationSide.SERVER
+	override val isDataGenRunning: Boolean
+		get() = DatagenModLoader.isRunningDataGen()
 
 	override fun isModLoaded(modId: String): Boolean {
 		return ModList.get().isLoaded(modId)
