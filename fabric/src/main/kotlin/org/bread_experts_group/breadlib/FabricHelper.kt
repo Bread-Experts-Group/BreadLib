@@ -26,7 +26,7 @@ object FabricHelper {
 		pack: FabricDataGenerator.Pack,
 		modID: String,
 		registries: CompletableFuture<HolderLookup.Provider>
-	): GenerateDataTask {
+	) {
 		val task = TaskManager.runTasks(GenerateDataTask(modID, registries))
 		for (generator in task.getGenerators()) {
 			pack.addProvider { packOutput ->
@@ -34,6 +34,5 @@ object FabricHelper {
 				generator
 			}
 		}
-		return task
 	}
 }
