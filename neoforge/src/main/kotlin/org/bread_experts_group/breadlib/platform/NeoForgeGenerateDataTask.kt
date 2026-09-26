@@ -9,9 +9,13 @@ internal class NeoForgeGenerateDataTask(private val event: GatherDataEvent) : Ge
 		if (
 			(event.includeClient() && generator.generateForClient) ||
 			(event.includeServer() && generator.generateForServer)
-		) event.createProvider {
+		) {
+//			event.createProvider {
+//				generator.setPackOutput(event.generator.packOutput)
+//				generator
+//			}
 			generator.setPackOutput(event.generator.packOutput)
-			generator
+			event.generator.addProvider(true, generator)
 		}
 	}
 }

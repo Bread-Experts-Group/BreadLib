@@ -47,6 +47,9 @@ open class RegistryProvider<T> private constructor(
 
 		/**
 		 * Method for statically initializing the classes holding providers and their contents.
+		 *
+		 * Be careful with the provided order of providers,
+		 * items registering before blocks could cause a null error due to blocks not registering first.
 		 */
 		@Suppress("unused")
 		fun initializeProviders(vararg providers: RegistryProvider<*>): Unit = Unit

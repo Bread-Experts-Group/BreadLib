@@ -188,11 +188,12 @@ object FabricEvents {
 		return node as RootCommandNode<FabricClientCommandSource>
 	}
 
-	// todo arm pose
 	private fun addExtensionsTasks() {
 		val itemExtensions = TaskManager.runTasks(ClientExtensionsTask())
 		for ((extension, item) in itemExtensions.getExtensions()) {
+			MixinUtil.CLIENT_ITEM_EXTENSIONS[item] = extension
 			BuiltinItemRendererRegistry.INSTANCE.register(item, extension.getCustomRenderer()::renderByItem)
 		}
+		// Look in MixinPlayerRenderer for arm pose
 	}
 }

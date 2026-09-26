@@ -12,7 +12,8 @@
     "MixinMouseHandler",
     "MixinSectionCompiler",
     "MixinShaderInstance",
-    "MixinTitleScreen"
+    "MixinTitleScreen",
+    "client.MixinPlayerRenderer"
   ],
   "server": [],
   "injectors": {

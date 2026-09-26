@@ -12,3 +12,6 @@ accessible field net/minecraft/server/MinecraftServer levels Ljava/util/Map;
 accessible field net/minecraft/core/MappedRegistry frozen Z
 
 accessible method net/minecraft/world/level/levelgen/NoiseRouterData overworld (Lnet/minecraft/core/HolderGetter;Lnet/minecraft/core/HolderGetter;ZZ)Lnet/minecraft/world/level/levelgen/NoiseRouter;
+
+accessible method net/minecraft/client/Minecraft getItemRenderer ()Lnet/minecraft/client/renderer/entity/ItemRenderer;
+accessible field net/minecraft/client/renderer/entity/ItemRenderer blockEntityRenderer Lnet/minecraft/client/renderer/BlockEntityWithoutLevelRenderer;

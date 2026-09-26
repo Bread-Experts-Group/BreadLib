@@ -2,7 +2,13 @@ package org.bread_experts_group.breadlib
 
 import com.mojang.blaze3d.vertex.PoseStack
 import net.minecraft.client.Minecraft
+import net.minecraft.client.model.HumanoidModel
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.item.ItemStack
 import net.minecraftforge.client.event.*
+import net.minecraftforge.client.extensions.common.IClientItemExtensions
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.RegisterCommandsEvent
 import net.minecraftforge.event.TickEvent
@@ -10,6 +16,7 @@ import net.minecraftforge.eventbus.api.Event
 import net.minecraftforge.eventbus.api.IEventBus
 import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
+import org.bread_experts_group.breadlib.registry.client.IClientItemExtension
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
 import org.bread_experts_group.breadlib.task.client.ClientExtensionsTask
@@ -60,9 +67,18 @@ object ForgeEvents {
 				TaskManager.runTasks(ClientLogInEvent(event.player))
 			}
 
-			val itemExtensions = TaskManager.runTasks(ClientExtensionsTask())
-			for ((extension, item) in itemExtensions.getExtensions()) {
-				MixinUtil.itemExtensions[item] = extension
+			val extensions = TaskManager.runTasks(ClientExtensionsTask())
+			for ((extension, item) in extensions.getExtensions()) {
+				MixinUtil.CLIENT_ITEM_EXTENSIONS[item] = object : IClientItemExtension, IClientItemExtensions {
+					override fun getCustomRenderer(): BlockEntityWithoutLevelRenderer =
+						extension.getCustomRenderer()
+
+					override fun getArmPose(
+						entity: LivingEntity,
+						hand: InteractionHand,
+						stack: ItemStack
+					): HumanoidModel.ArmPose = extension.getArmPose(entity, hand, stack)
+				}
 			}
 		}
 		this.addServerTickTasks()

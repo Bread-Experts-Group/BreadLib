@@ -89,6 +89,7 @@ fun kExample() {
 	if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {
 		TasksClientTest.renderTest()
 		TasksClientTest.layeredDrawTest()
+		TasksClientTest.extensionsTest()
 	}
 
 	newTask { task: NetworkTask ->

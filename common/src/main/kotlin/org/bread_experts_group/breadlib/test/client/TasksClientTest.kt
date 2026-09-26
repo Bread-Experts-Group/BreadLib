@@ -3,13 +3,20 @@ package org.bread_experts_group.breadlib.test.client
 import net.minecraft.client.DeltaTracker
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.model.HumanoidModel
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.world.InteractionHand
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.item.ItemStack
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.BreadLib.modLoc
 import org.bread_experts_group.breadlib.platform.PlatformServices
+import org.bread_experts_group.breadlib.registry.client.IClientItemExtension
 import org.bread_experts_group.breadlib.task.TaskManager.newTask
+import org.bread_experts_group.breadlib.task.client.ClientExtensionsTask
 import org.bread_experts_group.breadlib.task.render.LayeredDrawTask
+import org.bread_experts_group.breadlib.test.ItemsTest
 import org.bread_experts_group.breadlib.util.Color
 
 object TasksClientTest {
@@ -36,6 +43,18 @@ object TasksClientTest {
 				guiGraphics.drawString(minecraft.font, "current dim: ${level.dimension().location()}", 0, 15, Color.ORANGE)
 				guiGraphics.drawString(minecraft.font, "biome: $biome", 0, 25, Color.ORANGE)
 			}
+		}
+	}
+
+	fun extensionsTest() {
+		newTask { task: ClientExtensionsTask ->
+			task.addItemExtension(object : IClientItemExtension {
+				override fun getArmPose(
+					entity: LivingEntity,
+					hand: InteractionHand,
+					stack: ItemStack
+				): HumanoidModel.ArmPose = HumanoidModel.ArmPose.BOW_AND_ARROW
+			}, ItemsTest.TEST_ITEM.get())
 		}
 	}
 }

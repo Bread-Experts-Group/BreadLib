@@ -7,8 +7,5 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MixinUtil {
-	/**
-	 * Forge doesn't have its own item extensions event like neo, so this just exists to reference in a mixin in IClientItemExtensions.
-	 */
-	public static Map<Item, IClientItemExtension> itemExtensions = new HashMap<>();
+	public static Map<Item, IClientItemExtension> CLIENT_ITEM_EXTENSIONS = new HashMap<>();
 }
