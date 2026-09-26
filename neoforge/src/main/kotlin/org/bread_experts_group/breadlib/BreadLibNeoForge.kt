@@ -7,13 +7,11 @@ import net.neoforged.neoforge.capabilities.Capabilities
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent
 import net.neoforged.neoforge.common.NeoForge
-import net.neoforged.neoforge.data.event.GatherDataEvent
 import net.neoforged.neoforge.event.server.ServerStartingEvent
 import org.bread_experts_group.breadlib.BreadLib.init
-import org.bread_experts_group.breadlib.NeoForgeRegistrationHelper.registerContent
+import org.bread_experts_group.breadlib.NeoForgeHelper.registerContent
 import org.bread_experts_group.breadlib.capability.BlockEnergyCapability
 import org.bread_experts_group.breadlib.capability.EnergyPacket
-import org.bread_experts_group.breadlib.platform.NeoForgeGenerateDataTask
 import org.bread_experts_group.breadlib.platform.PlatformInitialization
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.TaskManager
@@ -55,8 +53,8 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 //			TaskManager.runTasks(LevelTask.Load(event.level))
 //		}
 
-		eventBus.addListener { event: GatherDataEvent ->
-			TaskManager.runTasks(NeoForgeGenerateDataTask(event))
+		NeoForgeHelper.runDataGenerator(eventBus, BreadLib.MOD_ID)
+//		eventBus.addListener { event: GatherDataEvent ->
 
 //			val generator = event.generator
 //			val packOutput = generator.packOutput
@@ -70,7 +68,7 @@ class BreadLibNeoForge(eventBus: IEventBus) {
 //				)
 //				generator.addProvider(true, provider)
 //			}
-		}
+//		}
 		eventBus.addListener { event: RegisterCapabilitiesEvent -> PlatformInitialization.registerCapabilities(event, BreadLib.MOD_ID) }
 
 		BreadLib.LOGGER.info("Hello NeoForge world!")

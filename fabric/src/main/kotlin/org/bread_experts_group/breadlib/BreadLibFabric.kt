@@ -2,7 +2,7 @@ package org.bread_experts_group.breadlib
 
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.api.ModInitializer
-import org.bread_experts_group.breadlib.FabricRegistrationHelper.registerContent
+import org.bread_experts_group.breadlib.FabricHelper.registerContent
 import org.bread_experts_group.breadlib.platform.PlatformInitialization
 
 

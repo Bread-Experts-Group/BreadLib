@@ -1,14 +1,12 @@
 package org.bread_experts_group.breadlib
 
 import net.minecraftforge.common.MinecraftForge
-import net.minecraftforge.data.event.GatherDataEvent
 import net.minecraftforge.event.server.ServerStartingEvent
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext
 import org.bread_experts_group.breadlib.BreadLib.init
 import org.bread_experts_group.breadlib.ForgeEvents.registerEvents
-import org.bread_experts_group.breadlib.ForgeRegistrationHelper.registerContent
-import org.bread_experts_group.breadlib.platform.ForgeGenerateDataTask
+import org.bread_experts_group.breadlib.ForgeHelper.registerContent
 import org.bread_experts_group.breadlib.task.TaskManager
 import org.bread_experts_group.breadlib.task.server.ServerStartingTask
 
@@ -16,8 +14,8 @@ import org.bread_experts_group.breadlib.task.server.ServerStartingTask
 class BreadLibForge(context: FMLJavaModLoadingContext) {
 	init {
 		val eventBus = context.modEventBus
-		eventBus.addListener { event: GatherDataEvent ->
-			TaskManager.runTasks(ForgeGenerateDataTask(event))
+//		eventBus.addListener { event: GatherDataEvent ->
+//			TaskManager.runTasks(ForgeGenerateDataTask(event))
 
 //			val generator = event.generator
 //			val packOutput = generator.packOutput
@@ -31,7 +29,7 @@ class BreadLibForge(context: FMLJavaModLoadingContext) {
 //				)
 //				generator.addProvider(true, provider)
 //			}
-		}
+//		}
 
 		MinecraftForge.EVENT_BUS.addListener { event: ServerStartingEvent ->
 			TaskManager.runTasks(ServerStartingTask(event.server))
@@ -42,5 +40,7 @@ class BreadLibForge(context: FMLJavaModLoadingContext) {
 		registerContent(eventBus, BreadLib.MOD_ID)
 		registerEvents(eventBus)
 		ForgeNetworking.setup()
+
+		ForgeHelper.runDataGenerator(eventBus, BreadLib.MOD_ID)
 	}
 }

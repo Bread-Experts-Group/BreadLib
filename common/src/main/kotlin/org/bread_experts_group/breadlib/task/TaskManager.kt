@@ -3,7 +3,7 @@ package org.bread_experts_group.breadlib.task
 import java.util.function.Consumer
 
 object TaskManager {
-	val tasks: MutableMap<Class<*>, MutableList<Consumer<out Task>>> = mutableMapOf()
+	private val tasks: MutableMap<Class<out Task>, MutableList<Consumer<out Task>>> = mutableMapOf()
 
 	fun <T : Task> newTask(tClass: Class<T>, task: Consumer<T>) {
 		val list = tasks.getOrPut(tClass) { mutableListOf() }

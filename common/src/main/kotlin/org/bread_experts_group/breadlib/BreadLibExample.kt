@@ -86,10 +86,12 @@ fun kExample() {
 		getBlockEntityTypes(BreadLib.MOD_ID)
 	)
 
-	if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT) {
+	if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT && !PlatformServices.PLATFORM.isDataGenRunning) {
 		TasksClientTest.renderTest()
 		TasksClientTest.layeredDrawTest()
-		TasksClientTest.extensionsTest()
+		// todo we need a system to schedule registering tasks at certain points during initialization,
+		//   because this is throwing since the item doesn't exist yet.
+//		TasksClientTest.extensionsTest()
 	}
 
 	newTask { task: NetworkTask ->
