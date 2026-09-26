@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.RegisterEvent
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.TaskManager
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask
+import org.bread_experts_group.breadlib.task.data.RegistrySetBuilderTask
 
 object NeoForgeHelper {
 	fun <T> registerContent(provider: RegistryProvider<T>, event: RegisterEvent) {
@@ -29,21 +30,21 @@ object NeoForgeHelper {
 
 	fun runDataGenerator(eventBus: IEventBus, modID: String) {
 		eventBus.addListener { event: GatherDataEvent ->
-			val task = TaskManager.runTasks(GenerateDataTask(modID))
 			val dataGenerator = event.generator
 			val packOutput = dataGenerator.packOutput
-			for (generator in task.getGenerators()) {
-				generator.setPackOutput(packOutput)
-				dataGenerator.addProvider(true, generator)
-			}
 
-			task.getSetBuilder()?.let {
-				val builder = RegistrySetBuilder()
-				it.invoke(builder)
+			val lookupProvider = TaskManager.runTasks(RegistrySetBuilderTask(modID)).supplier()?.let {
+				val builder = RegistrySetBuilder().also { builder -> it.invoke(builder) }
 				val provider = DatapackBuiltinEntriesProvider(
 					packOutput, event.lookupProvider, builder, setOf(modID)
 				)
 				dataGenerator.addProvider(true, provider)
+			}?.registryProvider ?: event.lookupProvider
+
+			val task = TaskManager.runTasks(GenerateDataTask(modID, lookupProvider))
+			for (generator in task.getGenerators()) {
+				generator.setPackOutput(packOutput)
+				dataGenerator.addProvider(true, generator)
 			}
 		}
 	}

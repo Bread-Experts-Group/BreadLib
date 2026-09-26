@@ -5,18 +5,18 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
 import net.minecraft.core.RegistrySetBuilder
 import org.bread_experts_group.breadlib.BreadLib
 import org.bread_experts_group.breadlib.FabricHelper
+import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.data.RegistrySetBuilderTask
 
 class BreadLibDataGeneratorEntry : DataGeneratorEntrypoint {
-	private var setBuilder: ((RegistrySetBuilder) -> Unit)? = null
-
 	override fun onInitializeDataGenerator(fabricDataGenerator: FabricDataGenerator) {
 		val pack = fabricDataGenerator.createPack()
 
 //		TODO: figure out what htis is pack.addProvider(::BreadLibWorldGenProvider)
-		setBuilder = FabricHelper.runDataGenerator(pack, BreadLib.MOD_ID).getSetBuilder()
+		FabricHelper.runDataGenerator(pack, BreadLib.MOD_ID, fabricDataGenerator.registries)
 	}
 
 	override fun buildRegistry(registryBuilder: RegistrySetBuilder) {
-		setBuilder?.invoke(registryBuilder)
+		TaskManager.runTasks(RegistrySetBuilderTask(BreadLib.MOD_ID)).supplier()?.invoke(registryBuilder)
 	}
 }
