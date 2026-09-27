@@ -67,22 +67,33 @@ object ForgeEvents {
 				TaskManager.runTasks(ClientLogInEvent(event.player))
 			}
 
-			val extensions = TaskManager.runTasks(ClientExtensionsTask())
-			for ((extension, item) in extensions.getExtensions()) {
-				MixinUtil.CLIENT_ITEM_EXTENSIONS[item] = object : IClientItemExtension, IClientItemExtensions {
-					override fun getCustomRenderer(): BlockEntityWithoutLevelRenderer =
-						extension.getCustomRenderer()
-
-					override fun getArmPose(
-						entity: LivingEntity,
-						hand: InteractionHand,
-						stack: ItemStack
-					): HumanoidModel.ArmPose = extension.getArmPose(entity, hand, stack)
-				}
-			}
 		}
 		this.addServerTickTasks()
 		this.addCommandTasks()
+	}
+
+	// Forge doesn't have a dedicated event for registering item extensions,
+	// so we have to run this in our mixin to prevent throwing a null error during initialization.
+	@JvmStatic
+	var extensionsTaskRan: Boolean = false
+		private set
+
+	@JvmStatic
+	fun setupItemExtensions() {
+		val extensions = TaskManager.runTasks(ClientExtensionsTask())
+		for ((extension, item) in extensions.getExtensions()) {
+			MixinUtil.CLIENT_ITEM_EXTENSIONS[item] = object : IClientItemExtension, IClientItemExtensions {
+				override fun getCustomRenderer(): BlockEntityWithoutLevelRenderer =
+					extension.getCustomRenderer()
+
+				override fun getArmPose(
+					entity: LivingEntity,
+					hand: InteractionHand,
+					stack: ItemStack
+				): HumanoidModel.ArmPose = extension.getArmPose(entity, hand, stack)
+			}
+		}
+		extensionsTaskRan = true
 	}
 
 	@Suppress("DEPRECATION", "removal")

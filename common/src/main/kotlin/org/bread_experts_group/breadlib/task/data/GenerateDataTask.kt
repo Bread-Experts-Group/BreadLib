@@ -1,17 +1,27 @@
 package org.bread_experts_group.breadlib.task.data
 
 import net.minecraft.core.HolderLookup
+import net.minecraft.data.DataProvider
+import net.minecraft.data.PackOutput
 import org.bread_experts_group.breadlib.data.DataGenerator
 import org.bread_experts_group.breadlib.task.Task
 import java.util.concurrent.CompletableFuture
 
-class GenerateDataTask(private val modID: String, val registries: CompletableFuture<HolderLookup.Provider>) : Task() {
-	private val generators: MutableMap<String, MutableList<DataGenerator>> = mutableMapOf()
+class GenerateDataTask(
+	val registries: CompletableFuture<HolderLookup.Provider>,
+	val packOutput: PackOutput
+) : Task() {
+	private val providers: MutableMap<String, MutableList<DataProvider>> = mutableMapOf()
 
-	fun addGenerator(generator: DataGenerator) {
-		val list = generators.getOrPut(generator.modID) { mutableListOf() }
-		list.add(generator)
+	fun addProvider(provider: DataProvider, modID: String) {
+		val list = providers.getOrPut(modID) { mutableListOf() }
+		list.add(provider)
 	}
 
-	fun getGenerators(): Collection<DataGenerator> = this.generators[modID].orEmpty()
+	fun addGenerator(generator: DataGenerator) {
+		generator.setPackOutput(packOutput)
+		this.addProvider(generator, generator.modID)
+	}
+
+	fun getProviders(modID: String): Collection<DataProvider> = this.providers[modID].orEmpty()
 }

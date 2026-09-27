@@ -1,8 +1,11 @@
 package org.bread_experts_group.breadlib
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator
+import net.minecraft.Util
 import net.minecraft.core.HolderLookup
 import net.minecraft.core.Registry
+import net.minecraft.data.CachedOutput
+import net.minecraft.data.DataProvider
 import org.bread_experts_group.breadlib.registry.RegistryProvider
 import org.bread_experts_group.breadlib.task.TaskManager
 import org.bread_experts_group.breadlib.task.data.GenerateDataTask
@@ -27,11 +30,13 @@ object FabricHelper {
 		modID: String,
 		registries: CompletableFuture<HolderLookup.Provider>
 	) {
-		val task = TaskManager.runTasks(GenerateDataTask(modID, registries))
-		for (generator in task.getGenerators()) {
-			pack.addProvider { packOutput ->
-				generator.setPackOutput(packOutput)
-				generator
+		pack.addProvider { packOutput ->
+			val task = TaskManager.runTasks(GenerateDataTask(registries, packOutput))
+			for (provider in task.getProviders(modID)) pack.addProvider { provider }
+			object : DataProvider {
+				override fun run(output: CachedOutput): CompletableFuture<*> =
+					CompletableFuture.runAsync({}, Util.backgroundExecutor())
+				override fun getName(): String = "Fabric Dummy Provider"
 			}
 		}
 	}

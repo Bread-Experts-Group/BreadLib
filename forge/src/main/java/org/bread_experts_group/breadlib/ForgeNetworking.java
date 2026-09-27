@@ -11,6 +11,9 @@ import org.bread_experts_group.breadlib.task.network.NetworkTask;
 
 import static org.bread_experts_group.breadlib.ForgeNetworkingClient.setupClient;
 
+// todo
+//  [11:21:48] [Render thread/ERROR] [ne.mi.ne.SimpleChannel/SIMPLE_CHANNEL]: Received empty payload on channel minecraft:breadlib_network login index 0
+//  [11:21:48] [Render thread/WARN] [minecraft/ClientPacketListener]: Unknown custom packet payload: minecraft:breadlib_network
 public class ForgeNetworking {
 	public static SimpleChannel NETWORK_CHANNEL;
 

@@ -35,9 +35,13 @@ import kotlin.random.Random
 private val blockProperties = BlockProperties
 	.prop(HorizontalDirectionalBlock.FACING, Direction.NORTH) { it.horizontalDirection.opposite }
 
-class TestBlock : BreadLibBlockWithEntity<TestBlockEntity>(TestBlockEntity::class.java, Properties.of(), modID = MOD_ID), ILightningStrikeAction {
+class TestBlock :
+	BreadLibBlockWithEntity<TestBlockEntity>(TestBlockEntity::class.java, Properties.of(), modID = MOD_ID),
+	ILightningStrikeAction {
 	override fun breadLibProperties(): BlockProperties = blockProperties
-	override fun blockEntityRenderer(): (BlockEntityRendererProvider.Context) -> BlockEntityRenderer<TestBlockEntity> = ::TestBlockEntityRenderer
+	override fun blockEntityRenderer(): (BlockEntityRendererProvider.Context) -> BlockEntityRenderer<TestBlockEntity> =
+		::TestBlockEntityRenderer
+
 	override fun onLightningStruck(
 		level: Level,
 		pos: BlockPos,
@@ -190,5 +194,5 @@ class TestBlock : BreadLibBlockWithEntity<TestBlockEntity>(TestBlockEntity::clas
 				it.teleportTo(newWorld, 0.0, 200.0, 0.0, 0f, 0f)
 			}
 		}
-    }
+	}
 }

@@ -47,7 +47,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		overrides: List<ItemModelOverride> = emptyList(),
 		perspectives: Map<ItemDisplayContext, ItemModelPerspective> = emptyMap(),
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	) {
+	): ModelGenerator = this.also {
 		models.add(item to JsonObject().also { model ->
 			model.addProperty("parent", parent.toString())
 			if (textures.isNotEmpty()) model.add("textures", JsonObject().also { modelTextures ->
@@ -91,7 +91,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		overrides: List<ItemModelOverride> = emptyList(),
 		perspectives: Map<ItemDisplayContext, ItemModelPerspective> = emptyMap(),
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	) = model2D(
+	): ModelGenerator = model2D(
 		ObjectResourceLocation(
 			ResourceLocation.withDefaultNamespace("generated"),
 			ITEM_CATEGORY
@@ -117,7 +117,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		overrides: List<ItemModelOverride> = emptyList(),
 		perspectives: Map<ItemDisplayContext, ItemModelPerspective> = emptyMap(),
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): Unit = this.flat2D(
+	): ModelGenerator = this.flat2D(
 		ObjectResourceLocation(item.get()),
 		layer0, layer1, layer2, layer3, layer4, guiLight, overrides, perspectives, *loaderSpecifics
 	)
@@ -127,7 +127,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		all: ObjectResourceLocation = block,
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	) {
+	): ModelGenerator = this.also {
 		models.add(block to JsonObject().also { model ->
 			model.addProperty("parent", "minecraft:$BLOCK_CATEGORY/cube_all")
 			model.add("textures", JsonObject().also { textures ->
@@ -142,7 +142,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		all: ObjectResourceLocation = ObjectResourceLocation(block.get()),
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): Unit = flat3D(
+	): ModelGenerator = flat3D(
 		ObjectResourceLocation(block.get()),
 		all, particles, *loaderSpecifics
 	)
@@ -154,7 +154,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		front: ObjectResourceLocation,
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	) {
+	): ModelGenerator = this.also {
 		models.add(block to JsonObject().also { model ->
 			model.addProperty("parent", "minecraft:$BLOCK_CATEGORY/orientable")
 			model.add("textures", JsonObject().also { textures ->
@@ -173,14 +173,14 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		front: ObjectResourceLocation,
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): Unit = verticalHorizontalFront3D(
+	): ModelGenerator = verticalHorizontalFront3D(
 		ObjectResourceLocation(block.get()),
 		vertical, horizontal, front, particles, *loaderSpecifics
 	)
 
 	fun model2D(
 		block: AbstractRegistryBlock<*>
-	): Unit = model2D(
+	): ModelGenerator = model2D(
 		ObjectResourceLocation(block),
 		ObjectResourceLocation(block.get().location, "item")
 	)
@@ -190,7 +190,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		variants: Map<String, BlockStateVariant> = mapOf(
 			"" to BlockStateSingleVariant(block)
 		)
-	) {
+	): ModelGenerator = this.also {
 		blockStates[block] = JsonObject().also { model ->
 			model.add("variants", JsonObject().also { modelVariants ->
 				for ((name, variant) in variants) modelVariants.add(
@@ -216,7 +216,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		variants: Map<String, BlockStateVariant> = mapOf(
 			"" to BlockStateSingleVariant(ObjectResourceLocation(block))
 		)
-	): Unit = this.blockState(ObjectResourceLocation(block), variants)
+	): ModelGenerator = this.blockState(ObjectResourceLocation(block), variants)
 
 	override fun getName(): String = "BreadLib Model Generator ($modID)"
 

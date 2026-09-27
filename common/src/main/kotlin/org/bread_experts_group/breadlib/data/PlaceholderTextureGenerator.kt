@@ -20,17 +20,17 @@ import kotlin.io.path.createDirectories
 
 class PlaceholderTextureGenerator(override val modID: String) : DataGenerator() {
 	private val checkerboards = mutableMapOf<ResourceLocation, String>()
-	fun checkerboard(location: ResourceLocation, category: String = "item") {
+	fun checkerboard(location: ResourceLocation, category: String = "item"): PlaceholderTextureGenerator = this.also {
 		require(this.checkerboards.put(location, category) == null) {
 			"$location already defined for texture generation ($category, checkerboard)"
 		}
 	}
 
-	fun checkerboard(item: Item): Unit = this.checkerboard(item.location)
-	fun checkerboard(block: Block): Unit = this.checkerboard(block.location, "block")
+	fun checkerboard(item: Item): PlaceholderTextureGenerator = this.checkerboard(item.location)
+	fun checkerboard(block: Block): PlaceholderTextureGenerator = this.checkerboard(block.location, "block")
 
-	fun checkerboard(item: RegistryItem<*>): Unit = this.checkerboard(item.get())
-	fun checkerboard(block: AbstractRegistryBlock<*>): Unit = this.checkerboard(block.get())
+	fun checkerboard(item: RegistryItem<*>): PlaceholderTextureGenerator = this.checkerboard(item.get())
+	fun checkerboard(block: AbstractRegistryBlock<*>): PlaceholderTextureGenerator = this.checkerboard(block.get())
 
 	override fun getName(): String = "BreadLib Placeholder Texture Generator (${this.modID})"
 

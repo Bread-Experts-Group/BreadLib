@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture
 class LocaleGenerator(override val modID: String, private val locale: Locale) : DataGenerator() {
 	private val translations = mutableMapOf<String, String>()
 
-	fun add(vararg translations: Pair<String, String>) {
+	fun add(vararg translations: Pair<String, String>): LocaleGenerator = this.also {
 		for ((key, value) in translations) this.translations.put(key, value)?.let {
 			throw IllegalArgumentException(
 				"Duplicate translation key \"$key\" while trying to add \"$value\": existed as \"$it\""
@@ -23,21 +23,21 @@ class LocaleGenerator(override val modID: String, private val locale: Locale) : 
 		}
 	}
 
-	fun addItems(vararg translations: Pair<Item, String>): Unit = this.add(
+	fun addItems(vararg translations: Pair<Item, String>): LocaleGenerator = this.add(
 		*translations.map { (item, value) -> item.descriptionId to value }.toTypedArray()
 	)
 
-	fun addBlocks(vararg translations: Pair<Block, String>): Unit = this.add(
+	fun addBlocks(vararg translations: Pair<Block, String>): LocaleGenerator = this.add(
 		*translations.map { (block, value) -> block.descriptionId to value }.toTypedArray()
 	)
 
-	fun addBLItems(vararg translations: Pair<RegistryItem<*>, String>) {
-		this.addItems(*translations.map { (first, second) -> first.get() to second }.toTypedArray())
-	}
+	fun addBLItems(vararg translations: Pair<RegistryItem<*>, String>): LocaleGenerator = this.addItems(
+		*translations.map { (first, second) -> first.get() to second }.toTypedArray()
+	)
 
-	fun addBLBlocks(vararg translations: Pair<AbstractRegistryBlock<*>, String>) {
-		this.addBlocks(*translations.map { (first, second) -> first.get() to second }.toTypedArray())
-	}
+	fun addBLBlocks(vararg translations: Pair<AbstractRegistryBlock<*>, String>): LocaleGenerator = this.addBlocks(
+		*translations.map { (first, second) -> first.get() to second }.toTypedArray()
+	)
 
 	override fun getName(): String = "BreadLib LocaleGenerator ($modID, ${locale.country}, ${locale.language})"
 

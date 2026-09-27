@@ -89,9 +89,7 @@ fun kExample() {
 	if (PlatformServices.PLATFORM.side == ApplicationSide.CLIENT && !PlatformServices.PLATFORM.isDataGenRunning) {
 		TasksClientTest.renderTest()
 		TasksClientTest.layeredDrawTest()
-		// todo we need a system to schedule registering tasks at certain points during initialization,
-		//   because this is throwing since the item doesn't exist yet.
-//		TasksClientTest.extensionsTest()
+		TasksClientTest.extensionsTest()
 	}
 
 	newTask { task: NetworkTask ->

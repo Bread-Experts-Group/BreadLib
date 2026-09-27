@@ -150,8 +150,8 @@ object NeoEvents {
 	}
 
 	private fun addExtensionTasks(eventBus: IEventBus) {
-		val itemExtensions = TaskManager.runTasks(ClientExtensionsTask())
 		eventBus.addListener { event: RegisterClientExtensionsEvent ->
+			val itemExtensions = TaskManager.runTasks(ClientExtensionsTask())
 			for ((extension, item) in itemExtensions.getExtensions())
 			event.registerItem(object : IClientItemExtensions {
 				override fun getCustomRenderer(): BlockEntityWithoutLevelRenderer = extension.getCustomRenderer()
