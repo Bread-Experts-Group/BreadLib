@@ -179,10 +179,12 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 	)
 
 	fun model2D(
-		block: AbstractRegistryBlock<*>
+		block: AbstractRegistryBlock<*>,
+		guiLight: GUILight = GUILight.SIDE
 	): ModelGenerator = model2D(
 		ObjectResourceLocation(block),
-		ObjectResourceLocation(block.get().location, "item")
+		ObjectResourceLocation(block.get().location, "item"),
+		guiLight = guiLight
 	)
 
 	fun blockState(
