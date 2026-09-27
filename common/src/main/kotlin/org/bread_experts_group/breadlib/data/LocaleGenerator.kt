@@ -4,10 +4,12 @@ import com.google.gson.JsonObject
 import net.minecraft.data.CachedOutput
 import net.minecraft.data.DataProvider
 import net.minecraft.data.PackOutput
+import net.minecraft.world.item.CreativeModeTab
 import net.minecraft.world.item.Item
 import net.minecraft.world.level.block.Block
 import org.bread_experts_group.breadlib.registry.objects.AbstractRegistryBlock
 import org.bread_experts_group.breadlib.registry.objects.RegistryItem
+import org.bread_experts_group.breadlib.registry.objects.RegistryObject
 import org.bread_experts_group.breadlib.util.resolve
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -22,6 +24,13 @@ class LocaleGenerator(override val modID: String, private val locale: Locale) : 
 			)
 		}
 	}
+
+	fun addCreativeTabs(vararg translations: Pair<CreativeModeTab, String>): LocaleGenerator = this.add(
+		*translations.map { (tab, value) ->  tab.displayName.string to value}.toTypedArray()
+	)
+
+	fun addBLCreativeTabs(vararg translations: Pair<RegistryObject<*, CreativeModeTab>, String>): LocaleGenerator =
+		this.addCreativeTabs(*translations.map { (tab, value) ->  tab.get() to value}.toTypedArray())
 
 	fun addItems(vararg translations: Pair<Item, String>): LocaleGenerator = this.add(
 		*translations.map { (item, value) -> item.descriptionId to value }.toTypedArray()

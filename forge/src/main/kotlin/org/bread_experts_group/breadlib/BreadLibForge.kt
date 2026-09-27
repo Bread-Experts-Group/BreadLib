@@ -14,23 +14,6 @@ import org.bread_experts_group.breadlib.task.server.ServerStartingTask
 class BreadLibForge(context: FMLJavaModLoadingContext) {
 	init {
 		val eventBus = context.modEventBus
-//		eventBus.addListener { event: GatherDataEvent ->
-//			TaskManager.runTasks(ForgeGenerateDataTask(event))
-
-//			val generator = event.generator
-//			val packOutput = generator.packOutput
-//			TaskManager.runTasks(BootstrapDatapackEntriesTask()).getSuppliers().forEach { (modID, supplier) ->
-//				val builder = RegistrySetBuilder().also { supplier(it) }
-//				val provider = DatapackBuiltinEntriesProvider(
-//					packOutput,
-//					event.lookupProvider,
-//					builder,
-//					setOf(modID)
-//				)
-//				generator.addProvider(true, provider)
-//			}
-//		}
-
 		MinecraftForge.EVENT_BUS.addListener { event: ServerStartingEvent ->
 			TaskManager.runTasks(ServerStartingTask(event.server))
 		}
