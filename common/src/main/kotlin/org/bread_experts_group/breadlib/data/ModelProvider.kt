@@ -22,7 +22,7 @@ import org.joml.Vector3f
 import java.util.concurrent.CompletableFuture
 
 @Suppress("MemberVisibilityCanBePrivate")
-class ModelGenerator(override val modID: String) : DataGenerator() {
+class ModelProvider(modID: String, packOutput: PackOutput) : DataGenerationProvider(modID, packOutput) {
 	companion object {
 		fun Vector3f.asJsonArray(): JsonArray = JsonArray(3).also {
 			it.add(x)
@@ -37,8 +37,6 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 	private val models = mutableSetOf<Pair<ObjectResourceLocation, JsonObject>>()
 	private val blockStates = mutableMapOf<ObjectResourceLocation, JsonObject>()
 
-	override val generateForServer: Boolean = false
-
 	fun model2D(
 		parent: ObjectResourceLocation,
 		item: ObjectResourceLocation,
@@ -47,7 +45,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		overrides: List<ItemModelOverride> = emptyList(),
 		perspectives: Map<ItemDisplayContext, ItemModelPerspective> = emptyMap(),
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): ModelGenerator = this.also {
+	): ModelProvider = this.also {
 		models.add(item to JsonObject().also { model ->
 			model.addProperty("parent", parent.toString())
 			if (textures.isNotEmpty()) model.add("textures", JsonObject().also { modelTextures ->
@@ -91,7 +89,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		overrides: List<ItemModelOverride> = emptyList(),
 		perspectives: Map<ItemDisplayContext, ItemModelPerspective> = emptyMap(),
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): ModelGenerator = model2D(
+	): ModelProvider = model2D(
 		ObjectResourceLocation(
 			ResourceLocation.withDefaultNamespace("generated"),
 			ITEM_CATEGORY
@@ -117,7 +115,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		overrides: List<ItemModelOverride> = emptyList(),
 		perspectives: Map<ItemDisplayContext, ItemModelPerspective> = emptyMap(),
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): ModelGenerator = this.flat2D(
+	): ModelProvider = this.flat2D(
 		ObjectResourceLocation(item.get()),
 		layer0, layer1, layer2, layer3, layer4, guiLight, overrides, perspectives, *loaderSpecifics
 	)
@@ -127,7 +125,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		all: ObjectResourceLocation = block,
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): ModelGenerator = this.also {
+	): ModelProvider = this.also {
 		models.add(block to JsonObject().also { model ->
 			model.addProperty("parent", "minecraft:$BLOCK_CATEGORY/cube_all")
 			model.add("textures", JsonObject().also { textures ->
@@ -142,7 +140,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		all: ObjectResourceLocation = ObjectResourceLocation(block.get()),
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): ModelGenerator = flat3D(
+	): ModelProvider = flat3D(
 		ObjectResourceLocation(block.get()),
 		all, particles, *loaderSpecifics
 	)
@@ -154,7 +152,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		front: ObjectResourceLocation,
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): ModelGenerator = this.also {
+	): ModelProvider = this.also {
 		models.add(block to JsonObject().also { model ->
 			model.addProperty("parent", "minecraft:$BLOCK_CATEGORY/orientable")
 			model.add("textures", JsonObject().also { textures ->
@@ -173,7 +171,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		front: ObjectResourceLocation,
 		particles: ObjectResourceLocation? = null,
 		vararg loaderSpecifics: LoaderSpecificModelProperty
-	): ModelGenerator = verticalHorizontalFront3D(
+	): ModelProvider = verticalHorizontalFront3D(
 		ObjectResourceLocation(block.get()),
 		vertical, horizontal, front, particles, *loaderSpecifics
 	)
@@ -181,7 +179,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 	fun model2D(
 		block: AbstractRegistryBlock<*>,
 		guiLight: GUILight = GUILight.SIDE
-	): ModelGenerator = model2D(
+	): ModelProvider = model2D(
 		ObjectResourceLocation(block),
 		ObjectResourceLocation(block.get().location, "item"),
 		guiLight = guiLight
@@ -192,7 +190,7 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		variants: Map<String, BlockStateVariant> = mapOf(
 			"" to BlockStateSingleVariant(block)
 		)
-	): ModelGenerator = this.also {
+	): ModelProvider = this.also {
 		blockStates[block] = JsonObject().also { model ->
 			model.add("variants", JsonObject().also { modelVariants ->
 				for ((name, variant) in variants) modelVariants.add(
@@ -218,9 +216,9 @@ class ModelGenerator(override val modID: String) : DataGenerator() {
 		variants: Map<String, BlockStateVariant> = mapOf(
 			"" to BlockStateSingleVariant(ObjectResourceLocation(block))
 		)
-	): ModelGenerator = this.blockState(ObjectResourceLocation(block), variants)
+	): ModelProvider = this.blockState(ObjectResourceLocation(block), variants)
 
-	override fun getName(): String = "BreadLib Model Generator ($modID)"
+	override fun getName(): String = "BreadLib Model Provider ($modID)"
 
 	override fun run(p0: CachedOutput): CompletableFuture<*> {
 		val completableFutures = arrayOfNulls<CompletableFuture<*>>(models.size + blockStates.size)

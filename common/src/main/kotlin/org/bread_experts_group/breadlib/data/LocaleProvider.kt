@@ -14,10 +14,14 @@ import org.bread_experts_group.breadlib.util.resolve
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
-class LocaleGenerator(override val modID: String, private val locale: Locale) : DataGenerator() {
+class LocaleProvider(
+	private val locale: Locale,
+	modID: String,
+	packOutput: PackOutput
+) : DataGenerationProvider(modID, packOutput) {
 	private val translations = mutableMapOf<String, String>()
 
-	fun add(vararg translations: Pair<String, String>): LocaleGenerator = this.also {
+	fun add(vararg translations: Pair<String, String>): LocaleProvider = this.also {
 		for ((key, value) in translations) this.translations.put(key, value)?.let {
 			throw IllegalArgumentException(
 				"Duplicate translation key \"$key\" while trying to add \"$value\": existed as \"$it\""
@@ -25,30 +29,30 @@ class LocaleGenerator(override val modID: String, private val locale: Locale) : 
 		}
 	}
 
-	fun addCreativeTabs(vararg translations: Pair<CreativeModeTab, String>): LocaleGenerator = this.add(
+	fun addCreativeTabs(vararg translations: Pair<CreativeModeTab, String>): LocaleProvider = this.add(
 		*translations.map { (tab, value) ->  tab.displayName.string to value}.toTypedArray()
 	)
 
-	fun addBLCreativeTabs(vararg translations: Pair<RegistryObject<*, CreativeModeTab>, String>): LocaleGenerator =
+	fun addBLCreativeTabs(vararg translations: Pair<RegistryObject<*, CreativeModeTab>, String>): LocaleProvider =
 		this.addCreativeTabs(*translations.map { (tab, value) ->  tab.get() to value}.toTypedArray())
 
-	fun addItems(vararg translations: Pair<Item, String>): LocaleGenerator = this.add(
+	fun addItems(vararg translations: Pair<Item, String>): LocaleProvider = this.add(
 		*translations.map { (item, value) -> item.descriptionId to value }.toTypedArray()
 	)
 
-	fun addBlocks(vararg translations: Pair<Block, String>): LocaleGenerator = this.add(
+	fun addBlocks(vararg translations: Pair<Block, String>): LocaleProvider = this.add(
 		*translations.map { (block, value) -> block.descriptionId to value }.toTypedArray()
 	)
 
-	fun addBLItems(vararg translations: Pair<RegistryItem<*>, String>): LocaleGenerator = this.addItems(
+	fun addBLItems(vararg translations: Pair<RegistryItem<*>, String>): LocaleProvider = this.addItems(
 		*translations.map { (first, second) -> first.get() to second }.toTypedArray()
 	)
 
-	fun addBLBlocks(vararg translations: Pair<AbstractRegistryBlock<*>, String>): LocaleGenerator = this.addBlocks(
+	fun addBLBlocks(vararg translations: Pair<AbstractRegistryBlock<*>, String>): LocaleProvider = this.addBlocks(
 		*translations.map { (first, second) -> first.get() to second }.toTypedArray()
 	)
 
-	override fun getName(): String = "BreadLib LocaleGenerator ($modID, ${locale.country}, ${locale.language})"
+	override fun getName(): String = "BreadLib LocaleProvider ($modID, ${locale.country}, ${locale.language})"
 
 	override fun run(p0: CachedOutput): CompletableFuture<*> {
 		if (this.translations.isEmpty()) return CompletableFuture.completedFuture(null)

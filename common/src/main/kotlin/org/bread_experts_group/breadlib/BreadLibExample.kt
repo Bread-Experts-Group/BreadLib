@@ -1,10 +1,11 @@
 package org.bread_experts_group.breadlib
 
 import net.minecraft.core.Direction
+import net.minecraft.data.PackOutput
 import net.minecraft.resources.ResourceLocation
-import org.bread_experts_group.breadlib.data.LocaleGenerator
-import org.bread_experts_group.breadlib.data.ModelGenerator
-import org.bread_experts_group.breadlib.data.PlaceholderTextureGenerator
+import org.bread_experts_group.breadlib.data.LocaleProvider
+import org.bread_experts_group.breadlib.data.ModelProvider
+import org.bread_experts_group.breadlib.data.PlaceholderTextureProvider
 import org.bread_experts_group.breadlib.data.model.ObjectResourceLocation
 import org.bread_experts_group.breadlib.data.model.block.BlockStateSingleVariant
 import org.bread_experts_group.breadlib.platform.ApplicationSide
@@ -24,7 +25,11 @@ import org.bread_experts_group.breadlib.test.network.ServerboundPacketTest
 import org.bread_experts_group.breadlib.util.info
 import java.util.*
 
-private fun kGetLocaleGenerator() = LocaleGenerator(BreadLib.MOD_ID, Locale.of("en", "us")).also {
+private fun kGetLocaleProvider(packOutput: PackOutput): LocaleProvider = LocaleProvider(
+	Locale.of("en", "us"),
+	BreadLib.MOD_ID,
+	packOutput
+).also {
 	it.addBLBlocks(
 		BlocksTest.TEST_BLOCK to "Test Block",
 		BlocksTest.QUARRY to "Quarry",
@@ -34,7 +39,9 @@ private fun kGetLocaleGenerator() = LocaleGenerator(BreadLib.MOD_ID, Locale.of("
 	)
 }
 
-private fun kGetModelGenerator() = ModelGenerator(BreadLib.MOD_ID).also {
+private fun kGetModelProvider(
+	packOutput: PackOutput
+): ModelProvider = ModelProvider(BreadLib.MOD_ID, packOutput).also {
 	it.flat2D(ItemsTest.TEST_ITEM)
 
 	it.flat3D(BlocksTest.TEST_BLOCK)
@@ -75,7 +82,9 @@ private fun kGetModelGenerator() = ModelGenerator(BreadLib.MOD_ID).also {
 	)
 }
 
-private fun kGetPlaceholderTextureGenerator() = PlaceholderTextureGenerator(BreadLib.MOD_ID).also {
+private fun kGetPlaceholderTextureProvider(
+	packOutput: PackOutput
+): PlaceholderTextureProvider = PlaceholderTextureProvider(BreadLib.MOD_ID, packOutput).also {
 	it.checkerboard(ItemsTest.TEST_ITEM)
 	it.checkerboard(BlocksTest.TEST_BLOCK)
 }
@@ -110,9 +119,10 @@ fun kExample() {
 	BreadLibTasks.setup()
 
 	newTask { task: GenerateDataTask ->
-		task.addGenerator(kGetLocaleGenerator())
-		task.addGenerator(kGetModelGenerator())
-		task.addGenerator(kGetPlaceholderTextureGenerator())
+		val packOutput = task.packOutput
+		task.addProvider(kGetLocaleProvider(packOutput))
+		task.addProvider(kGetModelProvider(packOutput))
+		task.addProvider(kGetPlaceholderTextureProvider(packOutput))
 	}
 
 	if (PlatformServices.PLATFORM.isModLoaded("breadlib")) info("breadlib appears loaded on the platform")

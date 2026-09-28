@@ -3,7 +3,7 @@ package org.bread_experts_group.breadlib.task.data
 import net.minecraft.core.HolderLookup
 import net.minecraft.data.DataProvider
 import net.minecraft.data.PackOutput
-import org.bread_experts_group.breadlib.data.DataGenerator
+import org.bread_experts_group.breadlib.data.DataGenerationProvider
 import org.bread_experts_group.breadlib.task.Task
 import java.util.concurrent.CompletableFuture
 
@@ -18,9 +18,8 @@ class GenerateDataTask(
 		list.add(provider)
 	}
 
-	fun addGenerator(generator: DataGenerator) {
-		generator.setPackOutput(packOutput)
-		this.addProvider(generator, generator.modID)
+	fun addProvider(provider: DataGenerationProvider) {
+		this.addProvider(provider, provider.modID)
 	}
 
 	fun getProviders(modID: String): Collection<DataProvider> = this.providers[modID].orEmpty()

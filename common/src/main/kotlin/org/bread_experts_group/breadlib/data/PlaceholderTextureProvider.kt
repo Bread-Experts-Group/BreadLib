@@ -18,21 +18,21 @@ import java.util.concurrent.CompletableFuture
 import javax.imageio.ImageIO
 import kotlin.io.path.createDirectories
 
-class PlaceholderTextureGenerator(override val modID: String) : DataGenerator() {
+class PlaceholderTextureProvider(modID: String, packOutput: PackOutput) : DataGenerationProvider(modID, packOutput) {
 	private val checkerboards = mutableMapOf<ResourceLocation, String>()
-	fun checkerboard(location: ResourceLocation, category: String = "item"): PlaceholderTextureGenerator = this.also {
+	fun checkerboard(location: ResourceLocation, category: String = "item"): PlaceholderTextureProvider = this.also {
 		require(this.checkerboards.put(location, category) == null) {
 			"$location already defined for texture generation ($category, checkerboard)"
 		}
 	}
 
-	fun checkerboard(item: Item): PlaceholderTextureGenerator = this.checkerboard(item.location)
-	fun checkerboard(block: Block): PlaceholderTextureGenerator = this.checkerboard(block.location, "block")
+	fun checkerboard(item: Item): PlaceholderTextureProvider = this.checkerboard(item.location)
+	fun checkerboard(block: Block): PlaceholderTextureProvider = this.checkerboard(block.location, "block")
 
-	fun checkerboard(item: RegistryItem<*>): PlaceholderTextureGenerator = this.checkerboard(item.get())
-	fun checkerboard(block: AbstractRegistryBlock<*>): PlaceholderTextureGenerator = this.checkerboard(block.get())
+	fun checkerboard(item: RegistryItem<*>): PlaceholderTextureProvider = this.checkerboard(item.get())
+	fun checkerboard(block: AbstractRegistryBlock<*>): PlaceholderTextureProvider = this.checkerboard(block.get())
 
-	override fun getName(): String = "BreadLib Placeholder Texture Generator (${this.modID})"
+	override fun getName(): String = "BreadLib Placeholder Texture Provider (${this.modID})"
 
 	@Suppress("UnstableApiUsage", "DEPRECATION")
 	override fun run(p0: CachedOutput): CompletableFuture<*> {
