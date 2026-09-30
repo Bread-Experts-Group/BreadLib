@@ -18,6 +18,7 @@ import org.bread_experts_group.breadlib.platform.ApplicationSide
 import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.client.AdditionalModelsTask
 import org.bread_experts_group.breadlib.task.client.ClientExtensionsTask
 import org.bread_experts_group.breadlib.task.command.ClientCommandTask
 import org.bread_experts_group.breadlib.task.command.ServerCommandTask
@@ -63,6 +64,14 @@ object NeoEvents {
 			this.addMouseButtonTasks()
 			this.addKeyboardTasks()
 			this.addExtensionTasks(eventBus)
+			this.modelTasks(eventBus)
+		}
+	}
+
+	private fun modelTasks(eventBus: IEventBus) {
+		eventBus.addListener { event: ModelEvent.RegisterAdditional ->
+			val task = TaskManager.runTasks(AdditionalModelsTask())
+			task.getModelLocations().forEach { event.register(it) }
 		}
 	}
 

@@ -51,7 +51,6 @@ class ShaderResourceManager : ResourceManager {
 	}
 
 	override fun getResource(location: ResourceLocation): Optional<Resource> {
-//		BreadLib.LOGGER.info("{}, {}", PlatformServices.PLATFORM.getPlatformName(), location)
 		val isBuiltin = location.namespace == ResourceLocation.DEFAULT_NAMESPACE
 		if (isBuiltin) return PlatformServices.NETWORK.client.resourceManager.getResource(location)
 
@@ -68,6 +67,5 @@ class ShaderResourceManager : ResourceManager {
 			return createResource(path).optional()
 		}
 		return Optional.empty()
-//		BreadLib.LOGGER.info("resolved: {}", resolved)
 	}
 }

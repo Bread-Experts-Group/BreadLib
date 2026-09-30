@@ -252,13 +252,13 @@ open class RegistryProvider<T> private constructor(
 		): RegistryItem<I> =
 			super.register<Item>(name, persistDynamic, supplier) as RegistryItem<I>
 
-		fun <I : Item> simpleItem(name: String, properties: Item.Properties): RegistryItem<I> =
+		fun <I : Item> simpleItem(name: String, properties: Item.Properties = Item.Properties()): RegistryItem<I> =
 			this.register(name) { Item(properties) }
 
 		fun registerSimpleBlockItem(
 			name: String,
 			block: Supplier<Block>,
-			properties: Item.Properties
+			properties: Item.Properties = Item.Properties()
 		): RegistryItem<BlockItem> = this.register(name) { BlockItem(block.get(), properties) }
 	}
 }

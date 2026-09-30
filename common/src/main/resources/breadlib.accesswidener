@@ -15,3 +15,4 @@ accessible method net/minecraft/world/level/levelgen/NoiseRouterData overworld (
 
 accessible method net/minecraft/client/Minecraft getItemRenderer ()Lnet/minecraft/client/renderer/entity/ItemRenderer;
 accessible field net/minecraft/client/renderer/entity/ItemRenderer blockEntityRenderer Lnet/minecraft/client/renderer/BlockEntityWithoutLevelRenderer;
+accessible method net/minecraft/client/renderer/entity/ItemRenderer renderModelLists (Lnet/minecraft/client/resources/model/BakedModel;Lnet/minecraft/world/item/ItemStack;IILcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;)V

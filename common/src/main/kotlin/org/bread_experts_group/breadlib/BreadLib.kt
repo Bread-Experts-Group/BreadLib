@@ -34,7 +34,7 @@ import kotlin.io.path.walk
 
 object BreadLib {
 	const val MOD_ID: String = "breadlib"
-	const val MOD_VERSION: String = "1.3.4"
+	val MOD_VERSION: String = PlatformServices.PLATFORM.getModInfo("breadlib").version
 
 	@JvmField
 	val LOGGER: Logger = LogManager.getLogger("BreadLib")
@@ -50,7 +50,6 @@ object BreadLib {
 		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path.joinToString("/"))
 	}
 
-	@JvmStatic
 	fun init() {
 		LOGGER.info(
 			"Hello from Common init on {}! we are currently in a {} environment on the {}!",

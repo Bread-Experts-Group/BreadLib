@@ -10,5 +10,5 @@ class RegistrySetBuilderTask : Task() {
 		suppliers[modID] = builder
 	}
 
-	fun supplier(modID: String): ((RegistrySetBuilder) -> Unit)? = suppliers[modID]
+	fun supplier(modID: String): ((RegistrySetBuilder) -> Unit) = suppliers[modID] ?: {}
 }

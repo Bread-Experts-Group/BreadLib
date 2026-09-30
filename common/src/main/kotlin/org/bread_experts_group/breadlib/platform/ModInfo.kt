@@ -13,9 +13,9 @@ data class ModInfo(
 	val dependencies: List<String>,
 	val path: Path
 ) {
-	companion object {
-		private val DIGEST = MessageDigest.getInstance("MD5")
-		private val HASH_BUFFER = ByteBuffer.allocate(8192)
+	private companion object {
+		val DIGEST: MessageDigest = MessageDigest.getInstance("MD5")
+		val HASH_BUFFER: ByteBuffer = ByteBuffer.allocate(8192)
 	}
 
 	fun dependsOn(modId: String): Boolean = modId in this.dependencies

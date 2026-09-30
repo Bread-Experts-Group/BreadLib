@@ -17,6 +17,6 @@ class BreadLibDataGeneratorEntry : DataGeneratorEntrypoint {
 	}
 
 	override fun buildRegistry(registryBuilder: RegistrySetBuilder) {
-		TaskManager.runTasks(RegistrySetBuilderTask()).supplier(BreadLib.MOD_ID)?.invoke(registryBuilder)
+		TaskManager.runTasks(RegistrySetBuilderTask()).supplier(BreadLib.MOD_ID).invoke(registryBuilder)
 	}
 }

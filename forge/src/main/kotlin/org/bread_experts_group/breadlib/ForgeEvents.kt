@@ -19,6 +19,7 @@ import org.bread_experts_group.breadlib.platform.PlatformServices
 import org.bread_experts_group.breadlib.registry.client.IClientItemExtension
 import org.bread_experts_group.breadlib.task.FireSide
 import org.bread_experts_group.breadlib.task.TaskManager
+import org.bread_experts_group.breadlib.task.client.AdditionalModelsTask
 import org.bread_experts_group.breadlib.task.client.ClientExtensionsTask
 import org.bread_experts_group.breadlib.task.client.ClientLogInEvent
 import org.bread_experts_group.breadlib.task.command.ClientCommandTask
@@ -62,6 +63,7 @@ object ForgeEvents {
 			this.addMouseScrollTask()
 			this.addMouseButtonTasks()
 			this.addShaderTask(eventBus)
+			this.modelTasks(eventBus)
 
 			MinecraftForge.EVENT_BUS.addListener { event: ClientPlayerNetworkEvent.LoggingIn ->
 				TaskManager.runTasks(ClientLogInEvent(event.player))
@@ -70,6 +72,13 @@ object ForgeEvents {
 		}
 		this.addServerTickTasks()
 		this.addCommandTasks()
+	}
+
+	private fun modelTasks(eventBus: IEventBus) {
+		eventBus.addListener { event: ModelEvent.RegisterAdditional ->
+			val task = TaskManager.runTasks(AdditionalModelsTask())
+			task.getModelLocations().forEach { event.register(it) }
+		}
 	}
 
 	// Forge doesn't have a dedicated event for registering item extensions,

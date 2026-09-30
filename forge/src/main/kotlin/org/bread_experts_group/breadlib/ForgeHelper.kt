@@ -33,13 +33,13 @@ object ForgeHelper {
 			val dataGenerator = event.generator
 			val packOutput = dataGenerator.packOutput
 
-			val lookupProvider = TaskManager.runTasks(RegistrySetBuilderTask()).supplier(modID)?.let {
+			val lookupProvider = TaskManager.runTasks(RegistrySetBuilderTask()).supplier(modID).let {
 				val builder = RegistrySetBuilder().also { builder -> it.invoke(builder) }
 				val provider = DatapackBuiltinEntriesProvider(
 					packOutput, event.lookupProvider, builder, setOf(modID)
 				)
 				dataGenerator.addProvider(true, provider)
-			}?.registryProvider ?: event.lookupProvider
+			}.registryProvider
 
 			val task = TaskManager.runTasks(GenerateDataTask(lookupProvider, packOutput))
 			for (provider in task.getProviders(modID)) dataGenerator.addProvider(true, provider)
