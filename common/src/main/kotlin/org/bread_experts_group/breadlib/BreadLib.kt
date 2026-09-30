@@ -34,7 +34,7 @@ import kotlin.io.path.walk
 
 object BreadLib {
 	const val MOD_ID: String = "breadlib"
-	val MOD_VERSION: String = PlatformServices.PLATFORM.getModInfo("breadlib").version
+	val MOD_VERSION: String by lazy { PlatformServices.PLATFORM.getModInfo("breadlib").version }
 
 	@JvmField
 	val LOGGER: Logger = LogManager.getLogger("BreadLib")
